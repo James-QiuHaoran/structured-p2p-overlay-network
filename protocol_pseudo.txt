@@ -1,0 +1,5 @@
+// Global Variables
+RING_UPPER_LIMIT = 20;  // when node joining or leaving, if # of nodes > UPPER_LIMIT, ring-formation
+RING_LOWER_LIMIT = 10;  // when node joining or leaving, if # of nodes < LOWER_LIMIT, ring-destruction
+
+# Node Join
