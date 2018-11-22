@@ -43,6 +43,70 @@ import (
 	"github.com/ethereum/go-ethereum/rlp"
 )
 
+//XML-RPC:
+
+//struct used
+type response struct {
+	Name   xml.Name   `xml:"methodResponse"`
+	Params []param    `xml:"params>param"`
+	Fault  faultValue `xml:"fault,omitempty"`
+}
+
+type param struct {
+	Value value `xml:"value"`
+}
+
+type value struct {
+	Array    []value  `xml:"array>data>value"`
+	Struct   []member `xml:"struct>member"`
+	String   string   `xml:"string"`
+	Int      string   `xml:"int"`
+	Int4     string   `xml:"i4"`
+	Double   string   `xml:"double"`
+	Boolean  string   `xml:"boolean"`
+	DateTime string   `xml:"dateTime.iso8601"`
+	Base64   string   `xml:"base64"`
+	Raw      string   `xml:",innerxml"` // the value can be defualt string
+}
+
+type member struct {
+	Name  string `xml:"name"`
+	Value value  `xml:"value"`
+}
+
+func xml2RPC(xmlraw string, rpc interface{}) error {
+	// Unmarshal raw XML into the temporal structure
+	var ret response
+	decoder := xml.NewDecoder(bytes.NewReader([]byte(xmlraw)))
+	decoder.CharsetReader = charset.NewReader
+	err := decoder.Decode(&ret)
+	if err != nil {
+		return FaultDecode
+	}
+
+	if !ret.Fault.IsEmpty() {
+		return getFaultResponse(ret.Fault)
+	}
+	
+	if reflect.TypeOf(rpc).Elem().NumField() != len(ret.Params) {
+		return FaultWrongArgumentsNumber
+	}
+	
+	for i, param := range ret.Params {
+		field := reflect.ValueOf(rpc).Elem().Field(i)
+		err = value2Field(param.Value, &field)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+
+
+
+
 const (
 	defaultDialTimeout = 15 * time.Second
 
