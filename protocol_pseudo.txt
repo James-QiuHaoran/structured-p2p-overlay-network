@@ -3,7 +3,7 @@ RING_UPPER_LIMIT = 20;   // when node joining or leaving, if # of nodes > UPPER_
 RING_LOWER_LIMIT = 10;   // when node joining or leaving, if # of nodes < LOWER_LIMIT, ring-destruction
 HEARTBEAT_TIMEOUT = 5;   // timeout set for liveness checking
 HEARTBEAT_INTERVAL = 5;  // interval set between two heartbeat messages
-NUM_CONTACT_NODES = 3;
+NUM_CONTACT_NODES = 3;   // number of contact nodes elected in each ring
 
 ================================================================================================================
 /* Structure of a Node
@@ -145,9 +145,10 @@ recursive_broadcast(root) {
 ================================================================================================================
 // contact node(s) election and notify all nodes within a ring
 election() {
-	random_ID = []
+	random_IDs = []
 	for i = 0 -> NUM_CONTACT_NODES:
-		random_ID.append(generate_random_number_using_SGX() mod num_nodes)
-	broadcast(random_ID)
+		random_IDs.append(generate_random_number_using_SGX() mod num_nodes)
+	broadcast_within_ring(random_IDs)
+	multicast_upper_ring(random_IDs)
 }
 ================================================================================================================
