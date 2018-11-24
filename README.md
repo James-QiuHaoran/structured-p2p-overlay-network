@@ -1,2 +1,6 @@
-# fast-blockchain-on-SGX-facilitated-P2P-network
-Final Year Project @HKU Department of Computer Science
+# Go Ethereum with Geometrically Fractal Rings
+
+Final Year Project \@ Department of Computer Science, HKU
+
+## Implementation
+The implementation of the network is based on Go Ethereum release 1.8.18
