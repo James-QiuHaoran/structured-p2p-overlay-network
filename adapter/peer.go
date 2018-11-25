@@ -1,18 +1,3 @@
-// Copyright 2014 The go-ethereum Authors
-// This file is part of the go-ethereum library.
-//
-// The go-ethereum library is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// The go-ethereum library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Lesser General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
 package p2p
 
@@ -371,27 +356,6 @@ func (p *Peer) startProtocols(writeStart <-chan struct{}, writeErr chan<- error)
 	}
 }
 
-// getProto finds the protocol responsible for handling
-// the given message code.
-func (p *Peer) getProto(code uint64) (*protoRW, error) {
-	for _, proto := range p.running {
-		if code >= proto.offset && code < proto.offset+proto.Length {
-			return proto, nil
-		}
-	}
-	return nil, newPeerError(errInvalidMsgCode, "%d", code)
-}
-
-type protoRW struct {
-	Protocol
-	in     chan Msg        // receives read messages
-	closed <-chan struct{} // receives when peer is shutting down
-	wstart <-chan struct{} // receives when write may start
-	werr   chan<- error    // for write results
-	offset uint64
-	w      MsgWriter
-}
-
 func (rw *protoRW) WriteMsg(msg Msg) (err error) {
 	if msg.Code >= rw.Length {
 		return newPeerError(errInvalidMsgCode, "not handled")
@@ -400,10 +364,6 @@ func (rw *protoRW) WriteMsg(msg Msg) (err error) {
 	select {
 	case <-rw.wstart:
 		err = rw.w.WriteMsg(msg)
-		// Report write status back to Peer.run. It will initiate
-		// shutdown if the error is non-nil and unblock the next write
-		// otherwise. The calling protocol code should exit for errors
-		// as well but we don't want to rely on that.
 		rw.werr <- err
 	case <-rw.closed:
 		err = ErrShuttingDown
