@@ -81,3 +81,16 @@ func (cs capsByNameAndVersion) Less(i, j int) bool {
 }
 
 func (capsByNameAndVersion) ENRKey() string { return "cap" }
+
+
+func (p Protocol) broadcast(m Msg) {
+	
+}
+
+func (p Protocol) join(info NodeInfo){
+	
+}
+
+func (p Protocol) sendTo(ip String, m Msg){
+	
+}
