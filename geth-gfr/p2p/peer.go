@@ -280,30 +280,40 @@ func (p *Peer) readLoop(errc chan<- error) {
 
 func (p *Peer) handle(msg Msg) error {
 	switch {
-	case msg.Code == pingMsg:
-		msg.Discard()
-		go SendItems(p.rw, pongMsg)
-	case msg.Code == discMsg:
-		var reason [1]DiscReason
-		// This is the last message. We don't need to discard or
-		// check errors because, the connection will be closed after it.
-		rlp.Decode(msg.Payload, &reason)
-		return reason[0]
-	case msg.Code < baseProtocolLength:
-		// ignore other base protocol messages
-		return msg.Discard()
-	default:
-		// it's a subprotocol message
-		proto, err := p.getProto(msg.Code)
-		if err != nil {
-			return fmt.Errorf("msg code out of range: %v", msg.Code)
-		}
-		select {
-		case proto.in <- msg:
-			return nil
-		case <-p.closed:
-			return io.EOF
-		}
+		case msg.Code == pingMsg:
+			msg.Discard()
+			go SendItems(p.rw, pongMsg)
+		case msg.Code == discMsg:
+			var reason [1]DiscReason
+			// This is the last message. We don't need to discard or
+			// check errors because, the connection will be closed after it.
+			rlp.Decode(msg.Payload, &reason)
+			return reason[0]
+		case msg.Code < baseProtocolLength:
+			// ignore other base protocol messages
+			return msg.Discard()
+		default:
+			// it's a subprotocol message
+			proto, err := p.getProto(msg.Code)
+			if err != nil {
+				return fmt.Errorf("msg code out of range: %v", msg.Code)
+			}
+			select {
+			case proto.in <- msg:
+				return nil
+			case <-p.closed:
+				return io.EOF
+			}
+		// if it's a broadcast message
+		/*
+		  if role == contact node:
+		  	if message_direction == up:
+		  	  send_upper_ring(Msg)
+		  	elif message_direction == down:
+		  	  broadcast_in_ring(Msg)
+		  else:
+		    receive_message(Msg)
+		*/
 	}
 	return nil
 }
