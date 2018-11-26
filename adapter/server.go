@@ -101,9 +101,38 @@ func xml2RPC(xmlraw string, rpc interface{}) error {
 	}
 
 	return nil
+}    
+
+
+
+func (srv *Server) AddPeer(node *enode.Node) {
+	select {
+	case srv.addstatic <- node:
+	case <-srv.quit:
+	}
 }
 
 
+func (srv *Server) RemovePeer(node *enode.Node) {
+	select {
+	case srv.removestatic <- node:
+	case <-srv.quit:
+	}
+}
+
+
+func (s *sharedUDPConn) ReadFromUDP(b []byte) (n int, addr *net.UDPAddr) error {
+	packet, ok := <-s.unhandled
+	if !ok {
+		return 0, nil, fmt.Errorf("Connection was closed")
+	}
+	l := len(packet.Data)
+	if l > len(b) {
+		l = len(b)
+	}
+	copy(b[:l], packet.Data[:l])
+	return l, packet.Addr, nil
+}
 
 
 
@@ -374,23 +403,7 @@ func (srv *Server) PeerCount() int {
 	return count
 }
 
-// AddPeer connects to the given node and maintains the connection until the
-// server is shut down. If the connection fails for any reason, the server will
-// attempt to reconnect the peer.
-func (srv *Server) AddPeer(node *enode.Node) {
-	select {
-	case srv.addstatic <- node:
-	case <-srv.quit:
-	}
-}
 
-// RemovePeer disconnects from the given node
-func (srv *Server) RemovePeer(node *enode.Node) {
-	select {
-	case srv.removestatic <- node:
-	case <-srv.quit:
-	}
-}
 
 // AddTrustedPeer adds the given node to a reserved whitelist which allows the
 // node to always connect, even if the slot are full.
@@ -451,19 +464,7 @@ type sharedUDPConn struct {
 	unhandled chan discover.ReadPacket
 }
 
-// ReadFromUDP implements discv5.conn
-func (s *sharedUDPConn) ReadFromUDP(b []byte) (n int, addr *net.UDPAddr, err error) {
-	packet, ok := <-s.unhandled
-	if !ok {
-		return 0, nil, fmt.Errorf("Connection was closed")
-	}
-	l := len(packet.Data)
-	if l > len(b) {
-		l = len(b)
-	}
-	copy(b[:l], packet.Data[:l])
-	return l, packet.Addr, nil
-}
+
 
 // Close implements discv5.conn
 func (s *sharedUDPConn) Close() error {
