@@ -82,15 +82,30 @@ func (cs capsByNameAndVersion) Less(i, j int) bool {
 
 func (capsByNameAndVersion) ENRKey() string { return "cap" }
 
-
-func (p Protocol) broadcast(m Msg) {
-	
+type Msg struct {
+	Code       uint64
+	Size       uint32 // size of the paylod
+	Payload    io.Reader
+	ReceivedAt time.Time
 }
 
-func (p Protocol) join(info NodeInfo){
-	
+func (msg Msg) String() string {
+	return fmt.Sprintf("msg #%v (%v bytes)", msg.Code, msg.Size)
 }
 
-func (p Protocol) sendTo(ip String, m Msg){
+func (p Protocol) broadcast(m Msg) error{
+	err := p.MsgReadWriter.WriteMsg(msg)
+	if err != nil {
+		return err
+	}
+	p.feed.Send(&PeerEvent{
+		Type:     PeerEventTypeMsgSend,
+		Peer:     ev.peerID,
+		Protocol: ev.Protocol,
+		MsgCode:  &msg.Code,
+		MsgSize:  &msg.Size,
+	})
 	
+	return nil
 }
+
