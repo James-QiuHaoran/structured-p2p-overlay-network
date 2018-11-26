@@ -1,0 +1,58 @@
+language: python
+python:
+- '2.7'
+- '3.4'
+- '3.5'
+- '3.6'
+- pypy
+cache:
+  directories:
+  - "$HOME/.cache/pip"
+# Gevent still seems a bit wobbly on PyPy - allow failures for now
+# Also Python 3 support isn't merged yet - reenable when done
+matrix:
+  allow_failures:
+    - python: pypy
+    - python: '3.4'
+    - python: '3.5'
+    - python: '3.6'
+install:
+- |
+  if [ "$TRAVIS_PYTHON_VERSION" = "pypy" ]; then
+    export PYENV_ROOT="$HOME/.pyenv"
+    if [ -f "$PYENV_ROOT/bin/pyenv" ]; then
+      pushd "$PYENV_ROOT" && git pull && popd
+    else
+      rm -rf "$PYENV_ROOT" && git clone --depth 1 https://github.com/yyuu/pyenv.git "$PYENV_ROOT"
+    fi
+    export PYPY_VERSION="5.3"
+    "$PYENV_ROOT/bin/pyenv" install --skip-existing "pypy-$PYPY_VERSION"
+    virtualenv --python="$PYENV_ROOT/versions/pypy-$PYPY_VERSION/bin/python" "$HOME/virtualenvs/pypy-$PYPY_VERSION"
+    source "$HOME/virtualenvs/pypy-$PYPY_VERSION/bin/activate"
+    pip install pytest
+  fi
+- pip install -U pip
+- pip uninstall -y py pytest
+- pip install -r requirements.txt
+- pip install pytest-runner==2.11.1
+- pip install coveralls
+script:
+- coverage run --source devp2p setup.py test --addopts "-v --no-print-logs"
+after_success:
+- coveralls
+notifications:
+  slack:
+    secure: P/qjOkPitf55axoE7CEaHcgOsYhyEL2lhByGNDJtRtvVPv7+Z9qMYQCoituR8WJqqtYBUL4SbdYs8H8b4ZZd8tPMssCFG/JRw0rloVn6Vy4Nb3VPDGkKNnFJhtYCKzBnqgDzTw1zvOVzXsj2YV7SdxeMtQGMPLZaTixG91OYzPk=
+  webhooks:
+    - secure: "BlIGii1h/OxRRug7eVdcQYCeKB4ZSnSBFAFL7jhueORchLesAZNuF1DVd34rAU1+fWNjqceHUw8SFdaosOOp4aYBtmkwv8R2qGUWX0f1Gs7U1ahvCuTvOpBWwiaH+yeLwoGMAhdnUlsUi+g/dC8cT5F8W4NxadwKsOVOc0uSIN8="
+deploy:
+  provider: pypi
+  user: ethereum_pypi_automated
+  password:
+    secure: CoLY2r4vgY1kvJdd824hpEjmkxzs9uf2lapQNUaGB3sRytOLRAF3cfA924WFeKwp1ZVsXwKEp0ZvoLQ26JB2JqThrP7vjR24tSSN+tTkBL9h4eoHCA+W3CX+FFFHMxL6t9VCYjXHQvk/cm3zubVx/e4x1pi4WFlJCYgXY5nnStI=
+  on:
+    tags: true
+    repo: ethereum/pydevp2p
+    branch: develop
+    python: 2.7
+  distributions: sdist bdist_wheel
