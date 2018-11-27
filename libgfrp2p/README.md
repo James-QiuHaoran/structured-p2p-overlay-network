@@ -1,1 +1,1 @@
-# Geographically Fractal Ring P2P Network
+# Geographical Fractal Random Ring (GFRR) P2P Network
