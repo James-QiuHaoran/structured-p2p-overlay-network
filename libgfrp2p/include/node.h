@@ -6,7 +6,8 @@ private:
     // P2P network info
     std::string id;
     unsigned long level;
-    bool is_contact_node;
+    bool is_contact_node_of_current_ring;
+    bool is_contact_node_of_the_sub_ring;
     
     // Low-level info
     std::string ip;
@@ -19,7 +20,8 @@ public:
     // Getters
     std::string get_id() const;
     unsigned long get_level() const;
-    bool get_is_contact_node() const;
+    bool get_is_contact_node_of_current_ring() const;
+    bool get_is_contact_node_of_the_sub_ring() const;
 
     std::string get_ip() const;
     unsigned int get_port() const;
@@ -30,5 +32,4 @@ public:
 
     void set_ip(std::string new_ip);
     void set_port(std::string new_port);
-
 };
