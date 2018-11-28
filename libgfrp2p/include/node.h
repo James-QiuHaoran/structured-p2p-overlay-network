@@ -14,11 +14,11 @@ private:
     
     // Low-level info
     std::string ip;
-    unsigned int port;
+    unsigned short port;
 
 public:
     // Constructor
-    Node(std::string id, std::string ip, unsigned int port);
+    Node(std::string id, std::string ip, unsigned short port);
 
     // Getters
     std::string get_id() const;
@@ -34,6 +34,6 @@ public:
     void set_is_current_ring_cnode(bool new_value);
     void set_is_sub_ring_cnode(bool new_value);
 
-    void set_ip(std::string new_ip);
+    void set_ip(const std::string& new_ip);
     void set_port(unsigned int new_port);
 };

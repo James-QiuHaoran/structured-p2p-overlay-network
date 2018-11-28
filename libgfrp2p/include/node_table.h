@@ -2,6 +2,7 @@
 #include <unordered_set>
 
 #include "node.h"
+#include "transport.h"
 
 // UDP packet format
 class Packet {
@@ -37,10 +38,18 @@ public:
 // Node table and maintenance
 class NodeTable {
 private:
+
     std::unordered_set<Node> nodes;
 
+
+    // Maintenance loop
+    void maintenance();
 public:
     // Get the nodes to peer up with
     std::unordered_set<Node> get_neighbors();
 
+    // Join the network and run the maintenance loop
+    void start();
+    // Leave the network
+    void stop();
 };
