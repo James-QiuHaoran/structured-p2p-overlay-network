@@ -1,13 +1,16 @@
 #include <string>
 
-// Model of nodes
+/* Model of nodes
+ * For data storage only
+ * Mutex lock might be neede */
 class Node {
 private:
     // P2P network info
     std::string id;
     unsigned long level;
-    bool is_contact_node_of_current_ring;
-    bool is_contact_node_of_the_sub_ring;
+    // using cnode = contact node
+    bool is_current_ring_cnode;
+    bool is_sub_ring_cnode;
     
     // Low-level info
     std::string ip;
@@ -15,21 +18,22 @@ private:
 
 public:
     // Constructor
-    Node(std::string id, unsigned long level, std::string ip, unsigned int port);
+    Node(std::string id, std::string ip, unsigned int port);
 
     // Getters
     std::string get_id() const;
     unsigned long get_level() const;
-    bool get_is_contact_node_of_current_ring() const;
-    bool get_is_contact_node_of_the_sub_ring() const;
+    bool get_is_current_ring_cnode() const;
+    bool get_is_sub_ring_cnode() const;
 
     std::string get_ip() const;
     unsigned int get_port() const;
 
     // Setters
     void set_level(unsigned long new_level);
-    void set_is_contact_node(bool new_is_contact_node);
+    void set_is_current_ring_cnode(bool new_value);
+    void set_is_sub_ring_cnode(bool new_value);
 
     void set_ip(std::string new_ip);
-    void set_port(std::string new_port);
+    void set_port(unsigned int new_port);
 };
