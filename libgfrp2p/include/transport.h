@@ -23,8 +23,8 @@ public:
     // Constructor
     AsyncUDPServer(Receiver* receiver, unsigned short port);
 
-    // Start the receive loop
-    void start();
+    // run the receive loop
+    void run();
 
     // Encapsulate low-level mechanism
     void send(const std::string& ip, unsigned short port, const std::string& data);

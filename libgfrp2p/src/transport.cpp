@@ -5,11 +5,11 @@ AsyncUDPServer::AsyncUDPServer(Receiver* receiver, unsigned short port):
 
 }
 
-void AsyncUDPServer::start() {
+void AsyncUDPServer::run() {
     try {
         this->io_context.run();
     catch (const std::exception& e) {
-        BOOST_LOG_TRIVIAL(fatal) << "AsyncUDPServer::start: io_context fails to run";
+        BOOST_LOG_TRIVIAL(fatal) << "AsyncUDPServer::run: io_context fails to run";
     }
     
     this->receive();
