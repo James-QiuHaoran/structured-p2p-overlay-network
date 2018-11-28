@@ -1,8 +1,11 @@
 #include <string>
 #include <array>
+#include <exception>
 
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
+
+#include <boost/log/trivial.hpp>
 
 using boost::asio::ip::udp;
 
@@ -21,7 +24,7 @@ public:
     AsyncUDPServer(Receiver* receiver, unsigned short port);
 
     // Start the receive loop
-    void start_receiving();
+    void start();
 
     // Encapsulate low-level mechanism
     void send(const std::string& ip, unsigned short port, const std::string& data);
@@ -39,7 +42,7 @@ private:
     std::array<char, 65536> recv_buffer;
     udp::endpoint recv_endpoint;
 
-    void continue_receiving();
+    void receiving();
 
     // boost server mechanism
     void handle_receive(const boost::system::error_code& error, std::size_t bytes_transferred);
