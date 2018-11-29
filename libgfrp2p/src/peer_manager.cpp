@@ -5,44 +5,69 @@ PeerManager::PeerManager() {
 
 }
 
+Message::Message() {
+
+}
+
+PeerError::PeerError() {
+
+}
+
+
 // getters
-std::string PeerManager::get_sender() const {
+std::string Message::get_sender() const {
 	return this->sender;
 }
 
-std::string PeerManager::get_receiver() const {
+std::string Message::get_receiver() const {
 	return this->receiver;
 }
 
-std::string PeerManager::get_messageID() const {
+std::string Message::get_messageID() const {
 	return this->messageID;
 }
 
-std::string PeerManager::get_messageHash() const {
+std::string Message::get_messageHash() const {
 	return this->messageHash;
 }
 
-std::string PeerManager::get_type() const {
+std::string Message::get_type() const {
 	return this->type;
 }
 
+std::string PeerError::get_errorType() const {
+	return this->errorType;
+}
+
+std::string PeerError::get_errorMessage() const {
+	return this->errorMessage;
+}
+
 // setters
-void PeerManagerset_sender(string sender) {
+void Message::set_sender(string sender) {
 	this->sender = sender;
 }
 
-void PeerManagerset_receiver(string receiver) {
+void Message::set_receiver(string receiver) {
 	this->receiver = receiver;
 }
 
-void PeerManagerset_messageID(string messageId) {
+void Message::set_messageID(string messageId) {
 	this->messageId = messageId;
 }
 
-void PeerManagerset_messageHash(string messageHash) {
+void Message::set_messageHash(string messageHash) {
 	this->messageHash = messageHash;
 }
 
-void PeerManagerset_type(string type) {
+void Message::set_type(string type) {
 	this->type = type;
+}
+
+void PeerError::set_errorType(string type) {
+	this->errorType = type;
+}
+
+void PeerError::set_errorMessage(string message) {
+	this->errorMessage = message;
 }

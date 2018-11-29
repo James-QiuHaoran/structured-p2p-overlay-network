@@ -32,6 +32,28 @@ public:
     void set_type(string type);
 };
 
+/* Error Class
+ * define error types and error messages
+ *
+ */
+class PeerError {
+private:
+    std::string errorType;
+    std::string errorMessage;
+
+public:
+    // constructor
+    PeerError();
+    
+    // getters
+    std::string get_errorType();
+    std::string get_errorMessage();
+
+    // setters
+    void set_errorType();
+    void set_errorMessage();
+};
+
 /* PeerManager class
  * responsible for broadcasting messages
  */
@@ -42,6 +64,9 @@ private:
     // server
 
 public:
+    // constructor
+    void PeerManager();
+    
     // create and initialize a peer
     void create_peer();
 
