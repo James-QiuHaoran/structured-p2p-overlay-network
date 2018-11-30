@@ -1,4 +1,5 @@
 #include <string>
+#include <unordered_set>
 #include "node.h"
 #include "app.h"
 
@@ -63,9 +64,16 @@ private:
     // listen address
     // server
 
+    std::unordered_set<Node> contact_nodes_this;
+    std::unordered_set<Node> contact_nodes_upper;
+
 public:
     // constructor
     void PeerManager();
+
+    // getters
+    std::unordered_set<Node> get_contact_nodes_this();
+    std::unordered_set<Node> get_contact_nodes_upper();
     
     // create and initialize a peer
     void create_peer();
@@ -78,6 +86,8 @@ public:
 
     // broadcast a message
     void broadcast(Message msg);
+    void broadcast_up(Message msg);
+    void broadcast_down(Message msg);
 
     // on joining a node
     void on_new_connection();
