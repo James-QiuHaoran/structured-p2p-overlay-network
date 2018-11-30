@@ -71,3 +71,26 @@ void PeerError::set_errorType(string type) {
 void PeerError::set_errorMessage(string message) {
 	this->errorMessage = message;
 }
+
+std::unordered_set<Node> PeerManager::get_contact_nodes_this() {
+	return this->contact_nodes_this;
+}
+
+std::unordered_set<Node> get_contact_nodes_upper() {
+	return this->contact_nodes_upper;
+}
+
+void PeerManager::broadcast(Message msg) {
+	// call the broadcast_up of the contact node of this ring
+}
+
+// broadcast upward to the contact nodes of the upper level ring
+void PeerManager::broadcast_up(Message msg) {
+	// send to all contact nodes in this->contact_nodes_upper
+}
+
+void PeerManager::broadcast_down(Message msg) {
+	// if it's a contact_node then broadcast to the ring
+	// if it's a normal_node then do nothing but receive the message
+	// do something according to the message
+}
