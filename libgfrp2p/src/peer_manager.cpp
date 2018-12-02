@@ -102,3 +102,64 @@ void PeerManager::on_node_lost_connection() {
 void PeerManager::on_node_leave() {
 	// if a node leave is detected and verified
 }
+
+void PeerManager::detect_node_left() {
+	if (liveness_check_predecessor(this.predecessor, this.pre-predecessor) == false)
+		in_ring_broadcast()  // broadcast to update node info within the smallest ring
+	if (liveness_check_successor(this.successor, this.suc-successor) == false)
+		in_ring_broadcast()  // broadcast to update node info within the smallest ring
+}
+
+bool PeerManager::liveness_check_predecessor(predecessor, pre-predecessor) {
+	return_obj = ping(predecessor.ip)
+	if (return_obj.msg == 'TIMEOUT') {
+		// check with its pre-predecessor (Remote-Procedure-Call)
+		status = check_your_successor(pre-predecessor.ip)
+		if (status == false) {
+			// recheck
+			return_obj = ping(predecessor.ip)
+			if (return_obj.msg == 'TIMEOUT')
+				return false;  // timeout
+			else
+				return true;   // alive
+		}
+		else
+			return true;   // alive
+	}
+}
+
+bool PeerManager::liveness_check_successor(successor, suc-successor) {
+	return_obj = ping(successor.ip)
+	if (return_obj.msg == 'TIMEOUT') {
+		// check with its suc-successor (Remote-Procedure-Call)
+		status = check_your_predecessor(suc-successor.ip)
+		if (status == false) {
+			// recheck
+			return_obj = ping(successor.ip)
+			if (return_obj.msg == 'TIMEOUT')
+				return false;  // timeout
+			else
+				return true;   // alive
+		}
+		else
+			return true;   // alive
+	}
+}
+
+// remote procedure call executed by its pre-predecessor
+bool PeerManager::check_your_predecessor() {
+	return_obj = ping(this.predecessor.ip)
+	if (return_obj.msg == 'TIMEOUT')
+		return false;
+	else
+		return true;
+}
+
+// remote procedure call executed by its suc-successor
+bool PeerManager::check_your_sucessor() {
+	return_obj = ping(this.successor.ip)
+	if (return_obj.msg == 'TIMEOUT')
+		return false;
+	else
+		return true;
+}

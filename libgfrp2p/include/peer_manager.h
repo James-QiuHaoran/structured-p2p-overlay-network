@@ -95,6 +95,11 @@ public:
     // detect node leave
     void on_node_lost_connection();
     void on_node_leave();
+    void detect_node_left();
+    bool liveness_check_predecessor();
+    bool liveness_check_successor();
+    bool check_your_predecessor();
+    bool check_your_sucessor();
 
     // stop the peer
     void stop();
