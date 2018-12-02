@@ -92,6 +92,10 @@ public:
     // on joining a node
     void on_new_connection();
 
+    // detect node leave
+    void on_node_lost_connection();
+    void on_node_leave();
+
     // stop the peer
     void stop();
 };

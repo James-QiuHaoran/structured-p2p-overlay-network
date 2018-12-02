@@ -94,3 +94,11 @@ void PeerManager::broadcast_down(Message msg) {
 	// if it's a normal_node then do nothing but receive the message
 	// do something according to the message
 }
+
+void PeerManager::on_node_lost_connection() {
+	// if a neighbor does not reply your heart beat message
+}
+
+void PeerManager::on_node_leave() {
+	// if a node leave is detected and verified
+}
