@@ -80,19 +80,50 @@ std::unordered_set<Node> get_contact_nodes_upper() {
 	return this->contact_nodes_upper;
 }
 
+// a node want to broadcast
 void PeerManager::broadcast(Message msg) {
-	// call the broadcast_up of the contact node of this ring
+	Node contact_node = get_contact_nodes_this();
+
+	// wrap the message [TODO]
+
+	// ask contact node to broadcast
+	send(contact_node, msg);
 }
+
+void PeerManager::send(Node node, Message msg) {}
 
 // broadcast upward to the contact nodes of the upper level ring
 void PeerManager::broadcast_up(Message msg) {
-	// send to all contact nodes in this->contact_nodes_upper
+	Node contact_nodes_upper = get_contact_nodes_upper();
+
+	// wrap the message [TODO]
+
+	// ask contact node in the upper ring to broadcast
+	send(contact_node, msg);
 }
 
 void PeerManager::broadcast_down(Message msg) {
-	// if it's a contact_node then broadcast to the ring
-	// if it's a normal_node then do nothing but receive the message
-	// do something according to the message
+	// if it's a contact_node then broadcast to the ring using the k-ary distributed spanning tree
+}
+
+void PeerManager::on_receive(Message msg) {
+	bool isContactNode = is_contact_node_this();
+	if (isContactNode) {
+		if (msg.sender.level < msg.receiver.level) {
+			broadcast_down(msg);
+		} else {
+			broadcast_up(msg);
+		}
+	} else {
+		if (msg.sender.level < msg.receiver.level) {
+			Node contact_node = get_contact_nodes_this();
+			// wrap the message [TODO]
+			// ask contact node to broadcast
+			send(contact_node, msg);
+		} else {
+			// do something regarding the message
+		}
+	}
 }
 
 void PeerManager::on_node_lost_connection() {
@@ -162,4 +193,16 @@ bool PeerManager::check_your_sucessor() {
 		return false;
 	else
 		return true;
+}
+
+std::unordered_set<Node> PeerManager::contact_node_election() {
+	// random_IDs = []
+	// for i = 0 -> NUM_CONTACT_NODES:
+	//	random_IDs.append(generate_random_number_using_SGX() mod num_nodes)
+}
+
+// after contact node elected, broadcast the result
+void PeerManager::election_result_broadcast() {
+	// broadcast_within_ring(random_IDs)
+	// multicast_upper_ring(random_IDs)
 }
