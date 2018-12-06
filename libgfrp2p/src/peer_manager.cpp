@@ -126,6 +126,7 @@ void PeerManager::on_receive(Message msg) {
 	}
 }
 
+/*
 void PeerManager::on_node_lost_connection() {
 	// if a neighbor does not reply your heart beat message
 }
@@ -194,6 +195,7 @@ bool PeerManager::check_your_sucessor() {
 	else
 		return true;
 }
+*/
 
 std::unordered_set<Node> PeerManager::contact_node_election() {
 	// random_IDs = []

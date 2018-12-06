@@ -91,6 +91,7 @@ public:
     void send(Node node, Message msg);
     void on_receive(Message msg);
 
+    /*
     // on joining a node
     void on_new_connection();
 
@@ -102,6 +103,7 @@ public:
     bool liveness_check_successor();
     bool check_your_predecessor();
     bool check_your_sucessor();
+    */
 
     // contact node(s) election
     std::unordered_set<Node> contact_node_election();
