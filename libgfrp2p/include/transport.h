@@ -70,7 +70,7 @@ private:
     // boost::asio::streambuf receive_buffer;
     tcp::endpoint recv_endpoint;
 
-    void receiving();
+    void receive();
 
     // boost server mechanism
     void handle_receive(const boost::system::error_code& error, std::size_t bytes_transferred);
