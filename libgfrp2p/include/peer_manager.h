@@ -2,6 +2,7 @@
 #include <unordered_set>
 #include "node.h"
 #include "app.h"
+#include "node_table.h"
 
 /* Message class
  * definition of messages transmitted among peers
@@ -60,29 +61,31 @@ public:
  */
 class PeerManager {
 private:
-    // peers[]
-    // listen address
-    // server
+    // contains node information
+    Node node;
 
-    std::unordered_set<Node> contact_nodes_this;
-    std::unordered_set<Node> contact_nodes_upper;
+    // contains peers and related information
+    NodeTable node_table;
+
+    // std::unordered_set<Node> contact_nodes_this;
+    // std::unordered_set<Node> contact_nodes_upper;
 
 public:
     // constructor
     void PeerManager();
 
     // getters
-    std::unordered_set<Node> get_contact_nodes_this();
-    std::unordered_set<Node> get_contact_nodes_upper();
+    // std::unordered_set<Node> get_contact_nodes_this();
+    // std::unordered_set<Node> get_contact_nodes_upper();
     
     // create and initialize a peer
-    void create_peer();
+    // void create_peer();
 
     // connect to the network
-    void connect();
+    // void connect();
 
     // start the server
-    void start();
+    // void start();
 
     // broadcast a message
     void broadcast(Message msg);
@@ -91,7 +94,12 @@ public:
     void send(Node node, Message msg);
     void on_receive(Message msg);
 
-    /*
+    // stop the peer
+    // void stop();
+};
+
+// To be put in node_table
+/*
     // on joining a node
     void on_new_connection();
 
@@ -103,12 +111,8 @@ public:
     bool liveness_check_successor();
     bool check_your_predecessor();
     bool check_your_sucessor();
-    */
 
     // contact node(s) election
     std::unordered_set<Node> contact_node_election();
     void election_result_broadcast();
-
-    // stop the peer
-    void stop();
-};
+*/
