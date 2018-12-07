@@ -2,6 +2,7 @@
 #include <unordered_set>
 #include "node.h"
 #include "app.h"
+#include "node_table.h"
 
 /* Message class
  * definition of messages transmitted among peers

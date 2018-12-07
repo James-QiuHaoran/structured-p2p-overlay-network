@@ -13,7 +13,6 @@ PeerError::PeerError() {
 
 }
 
-
 // getters
 std::string Message::get_sender() const {
 	return this->sender;
