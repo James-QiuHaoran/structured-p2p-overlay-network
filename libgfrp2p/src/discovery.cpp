@@ -50,15 +50,15 @@ void Discovery::send(const std::string& ip, unsigned short port, std::string pay
 }
 
 void Discovery::send_ping(const std::string& id, const std::string& ip, unsigned short port) {
-    std::string payload = self->id + CMD_PING;
+    std::string payload = this->node_table->get_self()->id + CMD_PING;
     this->send(ip, port, payload)
     if (this->node_table->has_node(id)) {
-        this->node_table->get_node(id)->set_last_ping_now();
+        this->node_table->set_node_last_ping_now(id);
     }
 }
 
 void Discovery::send_pong(const std::string& ip, unsigned short port) {
-    std::string payload = self->id + CMD_PONG;
+    std::string payload = this->node_table->get_self()->id + CMD_PONG;
     this->send(ip, port, payload)
 }
 
@@ -68,7 +68,7 @@ void Discovery::receive_ping(const std::string& ip, unsigned short port) {
 
 void Discovery::receive_pong(const std::string& id, const std::string& ip, unsigned short port) {
     if (this->node_table->has_node(id)) {
-        this->node_table->get_node(id)->set_last_pong_now();
+        this->node_table->set_node_last_pong_now(id);
     }
 }
 

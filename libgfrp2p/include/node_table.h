@@ -1,71 +1,57 @@
 #include <string>
+#include <unordered_map>
 #include <unordered_set>
 #include <memory>
+#include <mutex>
+
+#include <boost/log/trivial.hpp>
 
 #include "node.h"
-#include "transport.h"
 
-// UDP packet format
-class Packet {
-private:
-    // Can be extended with hash, signature, etc.
-    std::string data;
-
-public:
-    // Assemble to UDP datagram
-    virtual std::string pack() const;
-    // Dissemble from UDP datagram
-    virtual void unpack(std::string datagram);
-
-    // Packet design-specific functions
-    std::string get_data() const;
+struct Ring {
+    std::unordered_set<std::shared_ptr<Node>> contact_nodes;
+    std::unordered_set<std::shared_ptr<Node>> predecessors;
+    std::unordered_set<std::shared_ptr<Node>> successors;
 };
-
-/* Wire protocol for discovery only
- * Define for the need of node network maintenance */
-class WireProtocol: private Receiver {
-private:
-    // UDP server for discovery
-    AsyncUDPServer udp_server;
-    
-    // Implement udp receive call back
-    virtual void receive(const std::string& ip, unsigned short port, const std::string& data) override;
-   
-    // Encapsulating low-level stuff
-    void send(const Node& node, std::string data);
-
-public:
-    // Constructor: port for peer discovery must be provided
-    WireProtocol(unsigned short port);
-
-    // Run the protocol
-    void run();
-
-    virtual void send_ping(const Node& node);
-    virtual void send_pong(const Node& node);
-    // TODO: summarize and add more
-
-    virtual void receive_ping(const Node& node);
-    virtual void receive_pong(const Node& node);
-};
-
 
 // Node table and maintenance
 class NodeTable {
+
 private:
+    
+    const std::string self_id;
 
-    std::unordered_set<Node> nodes;
+    unsigned long self_level;
 
+    // Store nodes in <id, node> hash table;
+    std::vector<Ring> table;
 
-    // Maintenance loop
-    void maintenance();
+    // Thread safty
+    std::mutex mlock;
+
 public:
+    NodeTable(const std::string& self_id);
 
-    // Get the nodes to peer up with
-    std::unordered_set<Node> get_neighbors();
+    // All operations should be  
+    /* Self operations */
+    std::string get_self_id() const;
+    unsigned long get_self_level();
 
-    // Join the network and run the maintenance loop
-    void start();
-    // Leave the network
-    void stop();
+    /* Storage operations */
+    bool has_node(const std::string& id);
+    // Deep copy of node information
+    std::shared_ptr<Node> get_node(const std::string& id);
+
+    /* Thread safe node operations */
+    void set_node_last_pong_now(const std::string& id);
+    void set_node_last_ping_now(const std::string& id);
+
+    /* Domain logic */
+    bool is_contact_node(unsigned long level);
+    std::unordered_set<std::shared_ptr<Node>> get_contact_nodes(unsigned long level);
+    std::unordered_set<std::shared_ptr<Node>> get_successors(unsigned long level);
+    std::unordered_set<std::shared_ptr<Node>> get_predecessors(unsigned long level);
+    
+    
+
 };
