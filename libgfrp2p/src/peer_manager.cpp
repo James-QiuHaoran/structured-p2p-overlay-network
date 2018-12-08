@@ -71,12 +71,12 @@ void PeerError::set_errorMessage(string message) {
 	this->errorMessage = message;
 }
 
-std::unordered_set<Node> PeerManager::get_contact_nodes_this() {
-	return this->contact_nodes_this;
+Node PeerManager::get_node() {
+	return this->node;
 }
 
-std::unordered_set<Node> get_contact_nodes_upper() {
-	return this->contact_nodes_upper;
+NodeTable get_node_table() {
+	return this->node_table;
 }
 
 // a node want to broadcast
@@ -125,6 +125,7 @@ void PeerManager::on_receive(Message msg) {
 	}
 }
 
+// to be put in node_table.cpp
 /*
 void PeerManager::on_node_lost_connection() {
 	// if a neighbor does not reply your heart beat message

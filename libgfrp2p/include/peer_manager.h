@@ -1,7 +1,7 @@
 #include <string>
 #include <unordered_set>
+
 #include "node.h"
-#include "app.h"
 #include "node_table.h"
 
 /* Message class
@@ -67,25 +67,22 @@ private:
     // contains peers and related information
     NodeTable node_table;
 
-    // std::unordered_set<Node> contact_nodes_this;
-    // std::unordered_set<Node> contact_nodes_upper;
-
 public:
     // constructor
     void PeerManager();
 
     // getters
-    // std::unordered_set<Node> get_contact_nodes_this();
-    // std::unordered_set<Node> get_contact_nodes_upper();
+    Node get_node();
+    NodeTable get_node_table();
     
     // create and initialize a peer
-    // void create_peer();
+    void create_peer();
 
     // connect to the network
-    // void connect();
+    void connect();
 
     // start the server
-    // void start();
+    void start();
 
     // broadcast a message
     void broadcast(Message msg);
@@ -95,7 +92,7 @@ public:
     void on_receive(Message msg);
 
     // stop the peer
-    // void stop();
+    void stop();
 };
 
 // To be put in node_table
