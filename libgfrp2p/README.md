@@ -1,9 +1,8 @@
 # Geographical Fractal Random Ring (GFRR) P2P Network
 
 ## Dependencies
-- Boost.Bind
-- Boost.Asio
-- Boost.Log
+- libboost-system-dev
+- libboost-log-dev
 
 ## Design of Wire Protocol
 ```
