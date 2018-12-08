@@ -85,11 +85,11 @@ public:
     void start();
 
     // broadcast a message
-    void broadcast(Message msg);
-    void broadcast_up(Message msg);
-    void broadcast_down(Message msg);
-    void send(Node node, Message msg);
-    void on_receive(Message msg);
+    void broadcast(const Message &msg);
+    void broadcast_up(const Message &msg, unsigned long current_level);
+    void broadcast_down(const Message &msg, unsigned long current_level);
+    void send(const Node &node, const Message &msg);
+    void on_receive(const Message &msg);
 
     // stop the peer
     void stop();

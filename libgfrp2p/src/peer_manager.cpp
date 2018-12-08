@@ -80,32 +80,48 @@ NodeTable get_node_table() {
 }
 
 // a node want to broadcast
-void PeerManager::broadcast(Message msg) {
-	Node contact_node = get_contact_nodes_this();
+void PeerManager::broadcast(const Message &msg) {
+	// get all contact nodes of the current ring (level 0)
+	std::unordered_set<std::shared_ptr<Node>> contact_nodes = this->node_table.get_contact_nodes(0);
 
+	// randomly select one contact from the contact nodes [TODO]
+	std::shared_ptr<Node> contact_node = contact_nodes.begin();
 	// wrap the message [TODO]
 
 	// ask contact node to broadcast
 	send(contact_node, msg);
 }
 
-void PeerManager::send(Node node, Message msg) {}
+void PeerManager::send(const Node &node, const Message &msg) {
+	// using wire protcol - TCP Transportation
+}
 
-// broadcast upward to the contact nodes of the upper level ring
-void PeerManager::broadcast_up(Message msg) {
-	Node contact_nodes_upper = get_contact_nodes_upper();
+// broadcast upwards to the contact nodes of the upper level ring
+// recursive function
+void PeerManager::broadcast_up(const Message &msg, unsigned long current_level) {
+	// get all contact nodes from the upper level ring
+	std::unordered_set<std::shared_ptr<Node>> contact_nodes_upper = get_contact_nodes(current_level);
 
+	if (contact_nodes_upper == NULL) {
+		broadcast_down(msg, current_level);
+		return;
+	}
+
+	// randomly select one contact from the contact nodes [TODO]
+	std::shared_ptr<Node> contact_node = contact_nodes_upper.begin();
 	// wrap the message [TODO]
 
 	// ask contact node in the upper ring to broadcast
 	send(contact_node, msg);
 }
 
-void PeerManager::broadcast_down(Message msg) {
+// broadcast downwards to the nodes of the lower level ring
+// recursive function
+void PeerManager::broadcast_down(const Message &msg, unsigned long current_level) {
 	// if it's a contact_node then broadcast to the ring using the k-ary distributed spanning tree
 }
 
-void PeerManager::on_receive(Message msg) {
+void PeerManager::on_receive(const Message &msg) {
 	bool isContactNode = is_contact_node_this();
 	if (isContactNode) {
 		if (msg.sender.level < msg.receiver.level) {
