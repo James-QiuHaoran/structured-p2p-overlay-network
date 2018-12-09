@@ -9,26 +9,31 @@
  */
 class Message {
 private:
-    std::string sender;
-    std::string receiver;
+    Node sender;
+    Node receiver;
+    int from_level;
     std::string messageID;
     std::string messageHash;
     std::string type;
+    int direction; // 1 upwards, 0 same level, -1 downwards
 
 public:
     // constructor
     Message();
 
     // getters
-    std::string get_sender() const;
-    std::string get_receiver() const;
+    Node get_sender() const;
+    Node get_receiver() const;
+    int get_from_level() const;
+    int get_direction() const;
     std::string get_messageID() const;
     std::string get_messageHash() const;
     std::string get_type() const;
 
     // setters
-    void set_sender(string sender);
-    void set_receiver(string receiver);
+    void set_sender(Node sender);
+    void set_receiver(Node receiver);
+    void set_direction(int direction);
     void set_messageID(string messageId);
     void set_messageHash(string messageHash);
     void set_type(string type);
@@ -36,7 +41,6 @@ public:
 
 /* Error Class
  * define error types and error messages
- *
  */
 class PeerError {
 private:
@@ -84,10 +88,12 @@ public:
     // start the server
     void start();
 
-    // broadcast a message
+    // broadcast/multicast a message
     void broadcast(const Message &msg);
     void broadcast_up(const Message &msg, unsigned long current_level);
+    void broadcast_within_ring(const Message &msg, unsigned long current_level);
     void broadcast_down(const Message &msg, unsigned long current_level);
+    void multicast_to_contact_nodes(const Message &msg, unsigned long current_level);
     void send(const Node &node, const Message &msg);
     void on_receive(const Message &msg);
 

@@ -14,12 +14,20 @@ PeerError::PeerError() {
 }
 
 // getters
-std::string Message::get_sender() const {
+Node Message::get_sender() const {
 	return this->sender;
 }
 
-std::string Message::get_receiver() const {
+Node Message::get_receiver() const {
 	return this->receiver;
+}
+
+int Message::get_from_level() const {
+
+}
+
+int Message::get_direction() const {
+	return this->direction;
 }
 
 std::string Message::get_messageID() const {
@@ -30,7 +38,7 @@ std::string Message::get_messageHash() const {
 	return this->messageHash;
 }
 
-std::string Message::get_type() const {
+int Message::get_type() const {
 	return this->type;
 }
 
@@ -43,12 +51,20 @@ std::string PeerError::get_errorMessage() const {
 }
 
 // setters
-void Message::set_sender(string sender) {
+void Message::set_sender(Node sender) {
 	this->sender = sender;
 }
 
-void Message::set_receiver(string receiver) {
+void Message::set_receiver(Node receiver) {
 	this->receiver = receiver;
+}
+
+void Message::set_from_level(int level) {
+	this->from_level = level;
+}
+
+void Message::set_direction(int direction) {
+	this->direction = direction;
 }
 
 void Message::set_messageID(string messageId) {
@@ -79,17 +95,27 @@ NodeTable get_node_table() {
 	return this->node_table;
 }
 
-// a node want to broadcast
-void PeerManager::broadcast(const Message &msg) {
-	// get all contact nodes of the current ring (level 0)
-	std::unordered_set<std::shared_ptr<Node>> contact_nodes = this->node_table.get_contact_nodes(0);
+// a node wants to broadcast a message
+void PeerManager::broadcast(const Message &msg, unsigned long current_level) {
+	// get all contact nodes of the current ring
+	std::unordered_set<std::shared_ptr<Node>> contact_nodes = this->node_table.get_contact_nodes(current_level);
 
 	// randomly select one contact from the contact nodes [TODO]
 	std::shared_ptr<Node> contact_node = contact_nodes.begin();
-	// wrap the message [TODO]
 
 	// ask contact node to broadcast
 	send(contact_node, msg);
+}
+
+// a node wants to multicast to the contact nodes of the current level
+void multicast_to_contact_nodes(const Message &msg, unsigned long current_level) {
+	// get all contact nodes of the current ring
+	std::unordered_set<std::shared_ptr<Node>> contact_nodes = this->node_table.get_contact_nodes(current_level);
+
+	// multicast to all contact nodes of the same level
+	for (auto node = contact_nodes.begin(); node != contact_nodes.end(); node++) {
+		send(node, msg);
+	}
 }
 
 void PeerManager::send(const Node &node, const Message &msg) {
@@ -100,45 +126,93 @@ void PeerManager::send(const Node &node, const Message &msg) {
 // recursive function
 void PeerManager::broadcast_up(const Message &msg, unsigned long current_level) {
 	// get all contact nodes from the upper level ring
-	std::unordered_set<std::shared_ptr<Node>> contact_nodes_upper = get_contact_nodes(current_level);
+	std::unordered_set<std::shared_ptr<Node>> contact_nodes_upper = this->node_table.get_contact_nodes(current_level);
 
+	// already reach the highest level, start to broadcast downwards
 	if (contact_nodes_upper == NULL) {
-		broadcast_down(msg, current_level);
+		broadcast_within_ring(msg, current_level);
 		return;
 	}
 
 	// randomly select one contact from the contact nodes [TODO]
 	std::shared_ptr<Node> contact_node = contact_nodes_upper.begin();
-	// wrap the message [TODO]
 
 	// ask contact node in the upper ring to broadcast
 	send(contact_node, msg);
+
+	return;
 }
 
-// broadcast downwards to the nodes of the lower level ring
+// broadcast to the nodes within the ring
+void PeerManager::broadcast_within_ring(const Message &msg, unsigned long current_level) {
+	// using the k-ary distributed spanning tree
+}
+
+// broadcast downwards to the contact nodes of the lower level ring
 // recursive function
 void PeerManager::broadcast_down(const Message &msg, unsigned long current_level) {
-	// if it's a contact_node then broadcast to the ring using the k-ary distributed spanning tree
+	// get all contact nodes from the upper level ring
+	std::unordered_set<std::shared_ptr<Node>> contact_nodes_lower = this->node_table.get_contact_nodes(current_level);
+
+	// already the lowest level
+	if (contact_nodes_lower == NULL) {
+		return;
+	}
+
+	// randomly select one contact from the contact nodes [TODO]
+	std::shared_ptr<Node> contact_node = contact_nodes_lower.begin();
+
+	// ask contact node in the upper ring to broadcast
+	send(contact_node, msg);
+
+	return;
 }
 
 void PeerManager::on_receive(const Message &msg) {
-	bool isContactNode = is_contact_node_this();
-	if (isContactNode) {
-		if (msg.sender.level < msg.receiver.level) {
-			broadcast_down(msg);
-		} else {
-			broadcast_up(msg);
+	if (msg.get_direction() == 0) {
+		// message comes from same level ring
+		if (msg.get_type() == 0) {
+			// to broadcast upwards
+			broadcast_up(msg, msg.get_from_level());
+		} else if (msg.get_type() == 1) {
+			// to receive this message
+			// [TODO]
 		}
-	} else {
-		if (msg.sender.level < msg.receiver.level) {
-			Node contact_node = get_contact_nodes_this();
-			// wrap the message [TODO]
-			// ask contact node to broadcast
-			send(contact_node, msg);
+	} else if (msg.get_direction() == 1) {
+		// message comes from lower level ring
+		if (this->node_table.is_contact_node(msg.get_from_level() + 1)) {
+			// it's a contact node
+			if (msg.get_type() == 0) {
+				// to broadcast upwards
+				broadcast_up(msg, msg.get_from_level());
+			} else if (msg.get_type() == 1) {
+				// to receive this message
+				// [TODO]
+			}
 		} else {
-			// do something regarding the message
+			// not a contact node
+			if (msg.get_type() == 0) {
+				// to broadcast upwards
+				// send to contact node to let it broadcast
+				broadcast(msg, msg.get_from_level() + 1);
+			} else if (msg.get_type() == 1) {
+				// to receive this message
+				// [TODO]
+			}
+		}
+	} else if (msg.get_direction() == -1) {
+		// message comes from upper level ring (can only be informing election results)
+		if (this->node_table.is_contact_node(msg.get_from_level() + 1)) {
+			// it's a contact node
+			// multicast to other contact nodes
+			multicast_to_contact_nodes(msg, msg.get_from_level() - 1);
+		} else {
+			// not a contact node
+			// multicast to contact nodes
+			multicast_to_contact_nodes(msg, msg.get_from_level() - 1);
 		}
 	}
+	return;
 }
 
 // to be put in node_table.cpp
