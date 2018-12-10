@@ -8,6 +8,7 @@ private:
     // P2P network info
     std::string id;
     // unsigned long level;
+    // a node may have multiple ids, each level has 1 id
 
     // Low-level info
     std::string ip;

@@ -13,6 +13,7 @@ struct Ring {
     std::unordered_map<std::string, std::shared_ptr<Node>> contact_nodes;
     std::unordered_map<std::string, std::shared_ptr<Node>> predecessors;
     std::unordered_map<std::string, std::shared_ptr<Node>> successors;
+    std::unordered_map<std::string, std::shared_ptr<Node>> peer_list; // used for broadcast within ring
 };
 
 // Node table and maintenance
@@ -58,5 +59,9 @@ public:
     std::unordered_set<std::shared_ptr<Node>> get_contact_nodes(unsigned long level);
     std::unordered_set<std::shared_ptr<Node>> get_successors(unsigned long level);
     std::unordered_set<std::shared_ptr<Node>> get_predecessors(unsigned long level);
-    
+    std::unordered_set<std::shared_ptr<Node>> get_peer_list(unsigned long level);
+
+    // for broadcast in ring (k-ary distributed spanning tree)
+    std::shared_ptr<Node> get_peer(unsigned long level, int id);  // get the particular peer
+    int get_end_id(unsigned long level);                          // get the end id in the ring
 };

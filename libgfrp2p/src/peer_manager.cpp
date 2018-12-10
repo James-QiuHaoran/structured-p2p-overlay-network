@@ -151,8 +151,20 @@ void PeerManager::broadcast_up(const Message &msg, unsigned long current_level) 
 }
 
 // broadcast to the nodes within the ring (k-ary distributed spanning tree)
-void PeerManager::broadcast_within_ring(const Message &msg, unsigned long current_level) {
+void PeerManager::broadcast_within_ring(const Message &msg, unsigned long current_level, int k) {
 	// should be recursive
+	int end_ID = this->node_table.get_end_ID(current_level);
+	int i = 0;
+	int current_id = this->node->get_id() + k^i;
+	while (current_id <= end_ID) {
+		if (k^i <= this->node->get_id()) {
+			continue;
+		} else {
+			std::shared_ptr<Node> node = this->node_table.get_peer(current_level, current_id);
+			// wrap the message [TODO]
+			send(node, msg);
+		}
+	}
 }
 
 // broadcast downwards to the contact nodes of the lower level ring

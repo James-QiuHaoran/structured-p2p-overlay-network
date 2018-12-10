@@ -114,3 +114,14 @@ std::unordered_set<std::shared_ptr<Node>> NodeTable::get_predecessors(unsigned l
     }  
     return result;
 }
+
+std::unordered_set<std::shared_ptr<Node>> NodeTable::get_peer_list(unsigned long level) {
+    std::lock_guard<std::mutex> lock(this->mlock);
+    std::unordered_set<std::shared_ptr<Node>> result;
+    if (level > this->self_level) return result;
+
+    for (const auto& kv: this->table.at(level).peer_list) {
+        result.insert(this->copy_node(kv.second));
+    }  
+    return result;
+}
