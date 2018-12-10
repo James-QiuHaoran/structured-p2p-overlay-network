@@ -21,7 +21,7 @@ Discovery::Discovery(const std::shared_ptr<NodeTable>& node_table, unsigned shor
     udp_server(new AsyncUDPServer(static_cast<Receiver*>(this), port)), node_table(node_table) { }
 
 /* Private functions */
-void Discovery::receive(const std::string& ip, unsigned short port, const std::string& datagram) override {
+void Discovery::receive(const std::string& ip, unsigned short port, const std::string& datagram) {
     // Unpack the UDP datagram
     std::unique_ptr<Packet> packet(new Packet());
     packet->unpack(datagram);
@@ -30,9 +30,9 @@ void Discovery::receive(const std::string& ip, unsigned short port, const std::s
     // Verify signature, etc.
 
     // Disassemble data
-    std::string id = data.substr(0, 8);
-    char cmd = data.at(8);
-    std::string cmd_field = data.substr(9);
+    std::string id = unpacked_data.substr(0, 8);
+    char cmd = unpacked_data.at(8);
+    std::string cmd_field = unpacked_data.substr(9);
 
     // Call the corresponding Node Table logic
     if (cmd & CMD_PING) {
@@ -51,7 +51,7 @@ void Discovery::send(const std::string& ip, unsigned short port, std::string pay
 
 void Discovery::send_ping(const std::string& id, const std::string& ip, unsigned short port) {
     std::string payload = this->node_table->get_self_id() + CMD_PING;
-    this->send(ip, port, payload)
+    this->send(ip, port, payload);
     if (this->node_table->has_node(id)) {
         this->node_table->set_node_last_ping_now(id);
     }
