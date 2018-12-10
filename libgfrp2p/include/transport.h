@@ -15,7 +15,7 @@ using boost::asio::ip::udp;
 class Receiver {
 public:
     virtual void receive(const std::string& ip, unsigned short port, const std::string& data) = 0;
-}
+};
 
 // A class that implements asynchronous UDP send and receive 
 class AsyncUDPServer {
