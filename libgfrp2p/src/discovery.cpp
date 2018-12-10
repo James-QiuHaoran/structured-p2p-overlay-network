@@ -5,7 +5,7 @@ std::string Packet::pack() const {
 }
 // No need to disassemble in this particular case
 void Packet::unpack(std::string datagram) {
-    this->data = datagram;
+    this->payload = datagram;
 }
 
 std::string Packet::get_payload() const {
@@ -45,12 +45,12 @@ void Discovery::receive(const std::string& ip, unsigned short port, const std::s
 
 void Discovery::send(const std::string& ip, unsigned short port, std::string payload) {
     Packet packet;
-    packet.set_data(payload);
+    packet.set_payload(payload);
     this->udp_server->send(ip, port, packet.pack());
 }
 
 void Discovery::send_ping(const std::string& id, const std::string& ip, unsigned short port) {
-    std::string payload = this->node_table->get_self()->id + CMD_PING;
+    std::string payload = this->node_table->get_self_id() + CMD_PING;
     this->send(ip, port, payload)
     if (this->node_table->has_node(id)) {
         this->node_table->set_node_last_ping_now(id);
@@ -58,8 +58,8 @@ void Discovery::send_ping(const std::string& id, const std::string& ip, unsigned
 }
 
 void Discovery::send_pong(const std::string& ip, unsigned short port) {
-    std::string payload = this->node_table->get_self()->id + CMD_PONG;
-    this->send(ip, port, payload)
+    std::string payload = this->node_table->get_self_id() + CMD_PONG;
+    this->send(ip, port, payload);
 }
 
 void Discovery::receive_ping(const std::string& ip, unsigned short port) {
@@ -75,7 +75,7 @@ void Discovery::receive_pong(const std::string& id, const std::string& ip, unsig
 
 
 void Discovery::start() {
-    this->udp_server.run();
+    this->udp_server->run();
 }
 
 void Discovery::stop() {

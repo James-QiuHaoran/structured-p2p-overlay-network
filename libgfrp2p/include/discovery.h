@@ -1,6 +1,7 @@
 #include <string>
 #include <memory>
 
+#include "transport.h"
 #include "node_table.h"
 
 // UDP packet format
@@ -22,7 +23,7 @@ public:
 };
 
 
-class Discovery: private Receiver {
+class Discovery: public Receiver {
     // Let wire protocol control the table
     friend class AsyncUDPServer;
 private:
@@ -35,6 +36,7 @@ private:
 
     // Implement udp receive call back
     virtual void receive(const std::string& ip, unsigned short port, const std::string& data) override;
+    
     // Encapsulating low-level stuff
     void send(const std::string& ip, unsigned short port, std::string payload);
 
