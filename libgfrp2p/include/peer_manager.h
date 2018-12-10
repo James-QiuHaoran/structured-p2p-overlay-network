@@ -95,7 +95,7 @@ public:
     void broadcast_within_ring(const Message &msg, unsigned long current_level);
     void broadcast_down(const Message &msg, unsigned long current_level);
     void multicast_to_contact_nodes(const Message &msg, unsigned long current_level);
-    void send(const Node &node, const Message &msg);
+    void send(std::shared_ptr<Node> node, const Message &msg);
     void on_receive(const Message &msg);
 
     // on a node join

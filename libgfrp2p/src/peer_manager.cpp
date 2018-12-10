@@ -118,8 +118,15 @@ void multicast_to_contact_nodes(const Message &msg, unsigned long current_level)
 	}
 }
 
-void PeerManager::send(const Node &node, const Message &msg) {
+void PeerManager::send(std::shared_ptr<Node> node, const Message &msg) {
 	// using wire protcol - TCP Transportation
+	AsyncTCPServer tcp_server = new AsyncTCPServer();
+
+	// generate data to send
+	std::string data = "Hello World!";
+
+	// send
+	tcp_server.send(node->get_ip(), node->get_port(), data);
 }
 
 // broadcast upwards to the contact nodes of the upper level ring
@@ -143,9 +150,9 @@ void PeerManager::broadcast_up(const Message &msg, unsigned long current_level) 
 	return;
 }
 
-// broadcast to the nodes within the ring
+// broadcast to the nodes within the ring (k-ary distributed spanning tree)
 void PeerManager::broadcast_within_ring(const Message &msg, unsigned long current_level) {
-	// using the k-ary distributed spanning tree
+	// should be recursive
 }
 
 // broadcast downwards to the contact nodes of the lower level ring
