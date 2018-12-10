@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include <boost/asio.hpp>
+#include <boost/asio/io_context.hpp>
 #include <boost/bind.hpp>
 #include <boost/log/trivial.hpp>
 
