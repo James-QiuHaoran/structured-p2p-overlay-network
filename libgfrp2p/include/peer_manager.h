@@ -14,7 +14,7 @@ private:
     int from_level;
     std::string messageID;
     std::string messageHash;
-    std::string type;
+    int type;
     int direction; // 1 upwards, 0 same level, -1 downwards
 
 public:
@@ -28,15 +28,16 @@ public:
     int get_direction() const;
     std::string get_messageID() const;
     std::string get_messageHash() const;
-    std::string get_type() const;
+    int get_type() const;
 
     // setters
     void set_sender(Node sender);
     void set_receiver(Node receiver);
     void set_direction(int direction);
+    void set_from_level(int level);
     void set_messageID(string messageId);
     void set_messageHash(string messageHash);
-    void set_type(string type);
+    void set_type(int type);
 };
 
 /* Error Class
@@ -66,7 +67,7 @@ public:
 class PeerManager {
 private:
     // contains node information
-    Node node;
+    std::shared_ptr<Node> node;
 
     // contains peers and related information
     NodeTable node_table;
@@ -76,7 +77,7 @@ public:
     void PeerManager();
 
     // getters
-    Node get_node();
+    std::shared_ptr<Node> get_node();
     NodeTable get_node_table();
     
     // create and initialize a peer
@@ -97,15 +98,22 @@ public:
     void send(const Node &node, const Message &msg);
     void on_receive(const Message &msg);
 
+    // on a node join
+    void on_new_connection(shared_ptr<Node> node);
+
+    // on a node leave
+    void on_lost_connection(shared_ptr<Node> node);
+
+    // contact nodes election
+    std::unordered_set<shared_ptr<Node>> contact_node_election();
+
     // stop the peer
     void stop();
 };
 
-// To be put in node_table
-/*
-    // on joining a node
-    void on_new_connection();
 
+/*
+    // To be put in node_table
     // detect node leave
     void on_node_lost_connection();
     void on_node_leave();
@@ -114,8 +122,4 @@ public:
     bool liveness_check_successor();
     bool check_your_predecessor();
     bool check_your_sucessor();
-
-    // contact node(s) election
-    std::unordered_set<Node> contact_node_election();
-    void election_result_broadcast();
 */

@@ -23,7 +23,7 @@ Node Message::get_receiver() const {
 }
 
 int Message::get_from_level() const {
-
+	return this->from_level;
 }
 
 int Message::get_direction() const {
@@ -87,7 +87,7 @@ void PeerError::set_errorMessage(string message) {
 	this->errorMessage = message;
 }
 
-Node PeerManager::get_node() {
+std::shared_ptr<Node> PeerManager::get_node() {
 	return this->node;
 }
 
@@ -215,16 +215,50 @@ void PeerManager::on_receive(const Message &msg) {
 	return;
 }
 
-// to be put in node_table.cpp
+std::unordered_set<shared_ptr<Node>> PeerManager::contact_node_election() {
+	// random_IDs = []
+	// for i = 0 -> NUM_CONTACT_NODES:
+	//	random_IDs.append(generate_random_number_using_SGX() mod num_nodes)
+
+	// after contact node elected, broadcast the result
+	// broadcast_within_ring(random_IDs)
+	// multicast_upper_ring(random_IDs)
+	// multicast_lower_ring(random_IDs)
+}
+
+// on a node join
+void on_new_connection(shared_ptr<Node> node) {
+
+}
+
+// on a node leave
+void on_lost_connection(shared_ptr<Node> node) {
+
+}
+
+// create and initialize a peer
+void PeerManager::create_peer() {
+
+}
+
+// connect to the network
+void PeerManager::connect() {
+
+}
+
+// start the server
+void PeerManager::start() {
+
+}
+
+// stop the peer
+void PeerManager::stop() {
+
+}
+
+
 /*
-void PeerManager::on_node_lost_connection() {
-	// if a neighbor does not reply your heart beat message
-}
-
-void PeerManager::on_node_leave() {
-	// if a node leave is detected and verified
-}
-
+// to be put in node_table.cpp
 void PeerManager::detect_node_left() {
 	if (liveness_check_predecessor(this.predecessor, this.pre-predecessor) == false)
 		in_ring_broadcast()  // broadcast to update node info within the smallest ring
@@ -286,15 +320,3 @@ bool PeerManager::check_your_sucessor() {
 		return true;
 }
 */
-
-std::unordered_set<Node> PeerManager::contact_node_election() {
-	// random_IDs = []
-	// for i = 0 -> NUM_CONTACT_NODES:
-	//	random_IDs.append(generate_random_number_using_SGX() mod num_nodes)
-}
-
-// after contact node elected, broadcast the result
-void PeerManager::election_result_broadcast() {
-	// broadcast_within_ring(random_IDs)
-	// multicast_upper_ring(random_IDs)
-}
