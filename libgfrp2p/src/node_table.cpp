@@ -5,7 +5,7 @@ std::shared_ptr<Node> NodeTable::get_node(const std::string& id) {
     for (const auto& r : table) {
         auto contact_nodes_iter = r.contact_nodes.find(id),
              predecessors_iter = r.predecessors.find(id),
-             successors_iter = r.successors.find(id);
+             successors_iter = r.successors.find(id),
              peer_list_iter = r.peer_list.find(id);
 
         if (contact_nodes_iter != r.contact_nodes.end()) 
@@ -42,7 +42,7 @@ bool NodeTable::has_node(const std::string& id) {
     for (const auto& r : table) {
         if (r.contact_nodes.find(id) != r.contact_nodes.end() || 
             r.predecessors.find(id) != r.predecessors.end() || 
-            r.successors.find(id) != r.successors.end()) || 
+            r.successors.find(id) != r.successors.end() || 
             r.peer_list.find(id) != r.peer_list.end())
         
             return true;

@@ -98,7 +98,7 @@ void AsyncTCPServer::handle_receive(const boost::system::error_code& error,
     this->receive();
 }
 
-void AsyncTCPServer::handle_send(const std::string& data,
+void AsyncTCPServer::handle_send(boost::shared_ptr<std::string> data,
     const boost::system::error_code& error,
     std::size_t bytes_transferred)  {
     

@@ -20,6 +20,8 @@ public:
 // A class that implements asynchronous UDP send and receive 
 class AsyncUDPServer {
 public:
+    static const std::size_t BUFFER_SIZE = 65536;
+
     // Constructor
     AsyncUDPServer(Receiver* receiver, unsigned short port);
 
@@ -38,7 +40,7 @@ private:
     /* Only one piece of incoming data is kept
      * If Receiver::receive() does not return promptly, packets may be ignored
      * TODO: implement queue */
-    std::array<char, 65536> recv_buffer;
+    std::array<char, BUFFER_SIZE> recv_buffer;
     udp::endpoint recv_endpoint;
 
     void receive();
