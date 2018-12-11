@@ -1,15 +1,9 @@
-#ifndef RING_UPPER_LIMIT
+#ifndef APP_H
+#define APP_H
+
 #define RING_UPPER_LIMIT 20
-#endif
-
-#ifndef RING_LOWER_LIMIT
 #define RING_LOWER_LIMIT 10
-#endif
-
-#ifndef HEARTBEAT_TIMEOUT
 #define HEARTBEAT_TIMEOUT 5
-#endif
-
-#ifndef NUM_CONTACT_NODES
 #define NUM_CONTACT_NODES 3
+
 #endif

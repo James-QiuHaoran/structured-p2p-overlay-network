@@ -1,3 +1,6 @@
+#ifndef TRANSPORT_H
+#define TRANSPORT_H
+
 #include <string>
 #include <array>
 #include <exception>
@@ -78,4 +81,6 @@ private:
     void handle_receive(const boost::system::error_code& error, std::size_t bytes_transferred);
     void handle_send(boost::shared_ptr<std::string> data, const boost::system::error_code& error, std::size_t bytes_transferred);
 };
+#endif
+
 #endif

@@ -1,3 +1,6 @@
+#ifndef NODE_TABLE_H
+#define NODE_TABLE_H
+
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -65,3 +68,5 @@ public:
     std::shared_ptr<Node> get_peer(unsigned long level, int id);  // get the particular peer
     int get_end_id(unsigned long level);                          // get the end id in the ring
 };
+
+#endif

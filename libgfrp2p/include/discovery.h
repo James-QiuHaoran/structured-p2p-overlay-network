@@ -1,3 +1,6 @@
+#ifndef DISCOVERY_H
+#define DISCOVERY_H
+
 #include <string>
 #include <memory>
 
@@ -63,3 +66,5 @@ public:
     void stop();
 
 };
+
+#endif

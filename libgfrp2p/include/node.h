@@ -1,3 +1,6 @@
+#ifndef NODE_H
+#define NODE_H
+
 #include <string>
 #include <chrono>
 
@@ -48,3 +51,5 @@ public:
     void set_last_pong_now();
     void set_last_ping_now();
 };
+
+#endif

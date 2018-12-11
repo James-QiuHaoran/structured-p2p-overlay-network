@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project(GFRR_P2P)
+project(GFRRP2P)
 
 IF(NOT CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE Release)

@@ -1,3 +1,6 @@
+#ifndef PEER_MANAGER_H
+#define PEER_MANAGER_H
+
 #include <string>
 #include <unordered_set>
 
@@ -123,3 +126,5 @@ public:
     bool check_your_predecessor();
     bool check_your_sucessor();
 */
+
+#endif

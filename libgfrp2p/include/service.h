@@ -1,3 +1,6 @@
+#ifndef SERVICE_H
+#define SERVICE_H
+
 #include <string>
 #include "node.h"
 #include "app.h"
@@ -12,3 +15,5 @@ private:
 public:
 	BasicService();
 };
+
+#endif
