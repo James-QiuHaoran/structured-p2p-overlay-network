@@ -21,7 +21,7 @@ void AsyncUDPServer::run() {
 void AsyncUDPServer::send(const std::string& ip, unsigned short port, const std::string& data) {
     udp::endpoint endpoint(boost::asio::ip::address::from_string(ip), port);
     boost::shared_ptr<std::string> message(new std::string(data));
-    this->socket.async_send_to(boost::asio::buffer(message), endpoint,
+    this->socket.async_send_to(boost::asio::buffer(*message), endpoint,
         boost::bind(&AsyncUDPServer::handle_send, this, message,
             boost::asio::placeholders::error,
             boost::asio::placeholders::bytes_transferred));
