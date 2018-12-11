@@ -46,7 +46,7 @@ void AsyncUDPServer::handle_receive(const boost::system::error_code& error,
     this->receive();
 }
 
-void AsyncUDPServer::handle_send(const std::string& data,
+void AsyncUDPServer::handle_send(boost::shared_ptr<std::string> data,
     const boost::system::error_code& error,
     std::size_t bytes_transferred)  {
         
