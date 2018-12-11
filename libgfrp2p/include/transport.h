@@ -41,13 +41,14 @@ private:
     std::array<char, 65536> recv_buffer;
     udp::endpoint recv_endpoint;
 
-    void receiving();
+    void receive();
 
     // boost server mechanism
     void handle_receive(const boost::system::error_code& error, std::size_t bytes_transferred);
     void handle_send(boost::shared_ptr<std::string> data, const boost::system::error_code& error, std::size_t bytes_transferred);
 };
 
+#ifdef NDEBUG
 // A class that implements asynchronous TCP send and receive
 class AsyncTCPServer {
 public:
@@ -69,9 +70,10 @@ private:
     // boost::asio::streambuf receive_buffer;
     tcp::endpoint recv_endpoint;
 
-    void receive();
+    void receiv();
 
     // boost server mechanism
     void handle_receive(const boost::system::error_code& error, std::size_t bytes_transferred);
     void handle_send(boost::shared_ptr<std::string> data, const boost::system::error_code& error, std::size_t bytes_transferred);
 };
+#endif

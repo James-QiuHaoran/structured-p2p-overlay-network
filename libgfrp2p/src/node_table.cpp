@@ -9,13 +9,13 @@ std::shared_ptr<Node> NodeTable::get_node(const std::string& id) {
              peer_list_iter = r.peer_list.find(id);
 
         if (contact_nodes_iter != r.contact_nodes.end()) 
-            return *contact_nodes_iter;
+            return contact_nodes_iter->second;
         if (predecessors_iter != r.predecessors.end()) 
-            return *predecessors_iter;
+            return predecessors_iter->second;
         if (successors_iter != r.successors.end()) 
-            return *successors_iter;
+            return successors_iter->second;
         if (peer_list_iter != r.peer_list.end())
-            return *peer_list_iter;
+            return peer_list_iter->second;
     }
     return std::shared_ptr<Node>();
 }
@@ -40,9 +40,10 @@ unsigned long NodeTable::get_self_level() {
 bool NodeTable::has_node(const std::string& id) {
     std::lock_guard<std::mutex> lock(this->mlock);
     for (const auto& r : table) {
-        if (r.contact_nodes.find(id) != r.end() || 
-            r.predecessors.find(id) != r.end() || 
-            r.successors.find(id) != r.end())
+        if (r.contact_nodes.find(id) != r.contact_nodes.end() || 
+            r.predecessors.find(id) != r.predecessors.end() || 
+            r.successors.find(id) != r.successors.end()) || 
+            r.peer_list.find(id) != r.peer_list.end())
         
             return true;
     }
