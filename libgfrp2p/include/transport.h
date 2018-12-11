@@ -4,7 +4,6 @@
 #include <iostream>
 
 #include <boost/asio.hpp>
-#include <boost/asio/io_context.hpp>
 #include <boost/bind.hpp>
 #include <boost/log/trivial.hpp>
 
@@ -33,7 +32,7 @@ public:
 private:
     Receiver* receiver;
 
-    boost::asio::io_context io_context;
+    boost::asio::io_service io_service;
     udp::socket socket;
     
     /* Only one piece of incoming data is kept
@@ -49,7 +48,6 @@ private:
     void handle_send(boost::shared_ptr<std::string> data, const boost::system::error_code& error, std::size_t bytes_transferred);
 };
 
-
 // A class that implements asynchronous TCP send and receive
 class AsyncTCPServer {
 public:
@@ -64,7 +62,7 @@ public:
     
 private:
     Receiver* receiver;
-    boost::asio::io_context io_context;
+    boost::asio::io_service io_service;
     tcp::socket socket;
 
     std::array<char, 65536> recv_buffer; 

@@ -2,19 +2,19 @@
 
 // constructors
 AsyncUDPServer::AsyncUDPServer(Receiver* receiver, unsigned short port):
-    receiver(receiver), io_context(), socket(io_context, udp::endpoint(udp::v4(), port)) {
+    receiver(receiver), io_service(), socket(io_service, udp::endpoint(udp::v4(), port)) {
 }
 
 AsyncTCPServer::AsyncTCPServer(Receiver* receiver, unsigned short port):
-    receiver(receiver), io_context(), socket(io_context, tcp::endpoint(tcp::v4(), port)) {
+    receiver(receiver), io_service(), socket(io_service, tcp::endpoint(tcp::v4(), port)) {
 }
 
 // member function implementation
 void AsyncUDPServer::run() {
     try {
-        this->io_context.run();
+        this->io_service.run();
     catch (const std::exception& e) {
-        BOOST_LOG_TRIVIAL(fatal) << "AsyncUDPServer::run: io_context fails to run";
+        BOOST_LOG_TRIVIAL(fatal) << "AsyncUDPServer::run: io_service fails to run";
     }
     
     this->receive();
@@ -22,9 +22,9 @@ void AsyncUDPServer::run() {
 
 void AsyncTCPServer::run() {
     try {
-        this->io_context.run();
+        this->io_service.run();
     catch (const std::exception& e) {
-        BOOST_LOG_TRIVIAL(fatal) << "AsyncTCPServer::run: io_context fails to run";
+        BOOST_LOG_TRIVIAL(fatal) << "AsyncTCPServer::run: io_service fails to run";
     }
     
     this->receive();
