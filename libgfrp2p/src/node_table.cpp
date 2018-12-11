@@ -6,13 +6,16 @@ std::shared_ptr<Node> NodeTable::get_node(const std::string& id) {
         auto contact_nodes_iter = r.contact_nodes.find(id),
              predecessors_iter = r.predecessors.find(id),
              successors_iter = r.successors.find(id);
+             peer_list_iter = r.peer_list.find(id);
 
-        if (contact_nodes_iter != r.end()) 
+        if (contact_nodes_iter != r.contact_nodes.end()) 
             return *contact_nodes_iter;
-        if (contact_nodes_iter != r.end()) 
+        if (predecessors_iter != r.predecessors.end()) 
             return *predecessors_iter;
-        if (contact_nodes_iter != r.end()) 
+        if (successors_iter != r.successors.end()) 
             return *successors_iter;
+        if (peer_list_iter != r.peer_list.end())
+            return *peer_list_iter;
     }
     return std::shared_ptr<Node>();
 }
@@ -48,18 +51,9 @@ bool NodeTable::has_node(const std::string& id) {
 
 std::shared_ptr<Node> NodeTable::get_node_copy(const std::string& id) {
     std::lock_guard<std::mutex> lock(this->mlock);
-    for (const auto& r : table) {
-        auto contact_nodes_iter = r.contact_nodes.find(id),
-             predecessors_iter = r.predecessors.find(id),
-             successors_iter = r.successors.find(id);
-
-        if (contact_nodes_iter != r.end()) 
-            return copy_node(*contact_nodes_iter);
-        if (contact_nodes_iter != r.end()) 
-            return copy_node(*predecessors_iter);
-        if (contact_nodes_iter != r.end()) 
-            return copy_node(*successors_iter);
-    }
+    auto node = this->get_node(id);
+    if (node)
+        return this->copy_node(node);
     return std::shared_ptr<Node>();
 }
 

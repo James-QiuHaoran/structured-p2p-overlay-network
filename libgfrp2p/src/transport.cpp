@@ -13,7 +13,7 @@ AsyncTCPServer::AsyncTCPServer(Receiver* receiver, unsigned short port):
 void AsyncUDPServer::run() {
     try {
         this->io_service.run();
-    catch (const std::exception& e) {
+    } catch (const std::exception& e) {
         BOOST_LOG_TRIVIAL(fatal) << "AsyncUDPServer::run: io_service fails to run";
     }
     
@@ -23,7 +23,7 @@ void AsyncUDPServer::run() {
 void AsyncTCPServer::run() {
     try {
         this->io_service.run();
-    catch (const std::exception& e) {
+    } catch (const std::exception& e) {
         BOOST_LOG_TRIVIAL(fatal) << "AsyncTCPServer::run: io_service fails to run";
     }
     
