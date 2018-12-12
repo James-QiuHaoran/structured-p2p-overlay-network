@@ -24,7 +24,7 @@ void AsyncUDPServer::send(const std::string& ip, unsigned short port, const std:
     udp::endpoint endpoint(boost::asio::ip::address::from_string(ip), port);
     boost::shared_ptr<std::string> message(new std::string(data));
     boost::system::error_code error;
-    this->socket.send_to(boost::asio::buffer(message), endpoint, 0, error);
+    this->socket.send_to(boost::asio::buffer(*message), endpoint, 0, error);
     if (error) {
         BOOST_LOG_TRIVIAL(error) << "AsyncUDPServer::handle_send: send error, packet might not be sent";
     }
