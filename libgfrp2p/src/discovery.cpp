@@ -18,7 +18,7 @@ void Packet::set_payload(std::string new_payload) {
 
 /* Constructor */
 Discovery::Discovery(const std::shared_ptr<NodeTable>& node_table, unsigned short port):
-    udp_server(new AsyncUDPServer(static_cast<Receiver*>(this), port)), node_table(node_table) { }
+    udp_server(new AsyncUDPServer(shared_from_this(), port)), node_table(node_table) { }
 
 /* Private functions */
 void Discovery::receive(const std::string& ip, unsigned short port, const std::string& datagram) {

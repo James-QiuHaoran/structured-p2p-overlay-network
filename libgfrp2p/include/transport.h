@@ -15,9 +15,12 @@ using boost::asio::ip::udp;
 
 // Classes that implement Receiver can be registered to the server
 // receive() will be called to handle received data
-class Receiver {
+class Receiver: public std::enable_shared_from_this<Receiver> {
 public:
     virtual void receive(const std::string& ip, unsigned short port, const std::string& data) = 0;
+
+    // For safe destruction
+    virtual ~Receiver() = 0;
 };
 
 // A class that implements asynchronous UDP send and receive 
@@ -26,7 +29,7 @@ public:
     static const std::size_t BUFFER_SIZE = 65536;
 
     // Constructor
-    AsyncUDPServer(Receiver* receiver, unsigned short port);
+    syncUDPServer(const std::shared_ptr<Receiver>& receiver, unsigned short port);
 
     // run the receive loop
     void run();
@@ -35,7 +38,7 @@ public:
     void send(const std::string& ip, unsigned short port, const std::string& data);
 
 private:
-    Receiver* receiver;
+    std::shared_ptr<Receiver> receiver;
 
     boost::asio::io_service io_service;
     udp::socket socket;

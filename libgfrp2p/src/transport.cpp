@@ -1,7 +1,10 @@
 #include "transport.h"
 
+// Destructor function body must be provided even pure virtual
+Receiver::~Receiver() { }
+
 // constructors
-AsyncUDPServer::AsyncUDPServer(Receiver* receiver, unsigned short port):
+AsyncUDPServer::AsyncUDPServer(const std::shared_ptr<Receiver>& receiver, unsigned short port):
     receiver(receiver), io_service(), socket(io_service, udp::endpoint(udp::v4(), port)) {
 }
 
