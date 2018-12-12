@@ -5,8 +5,8 @@ Receiver::~Receiver() { }
 
 // constructors
 AsyncUDPServer::AsyncUDPServer(const std::shared_ptr<Receiver>& receiver, unsigned short port):
-    receiver(receiver), io_service(), socket(io_service, udp::endpoint(udp::v4(), port)) { }
-
+    receiver(receiver), io_service(), socket(io_service, udp::endpoint(udp::v4(), port)),
+    buffer(new AtomicQueue<BufferItemType>()) { }
 
 // member function implementation
 void AsyncUDPServer::run() {
@@ -18,7 +18,6 @@ void AsyncUDPServer::run() {
     
     this->receive();
 }
-
 
 void AsyncUDPServer::send(const std::string& ip, unsigned short port, const std::string& data) {
     udp::endpoint endpoint(boost::asio::ip::address::from_string(ip), port);
@@ -44,12 +43,7 @@ void AsyncUDPServer::handle_receive(const boost::system::error_code& error,
         // Call back to the receiver
         std::string data(this->recv_buffer.begin(), this->recv_buffer.end());
         
-        // Push to buffer
-        {
-            std::lock_guard<std::mutex> lock(this->buffer_mlock);
-            this->buffer.push(std::make_tuple(recv_endpoint.address().to_string(), recv_endpoint.port(), data));
-        }
-        this->buffer_cv.notify_one();
+        this->buffer->enqueue_and_notify(BufferItemType(recv_endpoint.address().to_string(), recv_endpoint.port(), data));
 
     } else {
         BOOST_LOG_TRIVIAL(error) << "AsyncUDPServer::handle_receive: receive error, packet ignored";
@@ -58,14 +52,8 @@ void AsyncUDPServer::handle_receive(const boost::system::error_code& error,
 }
 
 void AsyncUDPServer::handle() {
-    std::unique_lock<std::mutex> lock(this->buffer_mlock);
-    while (this->buffer.empty()) {
-        this->buffer_cv.wait(lock);
-    }
     // Copy and unlock immediately
-    BufferItemType front = this->buffer.front();
-    this->buffer.pop();
-    lock.unlock();
+    auto front = this->buffer->wait_for_dequeue();
 
     this->receiver->receive(std::get<0>(front), std::get<1>(front), std::get<2>(front));
 }
@@ -98,7 +86,7 @@ void handle_write(const boost::system::error_code& error,
 }
 
 
-AsynctcpServer::AsyncTCPServer(const std::shared_ptr<Receiver>& receiver, unsigned short port):
+AsyncTCPServer::AsyncTCPServer(const std::shared_ptr<Receiver>& receiver, unsigned short port):
     receiver(receiver), io_service(), acceptor(io_service, tcp::endpoint((tcp::v4(), port)) { }
 
 
