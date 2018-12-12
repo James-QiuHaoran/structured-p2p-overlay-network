@@ -3,8 +3,11 @@
 
 #include <string>
 #include <array>
+#include <queue>
 #include <exception>
 #include <iostream>
+#include <thread>
+#include <condition_variable>
 
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
@@ -27,6 +30,7 @@ public:
 class AsyncUDPServer {
 public:
     static const std::size_t BUFFER_SIZE = 65536;
+    static const std::size_t MAX_QUEUE_SIZE = 1000;
 
     // Constructor
     AsyncUDPServer(const std::shared_ptr<Receiver>& receiver, unsigned short port);
@@ -38,11 +42,19 @@ public:
     void send(const std::string& ip, unsigned short port, const std::string& data);
 
 private:
+    using BufferItemType = std::tuple<std::string, unsigned short, std::string>;
+
     std::shared_ptr<Receiver> receiver;
 
     boost::asio::io_service io_service;
     udp::socket socket;
-    
+
+    // For incoming packets to queue up and unblock the socket
+    std::mutex buffer_mlock;
+    std::condition_variable buffer_cv;
+    std::queue<BufferItemType> buffer;
+    std::thread handler;
+
     /* Only one piece of incoming data is kept
      * If Receiver::receive() does not return promptly, packets may be ignored
      * TODO: implement queue */
@@ -51,13 +63,36 @@ private:
 
     void receive();
 
-    // boost server mechanism
+    // Boost server mechanism
     void handle_receive(const boost::system::error_code& error, std::size_t bytes_transferred);
     void handle_send(boost::shared_ptr<std::string> data, const boost::system::error_code& error, std::size_t bytes_transferred);
+
+    // Routine of the handling thread
+    void handle();
 };
 
 #ifdef NDEBUG
 // A class that implements asynchronous TCP send and receive
+class TCPConnection: public boost::enable_shared_from_this<TCPConnection> {
+public:
+    typedef boost::shared_ptr<TCPConnection> Pointer;
+
+    static Pointer create(boost::asio::io_service& io_service);
+
+    tcp::socket& get_socket();
+
+    void start();
+private:
+    tcp::socket socket;
+    std::string buffer;
+
+    TCPConnection(boost::asio::io_service& io_service): socket(io_service);
+
+    void handle_write(const boost::system::error_code& error,
+        size_t bytes_transferred);
+
+};
+
 class AsyncTCPServer {
 public:
     // Constructor
@@ -70,20 +105,17 @@ public:
     void send(const std::string& ip, unsigned short port, const std::string& data);
     
 private:
-    Receiver* receiver;
+    std::shared_ptr<Receiver> receiver;
+
     boost::asio::io_service io_service;
-    tcp::socket socket;
+    tcp::acceptor acceptor;
 
-    std::array<char, 65536> recv_buffer; 
-    // boost::asio::streambuf receive_buffer;
-    tcp::endpoint recv_endpoint;
-
-    void receiv();
-
-    // boost server mechanism
-    void handle_receive(const boost::system::error_code& error, std::size_t bytes_transferred);
-    void handle_send(boost::shared_ptr<std::string> data, const boost::system::error_code& error, std::size_t bytes_transferred);
+    void accept();
+    void handle_accept(TCPConnection::Pointer connection,
+        const boost::system::error_code& error);
+    
 };
-#endif
 
+
+#endif
 #endif

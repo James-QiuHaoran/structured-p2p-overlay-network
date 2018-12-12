@@ -5,8 +5,7 @@ Receiver::~Receiver() { }
 
 // constructors
 AsyncUDPServer::AsyncUDPServer(const std::shared_ptr<Receiver>& receiver, unsigned short port):
-    receiver(receiver), io_service(), socket(io_service, udp::endpoint(udp::v4(), port)) {
-}
+    receiver(receiver), io_service(), socket(io_service, udp::endpoint(udp::v4(), port)) { }
 
 
 // member function implementation
@@ -24,7 +23,7 @@ void AsyncUDPServer::run() {
 void AsyncUDPServer::send(const std::string& ip, unsigned short port, const std::string& data) {
     udp::endpoint endpoint(boost::asio::ip::address::from_string(ip), port);
     boost::shared_ptr<std::string> message(new std::string(data));
-    this->socket.async_send_to(boost::asio::buffer(*message), endpoint,
+    this->socket.send_to(boost::asio::buffer(*message), endpoint,
         boost::bind(&AsyncUDPServer::handle_send, this, message,
             boost::asio::placeholders::error,
             boost::asio::placeholders::bytes_transferred));
@@ -43,7 +42,14 @@ void AsyncUDPServer::handle_receive(const boost::system::error_code& error,
     if (!error || error == boost::asio::error::message_size) {
         // Call back to the receiver
         std::string data(this->recv_buffer.begin(), this->recv_buffer.end());
-        receiver->receive(recv_endpoint.address().to_string(), recv_endpoint.port(), data);
+        
+        // Push to buffer
+        {
+            std::lock_guard<std::mutex> lock(this->buffer_mlock);
+            this->buffer.push(std::make_tuple(recv_endpoint.address().to_string(), recv_endpoint.port(), data));
+        }
+        this->buffer_cv.notify_one();
+
     } else {
         BOOST_LOG_TRIVIAL(error) << "AsyncUDPServer::handle_receive: receive error, packet ignored";
     }
@@ -59,11 +65,50 @@ void AsyncUDPServer::handle_send(boost::shared_ptr<std::string> data,
     }
 }
 
-//TCP server code, need debug
-#ifdef NDEBUG
-AsyncTCPServer::AsyncTCPServer(Receiver* receiver, unsigned short port):
-    receiver(receiver), io_service(), socket(io_service, tcp::endpoint(tcp::v4(), port)) {
+void AsyncUDPServer::handle() {
+    std::unique_lock<std::mutex> lock(this->buffer_mlock);
+    while (this->buffer.empty()) {
+        cv.wait(lock);
+    }
+    // Copy and unlock immediately
+    BufferItemType front = this->buffer.front();
+    this->buffer.pop();
+    lock.unlock();
+
+    this->receiver->receive(std::get<0>(front), std::get<1>(front), std::get<2>(front));
 }
+
+#ifdef NDEBUG
+
+TCPConnection::Pointer TCPConnection::create(boost::asio::io_service& io_service) {
+    return Pointer(new TCPConnection(io_service));
+}
+
+tco::socket& TCPConnection::get_socket() { return this->socket(); }
+
+void TCPConnection::start() {
+    message_ = make_daytime_string();
+
+    boost::asio::async_write(this->socket, boost::asio::buffer(this->buffer),
+        boost::bind(&TCPConnection::handle_write, shared_from_this(),
+        boost::asio::placeholders::error,
+        boost::asio::placeholders::bytes_transferred));
+}
+
+TCPConnection::TCPConnection(boost::asio::io_service& io_service): socket(io_service) { }
+
+void handle_write(const boost::system::error_code& error,
+    size_t bytes_transferred) {
+    
+    if (error) {
+        BOOST_LOG_TRIVIAL(error) << "TCPConnection::handle_write: Write error";
+    }
+}
+
+
+AsynctcpServer::AsyncTCPServer(const std::shared_ptr<Receiver>& receiver, unsigned short port):
+    receiver(receiver), io_service(), acceptor(io_service, tcp::endpoint((tcp::v4(), port)) { }
+
 
 void AsyncTCPServer::run() {
     try {
@@ -72,43 +117,27 @@ void AsyncTCPServer::run() {
         BOOST_LOG_TRIVIAL(fatal) << "AsyncTCPServer::run: io_service fails to run";
     }
     
-    this->receive();
+    this->accept();
 }
 
-void AsyncTCPServer::send(const std::string& ip, unsigned short port, const std::string& data) {
-    tcp::endpoint endpoint(boost::asio::ip::address::from_string(ip), port);
-    this->socket.async_send_to(boost::asio::buffer(data), endpoint,
-        boost::bind(&AsyncTCPServer::handle_send, this, data,
-            boost::asio::placeholders::error,
-            boost::asio::placeholders::bytes_transferred));
-} 
+void AsyncTCPServer::accept() {
+    // Create a new connection on accept
+    TCPConnection::Pointer connection = TCPConnection::create(acceptor.get_io_service());
 
-void AsyncTCPServer::receive() {
-    this->socket.async_receive_from(boost::asio::buffer(this->recv_buffer), this->recv_endpoint,
-        boost::bind(&AsyncTCPServer::handle_receive, this,
-            boost::asio::placeholders::error,
-            boost::asio::placeholders::bytes_transferred));
+    this->acceptor.async_accept(connection->get_socket(),
+        boost::bind(&tcp_server::handle_accept, this, connection,
+        boost::asio::placeholders::error));
 }
 
-void AsyncTCPServer::handle_receive(const boost::system::error_code& error,
-    std::size_t bytes_transferred) {
-    if (!error || error == boost::asio::error::message_size) {
-        // call back to the receiver
-        std::string data(this->recv_buffer.begin(), this->recv_buffer.end());
-        receiver->receive(recv_endpoint.address().to_string(), recv_endpoint.port(), data);
+void AsyncTCPServer::handle_accept(TCPConnection::Pointer connection,
+    const boost::system::error_code& error) {
+    if (!error) {
+        connection->start();
     } else {
-        BOOST_LOG_TRIVIAL(error) << "AsyncTCPServer::handle_receive: receive error, packet ignored";
+        BOOST_LOG_TRIVIAL(error) << "AsyncTCPServer::handle_accept: Accept error";
     }
-    this->receive();
-}
 
-void AsyncTCPServer::handle_send(boost::shared_ptr<std::string> data,
-    const boost::system::error_code& error,
-    std::size_t bytes_transferred)  {
-    
-    if (error) {
-        BOOST_LOG_TRIVIAL(error) << "AsyncTCPServer::handle_send: send error, packet might not be sent";
-    }
+    this->accept();
 }
 
 #endif
