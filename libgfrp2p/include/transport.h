@@ -65,7 +65,6 @@ private:
 
     // Boost server mechanism
     void handle_receive(const boost::system::error_code& error, std::size_t bytes_transferred);
-    void handle_send(boost::shared_ptr<std::string> data, const boost::system::error_code& error, std::size_t bytes_transferred);
 
     // Routine of the handling thread
     void handle();

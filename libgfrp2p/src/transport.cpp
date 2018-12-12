@@ -23,10 +23,11 @@ void AsyncUDPServer::run() {
 void AsyncUDPServer::send(const std::string& ip, unsigned short port, const std::string& data) {
     udp::endpoint endpoint(boost::asio::ip::address::from_string(ip), port);
     boost::shared_ptr<std::string> message(new std::string(data));
-    this->socket.send_to(boost::asio::buffer(*message), endpoint,
-        boost::bind(&AsyncUDPServer::handle_send, this, message,
-            boost::asio::placeholders::error,
-            boost::asio::placeholders::bytes_transferred));
+    boost::system::error_code error;
+    this->socket.send_to(boost::asio::buffer(message), remote_endpoint, 0, error);
+    if (error) {
+        BOOST_LOG_TRIVIAL(error) << "AsyncUDPServer::handle_send: send error, packet might not be sent";
+    }
 } 
 
 void AsyncUDPServer::receive() {
@@ -56,19 +57,10 @@ void AsyncUDPServer::handle_receive(const boost::system::error_code& error,
     this->receive();
 }
 
-void AsyncUDPServer::handle_send(boost::shared_ptr<std::string> data,
-    const boost::system::error_code& error,
-    std::size_t bytes_transferred)  {
-        
-    if (error) {
-        BOOST_LOG_TRIVIAL(error) << "AsyncUDPServer::handle_send: send error, packet might not be sent";
-    }
-}
-
 void AsyncUDPServer::handle() {
     std::unique_lock<std::mutex> lock(this->buffer_mlock);
     while (this->buffer.empty()) {
-        cv.wait(lock);
+        this->buffer_cv.wait(lock);
     }
     // Copy and unlock immediately
     BufferItemType front = this->buffer.front();
