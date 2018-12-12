@@ -29,7 +29,7 @@ public:
     static const std::size_t BUFFER_SIZE = 65536;
 
     // Constructor
-    syncUDPServer(const std::shared_ptr<Receiver>& receiver, unsigned short port);
+    AsyncUDPServer(const std::shared_ptr<Receiver>& receiver, unsigned short port);
 
     // run the receive loop
     void run();
@@ -61,7 +61,7 @@ private:
 class AsyncTCPServer {
 public:
     // Constructor
-    AsyncTCPServer(Receiver* receiver, unsigned short port);
+    AsyncTCPServer(const std::shared_ptr<Receiver>& receiver, unsigned short port);
     
     // run the receive loop
     void run();
