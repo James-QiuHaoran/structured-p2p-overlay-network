@@ -14,7 +14,7 @@ class Message {
 private:
     Node sender;
     Node receiver;
-    int from_level;
+    unsigned long from_level;
     std::string messageID;
     std::string messageHash;
     int type;
@@ -27,7 +27,7 @@ public:
     // getters
     Node get_sender() const;
     Node get_receiver() const;
-    int get_from_level() const;
+    unsigned long get_from_level() const;
     int get_direction() const;
     std::string get_messageID() const;
     std::string get_messageHash() const;
@@ -37,7 +37,7 @@ public:
     void set_sender(Node sender);
     void set_receiver(Node receiver);
     void set_direction(int direction);
-    void set_from_level(int level);
+    void set_from_level(unsigned long level);
     void set_messageID(string messageId);
     void set_messageHash(string messageHash);
     void set_type(int type);

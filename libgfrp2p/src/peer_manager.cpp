@@ -22,7 +22,7 @@ Node Message::get_receiver() const {
 	return this->receiver;
 }
 
-int Message::get_from_level() const {
+unsigned long Message::get_from_level() const {
 	return this->from_level;
 }
 
@@ -59,7 +59,7 @@ void Message::set_receiver(Node receiver) {
 	this->receiver = receiver;
 }
 
-void Message::set_from_level(int level) {
+void Message::set_from_level(unsigned long level) {
 	this->from_level = level;
 }
 
@@ -234,6 +234,7 @@ void PeerManager::on_receive(const Message &msg) {
 	return;
 }
 
+// elect the contact nodes for the next period
 std::unordered_set<shared_ptr<Node>> PeerManager::contact_node_election() {
 	// random_IDs = []
 	// for i = 0 -> NUM_CONTACT_NODES:
