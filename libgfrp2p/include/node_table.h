@@ -13,6 +13,7 @@
 
 struct Ring {
     // If an id exists in multiple maps, they must be the same object
+    unsigned long ring_level;
     std::unordered_map<std::string, std::shared_ptr<Node>> contact_nodes;
     std::unordered_map<std::string, std::shared_ptr<Node>> predecessors;
     std::unordered_map<std::string, std::shared_ptr<Node>> successors;
