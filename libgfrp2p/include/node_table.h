@@ -11,6 +11,8 @@
 
 #include "node.h"
 
+using boost::numeric_cast;
+
 // If an id exists in multiple maps, they must be the same object
 struct Ring {
     unsigned long ring_level;                                              // level of the ring
@@ -32,25 +34,24 @@ private:
     std::mutex mlock;
 
     // copy of pointer, use only when locked
-    std::shared_ptr<Node> get_node(const std::string& id);
+    std::shared_ptr<Node> get_node(unsigned long level, const std::string& id);
     std::shared_ptr<Node> copy_node(const std::shared_ptr<Node>& node);
  
 public:
     NodeTable(const std::string& self_id);
 
-    // all operations except those involving const members only must get lock
-
+    // all operations must get lock, except those involving const members only
     /* self operations */
     std::string get_self_id() const;
 
     /* storage operations */
-    bool has_node(const std::string& id);
+    bool has_node(unsigned long level, const std::string& id);
     // deep copy of node information
-    std::shared_ptr<Node> get_node_copy(const std::string& id);
+    std::shared_ptr<Node> get_node_copy(unsigned long level, const std::string& id);
 
     /* thread safe node operations */
-    void set_node_last_pong_now(const std::string& id);
-    void set_node_last_ping_now(const std::string& id);
+    void set_node_last_pong_now(unsigned long level, const std::string& id);
+    void set_node_last_ping_now(unsigned long level, const std::string& id);
 
     /* domain logic */
     bool is_contact_node(unsigned long level);
@@ -60,8 +61,8 @@ public:
     std::unordered_set<std::shared_ptr<Node>> get_predecessor(unsigned long level);
     std::unordered_set<std::shared_ptr<Node>> get_peer_list(unsigned long level);
     // for broadcast in ring (k-ary distributed spanning tree)
-    std::shared_ptr<Node> get_peer(unsigned long level, int id);  // get the particular peer
-    int get_end_id(unsigned long level);                          // get the end id in the ring
+    std::shared_ptr<Node> get_peer(unsigned long level, const std::string& id);  // get the particular peer
+    int get_end_id(unsigned long level);                                         // get the end id in the ring
 };
 
 #endif
