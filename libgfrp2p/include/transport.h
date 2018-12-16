@@ -154,7 +154,6 @@ private:
     void accept();
     void handle_accept(TCPConnection::Pointer connection,
         const boost::system::error_code& error);
-    
 };
 
 

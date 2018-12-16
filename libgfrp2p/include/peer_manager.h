@@ -12,17 +12,17 @@
  */
 class Message {
 private:
+    std::string messageID;
+    int type;
+    unsigned long from_level;
+    int direction; // 1 upwards, 0 same level, -1 downwards
     Node sender;
     Node receiver;
-    unsigned long from_level;
-    std::string messageID;
-    std::string messageHash;
-    int type;
-    int direction; // 1 upwards, 0 same level, -1 downwards
 
 public:
     // constructor
     Message();
+    Message(std::string messageID, int type, unsigned long from_level, int direction, Node sender, Node receiver);
 
     // getters
     Node get_sender() const;
@@ -30,7 +30,6 @@ public:
     unsigned long get_from_level() const;
     int get_direction() const;
     std::string get_messageID() const;
-    std::string get_messageHash() const;
     int get_type() const;
 
     // setters
@@ -39,7 +38,6 @@ public:
     void set_direction(int direction);
     void set_from_level(unsigned long level);
     void set_messageID(string messageId);
-    void set_messageHash(string messageHash);
     void set_type(int type);
 };
 
@@ -54,6 +52,7 @@ private:
 public:
     // constructor
     PeerError();
+    PeerError(std::string errorType, std::string errorMessage);
     
     // getters
     std::string get_errorType();
@@ -118,6 +117,7 @@ public:
     void stop();
 };
 
+#endif
 
 /*
     // To be put in node_table
@@ -130,5 +130,3 @@ public:
     bool check_your_predecessor();
     bool check_your_sucessor();
 */
-
-#endif

@@ -24,7 +24,7 @@ std::shared_ptr<Node> NodeTable::copy_node(const std::shared_ptr<Node>& node) {
 
 /* public functions */
 NodeTable::NodeTable(const std::string& self_id):
-    self_id(self_id), self_level(0) { }
+    self_id(self_id) { }
 
 std::string NodeTable::get_self_id() const {
     return this->self_id;
