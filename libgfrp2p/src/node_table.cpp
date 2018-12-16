@@ -1,8 +1,8 @@
 #include "node_table.h"
 
-/* Private functions */
+/* private functions */
 std::shared_ptr<Node> NodeTable::get_node(const std::string& id) {
-    for (const auto& r : table) {
+    for (const auto& r : tables) {
         auto contact_nodes_iter = r.contact_nodes.find(id),
              predecessors_iter = r.predecessors.find(id),
              successors_iter = r.successors.find(id),
@@ -30,11 +30,6 @@ NodeTable::NodeTable(const std::string& self_id):
 
 std::string NodeTable::get_self_id() const {
     return this->self_id;
-}
-
-unsigned long NodeTable::get_self_level() {
-    std::lock_guard<std::mutex> lock(this->mlock);
-    return this->self_level;
 }
 
 bool NodeTable::has_node(const std::string& id) {

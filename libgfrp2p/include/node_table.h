@@ -11,60 +11,54 @@
 
 #include "node.h"
 
+// If an id exists in multiple maps, they must be the same object
 struct Ring {
-    // If an id exists in multiple maps, they must be the same object
-    unsigned long ring_level;
-    std::unordered_map<std::string, std::shared_ptr<Node>> contact_nodes;
-    std::unordered_map<std::string, std::shared_ptr<Node>> predecessors;
-    std::unordered_map<std::string, std::shared_ptr<Node>> successors;
-    std::unordered_map<std::string, std::shared_ptr<Node>> peer_list; // used for broadcast within ring
+    unsigned long ring_level;                                              // level of the ring
+    std::unordered_map<std::string, std::shared_ptr<Node>> contact_nodes;  // contact nodes of the ring
+    std::shared_ptr<Node> predecessor;                                     // successor within the ring
+    std::shared_ptr<Node> successor;                                       // predecessor within the ring
+    std::unordered_map<std::string, std::shared_ptr<Node>> peer_list;      // used for broadcast within ring
 };
 
 // Node table and maintenance
 class NodeTable {
-
 private:
-    
     const std::string self_id;
 
-    unsigned long self_level;
+    // store nodes in level-referenced sets
+    std::vector<Ring> tables;
 
-    // Store nodes in level-referenced sets
-    std::vector<Ring> table;
-
-    // Thread safty
+    // thread safty
     std::mutex mlock;
 
-    // Copy of pointer, use only when locked
+    // copy of pointer, use only when locked
     std::shared_ptr<Node> get_node(const std::string& id);
     std::shared_ptr<Node> copy_node(const std::shared_ptr<Node>& node);
  
 public:
     NodeTable(const std::string& self_id);
 
-    // All operations except those involving const members only must get lock
+    // all operations except those involving const members only must get lock
 
-    /* Self operations */
+    /* self operations */
     std::string get_self_id() const;
-    unsigned long get_self_level();
 
-    /* Storage operations */
+    /* storage operations */
     bool has_node(const std::string& id);
-    // Deep copy of node information
+    // deep copy of node information
     std::shared_ptr<Node> get_node_copy(const std::string& id);
 
-    /* Thread safe node operations */
+    /* thread safe node operations */
     void set_node_last_pong_now(const std::string& id);
     void set_node_last_ping_now(const std::string& id);
 
-    /* Domain logic */
+    /* domain logic */
     bool is_contact_node(unsigned long level);
-    // All nodes returned are deep copy for thread safty
+    // all nodes returned are deep copy for thread safty
     std::unordered_set<std::shared_ptr<Node>> get_contact_nodes(unsigned long level);
-    std::unordered_set<std::shared_ptr<Node>> get_successors(unsigned long level);
-    std::unordered_set<std::shared_ptr<Node>> get_predecessors(unsigned long level);
+    std::unordered_set<std::shared_ptr<Node>> get_successor(unsigned long level);
+    std::unordered_set<std::shared_ptr<Node>> get_predecessor(unsigned long level);
     std::unordered_set<std::shared_ptr<Node>> get_peer_list(unsigned long level);
-
     // for broadcast in ring (k-ary distributed spanning tree)
     std::shared_ptr<Node> get_peer(unsigned long level, int id);  // get the particular peer
     int get_end_id(unsigned long level);                          // get the end id in the ring
