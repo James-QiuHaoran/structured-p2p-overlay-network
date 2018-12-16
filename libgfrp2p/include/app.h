@@ -5,5 +5,6 @@
 #define RING_LOWER_LIMIT 10
 #define HEARTBEAT_TIMEOUT 5
 #define NUM_CONTACT_NODES 3
+#define MSG_HASH_LENGTH  50
 
 #endif

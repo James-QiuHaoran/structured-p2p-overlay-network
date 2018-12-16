@@ -15,27 +15,24 @@ private:
     std::string messageID;
     int type;
     unsigned long from_level;
-    int direction; // 1 upwards, 0 same level, -1 downwards
     Node sender;
     Node receiver;
 
 public:
     // constructor
     Message();
-    Message(std::string messageID, int type, unsigned long from_level, int direction, Node sender, Node receiver);
+    Message(std::string messageID, int type, unsigned long from_level, Node sender, Node receiver);
 
     // getters
     Node get_sender() const;
     Node get_receiver() const;
     unsigned long get_from_level() const;
-    int get_direction() const;
     std::string get_messageID() const;
     int get_type() const;
 
     // setters
     void set_sender(const Node &sender);
     void set_receiver(const Node &receiver);
-    void set_direction(int direction);
     void set_from_level(unsigned long level);
     void set_messageID(string messageId);
     void set_type(int type);
