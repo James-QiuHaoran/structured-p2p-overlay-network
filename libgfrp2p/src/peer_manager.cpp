@@ -1,17 +1,11 @@
 #include "peer_manager.h"
 
 // constructor
-PeerManager::PeerManager() {
+PeerManager::PeerManager() {}
 
-}
+Message::Message() {}
 
-Message::Message() {
-
-}
-
-PeerError::PeerError() {
-
-}
+PeerError::PeerError() {}
 
 // getters
 Node Message::get_sender() const {
@@ -50,12 +44,20 @@ std::string PeerError::get_errorMessage() const {
 	return this->errorMessage;
 }
 
+std::shared_ptr<Node> PeerManager::get_node() {
+	return this->node;
+}
+
+NodeTable get_node_table() {
+	return this->node_table;
+}
+
 // setters
-void Message::set_sender(Node sender) {
+void Message::set_sender(const Node &sender) {
 	this->sender = sender;
 }
 
-void Message::set_receiver(Node receiver) {
+void Message::set_receiver(const Node &receiver) {
 	this->receiver = receiver;
 }
 
@@ -87,12 +89,12 @@ void PeerError::set_errorMessage(string message) {
 	this->errorMessage = message;
 }
 
-std::shared_ptr<Node> PeerManager::get_node() {
-	return this->node;
+void PeerManager::set_node(std::shared_ptr<Node> node) {
+	this->node = node;
 }
 
-NodeTable get_node_table() {
-	return this->node_table;
+void PeerManager::set_node_table(NodeTable node_table) {
+	this->node_table = node_table;
 }
 
 // a node wants to broadcast a message

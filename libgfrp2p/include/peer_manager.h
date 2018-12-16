@@ -34,8 +34,8 @@ public:
     int get_type() const;
 
     // setters
-    void set_sender(Node sender);
-    void set_receiver(Node receiver);
+    void set_sender(const Node &sender);
+    void set_receiver(const Node &receiver);
     void set_direction(int direction);
     void set_from_level(unsigned long level);
     void set_messageID(string messageId);
@@ -82,6 +82,10 @@ public:
     // getters
     std::shared_ptr<Node> get_node();
     NodeTable get_node_table();
+
+    // setters
+    void set_node(std::shared_ptr<Node> node);
+    void set_node_table(NodeTable node_table);
     
     // create and initialize a peer
     void create_peer();
