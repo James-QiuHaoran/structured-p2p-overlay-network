@@ -12,6 +12,8 @@
 #include "node.h"
 
 // using boost::numeric_cast;
+// thread safty
+std::mutex mlock;
 
 // If an id exists in multiple maps, they must be the same object
 struct Ring {
@@ -26,19 +28,21 @@ struct Ring {
 // Node table and maintenance
 class NodeTable {
 private:
-    const std::string self_id;
+    std::string self_id;
 
     // store nodes in level-referenced sets
     std::vector<Ring> tables;
 
+    // moved out
     // thread safty
-    std::mutex mlock;
+    // std::mutex mlock;
 
     // copy of pointer, use only when locked
     std::shared_ptr<Node> get_node(unsigned long level, const std::string& id);
     std::shared_ptr<Node> copy_node(const std::shared_ptr<Node>& node);
  
 public:
+    NodeTable();
     NodeTable(const std::string& self_id);
 
     // all operations must get lock, except those involving const members only
