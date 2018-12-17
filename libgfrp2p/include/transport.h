@@ -12,6 +12,7 @@
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include <boost/log/trivial.hpp>
+#include <boost/enable_shared_from_this.hpp>
 
 using boost::asio::ip::tcp;
 using boost::asio::ip::udp;
