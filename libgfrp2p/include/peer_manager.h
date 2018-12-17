@@ -3,6 +3,7 @@
 
 #include <string>
 #include <unordered_set>
+#include <cstdlib>
 
 #include "node.h"
 #include "node_table.h"

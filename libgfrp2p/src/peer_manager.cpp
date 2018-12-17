@@ -1,5 +1,4 @@
 #include "peer_manager.h"
-#include <cstdlib>
 
 // generate a random alpha-numeric string of length len
 std::string random_string(size_t length) {
