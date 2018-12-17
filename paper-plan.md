@@ -1,13 +1,5 @@
 # Hidden Geographical Fractal Ring (HGFR)
 
-### Interface/API provided for the Adapter:
-- broadcast(Message m)
-- join(NodeProfile np)
-
-### Interface/API provided for the Wire Protocol Layer
-- send(Packet p, String sender_ip, String receiver_ip)
----
-
 ### Observation on P2P Network:
 1. Reach **all** nodes (sufficient amount of nodes); [fault-tolerance/robustness]
 2. Secure/address threat models; [security]
@@ -50,8 +42,8 @@ Settings:
     - district: 20~50ms (random)
     - within the same district: do not sleep;
 - ID -> id|district|city|country|continents
-- Solve docker problem: multi-swarm;
-- Blockchain workload generator (oringinal version);
+- Solve docker problem: multi-swarm [TODO];
+- Blockchain workload generator (oringinal version) [TODO];
 
 Comparison Targets:
 - Kademlia (how to compare? simulate encryption-decryption time)
@@ -93,3 +85,12 @@ Fixed node number: # of messages sent / # of operations
 - chap 7: related work
 - chap 8: conclusion
 - ack
+---
+
+### Interface/API provided for the Adapter:
+- broadcast(Message m)
+- join(NodeProfile np)
+
+### Interface/API provided for the Wire Protocol Layer
+- send(Packet p, String sender_ip, String receiver_ip)
+---
