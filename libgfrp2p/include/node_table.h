@@ -11,7 +11,7 @@
 
 #include "node.h"
 
-using boost::numeric_cast;
+// using boost::numeric_cast;
 
 // If an id exists in multiple maps, they must be the same object
 struct Ring {

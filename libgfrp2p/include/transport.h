@@ -111,7 +111,7 @@ private:
 class TCPBuffer {
 private:
 
-}
+};
 
 // A class that implements asynchronous TCP send and receive
 class TCPConnection: public boost::enable_shared_from_this<TCPConnection> {
@@ -127,7 +127,7 @@ private:
     tcp::socket socket;
     std::string buffer;
 
-    TCPConnection(boost::asio::io_service& io_service): socket(io_service);
+    TCPConnection(boost::asio::io_service& io_service): socket(io_service){};
 
     void handle_write(const boost::system::error_code& error,
         size_t bytes_transferred);
