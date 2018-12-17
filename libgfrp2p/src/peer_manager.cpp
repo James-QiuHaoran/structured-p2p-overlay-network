@@ -85,14 +85,18 @@ void PeerManager::broadcast(const Message &msg, unsigned long current_level) {
 	// randomly select one contact from the contact nodes
 	int random_id = rand() % contact_nodes.size();
 	int i = 0;
+	Node receiver;
 	for (auto contact_node : contact_nodes) {
-		if (i == random_id)
+		if (i == random_id) {
+			receiver = std::make_shared<Node>(*contact_node).get();
 			break;
+		}
 		else
 			i++;
 	}
 
 	// ask contact node to broadcast
+	msg.set_receiver(receiver);
 	send(contact_node, msg);
 }
 
@@ -103,6 +107,8 @@ void multicast_to_contact_nodes(const Message &msg, unsigned long current_level)
 
 	// multicast to all contact nodes of the same level
 	for (auto node : contact_nodes) {
+		Node receiver = std::make_shared<Node>(*node).get();
+		msg.set_receiver(receiver);
 		send(node, msg);
 	}
 }
@@ -133,14 +139,18 @@ void PeerManager::broadcast_up(const Message &msg, unsigned long current_level) 
 	// randomly select one contact from the contact nodes
 	int random_id = rand() % contact_nodes.size();
 	int i = 0;
+	Node receiver;
 	for (auto contact_node : contact_nodes) {
-		if (i == random_id)
+		if (i == random_id) {
+			receiver = std::make_shared<Node>(*contact_node).get();
 			break;
+		}
 		else
 			i++;
 	}
 
 	// ask contact node in the upper ring to broadcast
+	msg.set_receiver(receiver);
 	send(contact_node, msg);
 
 	return;
@@ -159,6 +169,8 @@ void PeerManager::broadcast_within_ring(const Message &msg, unsigned long curren
 			continue;
 		} else {
 			std::shared_ptr<Node> node = this->node_table.get_peer_by_order(current_level, node_id_in_vector+k^i);
+			Node receiver = std::make_shared<Node>(*node).get();
+			msg.set_receiver(receiver);
 			send(node, msg);
 			i++;
 		}
@@ -179,14 +191,18 @@ void PeerManager::broadcast_down(const Message &msg, unsigned long current_level
 	// randomly select one contact from the contact nodes
 	int random_id = rand() % contact_nodes.size();
 	int i = 0;
+	Node receiver;
 	for (auto contact_node : contact_nodes) {
-		if (i == random_id)
+		if (i == random_id) {
+			receiver = std::make_shared<Node>(*node).get();
 			break;
+		}
 		else
 			i++;
 	}
 
 	// ask contact node in the upper ring to broadcast
+	msg.set_receiver(receiver);
 	send(contact_node, msg);
 
 	return;
