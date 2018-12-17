@@ -13,7 +13,7 @@
 class Message {
 private:
     std::string messageID;
-    int type;
+    int type, node_id;
     unsigned long from_level;
     Node sender;
     Node receiver;
@@ -29,6 +29,7 @@ public:
     unsigned long get_from_level() const;
     std::string get_messageID() const;
     int get_type() const;
+    int get_node_id const;
 
     // setters
     void set_sender(const Node &sender);
@@ -36,6 +37,7 @@ public:
     void set_from_level(unsigned long level);
     void set_messageID(string messageId);
     void set_type(int type);
+    void set_node_id(int id);
 };
 
 /* Error Class

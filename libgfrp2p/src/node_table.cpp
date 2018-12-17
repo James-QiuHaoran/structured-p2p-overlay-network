@@ -151,6 +151,22 @@ std::shared_ptr<Node> NodeTable::get_peer_by_order(unsigned long level,  int ord
     return this->copy_node(ring.peer_list.at(order));
 }
 
+int get_node_id_in_vector(unsigned long level, const std::string& id) {
+    // does not reside in that level's ring
+    if (level > this->tables.size() - 1)
+        return -1;
+
+    auto ring = this->table.at(level);
+    int i = 0;
+    for (auto& node : ring.peer_list) {
+        if (node.get_id() == id)
+            return i;
+        else
+            i++;
+    }
+    return -1;
+}
+
 int NodeTable::get_peer_list_size(unsigned long level) {
     // does not reside in that level's ring
     if (level > this->tables.size() - 1)

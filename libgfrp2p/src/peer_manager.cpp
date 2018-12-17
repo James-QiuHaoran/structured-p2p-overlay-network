@@ -44,6 +44,8 @@ unsigned long Message::get_from_level() const { return this->from_level; }
 
 std::string Message::get_messageID() const { return this->messageID; }
 
+std::int Message::get_node_id() const { return this->node_id; }
+
 int Message::get_type() const { return this->type; }
 
 std::string PeerError::get_errorType() const { return this->errorType; }
@@ -62,6 +64,8 @@ void Message::set_receiver(const Node &receiver) { this->receiver = receiver; }
 void Message::set_from_level(unsigned long level) { this->from_level = level; }
 
 void Message::set_messageID(string messageId) { this->messageId = messageId; }
+
+void Message::set_node_id(int id) { this->node_id = id; }
 
 void Message::set_type(string type) { this->type = type; }
 
@@ -145,16 +149,16 @@ void PeerManager::broadcast_up(const Message &msg, unsigned long current_level) 
 // broadcast to the nodes within the ring (k-ary distributed spanning tree)
 void PeerManager::broadcast_within_ring(const Message &msg, unsigned long current_level, int k) {
 	// should be recursive
-	int end_ID = this->node_table.get_end_ID(current_level);
+	int end_ID = this->node_table.get_peer_list_size(current_level);
 	int i = 0;
-	int current_id;
+	int current_id, node_id = msg.get_node_id(), node_id_in_vector = this->node_table.get_node_id_in_vector();
 	while (current_id <= end_ID) {
-		int current_id = this->node->get_id() + k^i;
-		if (k^i <= this->node->get_id()) {
+		int current_id = node_id + k^i;
+		if (k^i <= node_id) {
 			i++;
 			continue;
 		} else {
-			std::shared_ptr<Node> node = this->node_table.get_peer_by_order(current_level, current_id);
+			std::shared_ptr<Node> node = this->node_table.get_peer_by_order(current_level, node_id_in_vector+k^i);
 			send(node, msg);
 			i++;
 		}
@@ -258,7 +262,7 @@ void PeerManager::on_receive(const Message &msg) {
 std::unordered_set<shared_ptr<Node>> PeerManager::contact_node_election(unsigned long level) {
 	std::unordered_set<int> random_IDs;
 	int num = 0;
-	int num_peers = this->node_table.get_end_id(level);
+	int num_peers = this->node_table.get_peer_list_size(level);
 	while (num < NUM_CONTACT_NODES) {
 		int random_ID = rand() % num_peers;
 		if (random_IDs.find(random_ID) == random_IDs.end()) {
