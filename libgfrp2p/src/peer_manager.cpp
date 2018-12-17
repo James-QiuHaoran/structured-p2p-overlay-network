@@ -147,13 +147,16 @@ void PeerManager::broadcast_within_ring(const Message &msg, unsigned long curren
 	// should be recursive
 	int end_ID = this->node_table.get_end_ID(current_level);
 	int i = 0;
-	int current_id = this->node->get_id() + k^i;
+	int current_id;
 	while (current_id <= end_ID) {
+		int current_id = this->node->get_id() + k^i;
 		if (k^i <= this->node->get_id()) {
+			i++;
 			continue;
 		} else {
-			std::shared_ptr<Node> node = this->node_table.get_peer(current_level, current_id);
+			std::shared_ptr<Node> node = this->node_table.get_peer_by_order(current_level, current_id);
 			send(node, msg);
+			i++;
 		}
 	}
 }
@@ -233,13 +236,10 @@ void PeerManager::on_receive(const Message &msg) {
 			break;
 		} case 3 : {
 			std::cout << "Election Result Broadcast Upwards & Downwards One Level\n";
-			// upwards to the contact nodes of the upper level ring
-			Message upper_ring_msg;
-			if (this->node_table.has_upper_ring(level))
-				this->multicast_to_contact_nodes(upper_ring_msg, level+1);
+			// continue to broadcast within ring
 
 			// downwards to all nodes of the lower level ring
-			Message lower_ring_msg;
+			Message lower_ring_msg(random_string(MSG_HASH_LENGTH), 3, level, this->node, NULL);
 			if (level != 0)
 				this->broadcast_within_ring(lower_ring_msg, level-1, k);
 			break;
