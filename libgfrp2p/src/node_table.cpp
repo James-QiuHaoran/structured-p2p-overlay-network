@@ -90,6 +90,7 @@ std::unordered_set<std::shared_ptr<Node>> NodeTable::get_contact_nodes(unsigned 
 
 std::shared_ptr<Node> NodeTable::get_successor(unsigned long level) {
     std::lock_guard<std::mutex> lock(this->mlock);
+    std::shared_ptr<Node> result;
 
     // does not reside in that level's ring
     if (level > this->tables.size() - 1)
@@ -97,13 +98,13 @@ std::shared_ptr<Node> NodeTable::get_successor(unsigned long level) {
 
     // return contact nodes of the ring
     auto ring = this->tables.at(level);
-
-    std::shared_ptr<Node> result = this->copy_node(ring.successor);
+    result = this->copy_node(ring.successor);
     return result;
 }
 
-std::unordered_set<std::shared_ptr<Node>> NodeTable::get_predecessor(unsigned long level) {
+std::shared_ptr<Node> NodeTable::get_predecessor(unsigned long level) {
     std::lock_guard<std::mutex> lock(this->mlock);
+    std::shared_ptr<Node> result;
     
     // does not reside in that level's ring
     if (level > this->tables.size() - 1)
@@ -111,8 +112,7 @@ std::unordered_set<std::shared_ptr<Node>> NodeTable::get_predecessor(unsigned lo
 
     // return contact nodes of the ring
     auto ring = this->tables.at(level);
-
-    std::shared_ptr<Node> result = this->copy_node(ring.predecessor);
+    result = this->copy_node(ring.predecessor);
     return result;
 }
 
@@ -126,7 +126,7 @@ std::unordered_set<std::shared_ptr<Node>> NodeTable::get_peer_set(unsigned long 
 
     // return contact nodes of the ring
     auto ring = this->tables.at(level);
-    for (const auto& kv: ring.peer_list) {
+    for (const auto& kv: ring.peer_set) {
         result.insert(this->copy_node(kv.second));
     }  
     return result;
@@ -151,15 +151,15 @@ std::shared_ptr<Node> NodeTable::get_peer_by_order(unsigned long level,  int ord
     return this->copy_node(ring.peer_list.at(order));
 }
 
-int get_node_id_in_vector(unsigned long level, const std::string& id) {
+int NodeTable::get_node_id_in_vector(unsigned long level, const std::string& id) {
     // does not reside in that level's ring
     if (level > this->tables.size() - 1)
         return -1;
 
-    auto ring = this->table.at(level);
+    auto ring = this->tables.at(level);
     int i = 0;
     for (auto& node : ring.peer_list) {
-        if (node.get_id() == id)
+        if (node->get_id() == id)
             return i;
         else
             i++;

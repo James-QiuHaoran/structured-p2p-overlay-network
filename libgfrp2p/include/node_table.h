@@ -58,8 +58,8 @@ public:
     bool is_contact_node(unsigned long level);
     // all nodes returned are deep copy for thread safty
     std::unordered_set<std::shared_ptr<Node>> get_contact_nodes(unsigned long level);
-    std::unordered_set<std::shared_ptr<Node>> get_successor(unsigned long level);
-    std::unordered_set<std::shared_ptr<Node>> get_predecessor(unsigned long level);
+    std::shared_ptr<Node> get_successor(unsigned long level);
+    std::shared_ptr<Node> get_predecessor(unsigned long level);
     std::unordered_set<std::shared_ptr<Node>> get_peer_set(unsigned long level);
     std::shared_ptr<Node> get_peer(unsigned long level, const std::string& id);  // get the particular peer by id
     
