@@ -85,9 +85,9 @@ void TCPConnection::write(const std::string& data) {
     Header length = data.length();
     char header[sizeof(Header)];
     std::memcpy(header, &length, sizeof(length));
-    std::string datagram = std::string(header) + data;
+    std::string packet = std::string(header) + data;
     
-    boost::asio::async_write(this->socket, boost::asio::buffer(datagram),
+    boost::asio::async_write(this->socket, boost::asio::buffer(packet),
         boost::bind(&TCPConnection::handle_write, this->shared_from_this(),
             boost::asio::placeholders::error,
             boost::asio::placeholders::bytes_transferred));
@@ -116,7 +116,7 @@ void TCPConnection::handle_read(const boost::system::error_code& error,
             this->datagram += data;
         }
 
-        if (this->datagram.length() >= total_length || error == boost::asio::error::eof || error == boost::asio::error::connection_reset)) {
+        if (this->datagram.length() >= total_length || error == boost::asio::error::eof || error == boost::asio::error::connection_reset) {
             tcp::endpoint endpoint = this->socket.remote_endpoint();
             
             // Expected length or disconnection
@@ -146,8 +146,8 @@ void TCPConnection::handle_write(const boost::system::error_code& error,
 
 
 AsyncTCPServer::AsyncTCPServer(const std::shared_ptr<Receiver>& receiver, unsigned short port):
-    receiver(receiver), io_service(), acceptor(io_service, tcp::endpoint((tcp::v4(), port)),
-    resolver(io_service), std::shared_ptr(new AtomicQueue<BufferItemType>()) { }
+    receiver(receiver), io_service(), acceptor(io_service, tcp::endpoint(tcp::v4(), port)),
+    resolver(io_service), buffer(new AtomicQueue<BufferItemType>()) { }
 
 
 void AsyncTCPServer::run() {
@@ -157,7 +157,7 @@ void AsyncTCPServer::run() {
         BOOST_LOG_TRIVIAL(fatal) << "AsyncTCPServer::run: io_service fails to run";
     }
 
-    this->handler = std::thread(&AsyncUDPServer::handle, this);
+    this->handler = std::thread(&AsyncTCPServer::handle, this);
     
     this->accept();
 }
@@ -166,33 +166,33 @@ void AsyncTCPServer::send(const std::string& ip, unsigned short port, const std:
     // if  found in current thread pool
     auto conn_iter = tcp_connections.find(ip + std::to_string(port));
     if (conn_iter != this->tcp_connections.end()) {
-        (*conn_iter) -> write(data);
+        conn_iter->second->write(data);
     } else {
         std::shared_ptr<std::string> datagram(new std::string(data));
-        TCPConnection::Pointer conn = TCPConnection::Create(this->io_service);
+        TCPConnection::Pointer conn = TCPConnection::Create(this->io_service, this->buffer);
         tcp::resolver::query query(ip, std::to_string(port));
         this->resolver.async_resolve(query,
             boost::bind(&AsyncTCPServer::handle_resolve, this,
             boost::asio::placeholders::error,
             boost::asio::placeholders::iterator,
-            conn, datagram);
+            conn, datagram));
     }
     
 }
 
 void AsyncTCPServer::accept() {
     // Create a new connection on accept
-    TCPConnection::Pointer connection = TCPConnection::Create(acceptor.get_io_service());
+    TCPConnection::Pointer connection = TCPConnection::Create(acceptor.get_io_service(), this->buffer);
 
     this->acceptor.async_accept(connection->get_socket(),
-        boost::bind(&tcp_server::handle_accept, this, connection,
+        boost::bind(&AsyncTCPServer::handle_accept, this, connection,
         boost::asio::placeholders::error));
 }
 
 void AsyncTCPServer::handle_accept(TCPConnection::Pointer connection,
     const boost::system::error_code& error) {
     if (!error) {
-        tcp::endpoint endpoint = connection->get_socket()->remote_endpoint();
+        tcp::endpoint endpoint = connection->get_socket().remote_endpoint();
         std::string conn_id = endpoint.address().to_string() + ":" + std::to_string(endpoint.port());
         this->tcp_connections[conn_id] = connection;
 
@@ -212,12 +212,12 @@ void AsyncTCPServer::handle_resolve(const boost::system::error_code& error,
     if (!error) {
       // Attempt a connection to the first endpoint in the list. Each endpoint
       // will be tried until we successfully establish a connection.
-      tcp::endpoint endpoint = *endpoint_iterator;
-      conn->get_socket().async_connect(endpoint,
-            boost::bind(&client::handle_connect, this,
-            boost::asio::placeholders::error, ++endpoint_iterator,
-            conn, datagram));
-    } else  
+        tcp::endpoint endpoint = *endpoint_iterator;
+        conn->get_socket().async_connect(endpoint,
+                boost::bind(&AsyncTCPServer::handle_connect, this,
+                boost::asio::placeholders::error, ++endpoint_iterator,
+                conn, datagram));
+    } else {
         BOOST_LOG_TRIVIAL(error) << "AsyncTCPServer::handle_resolve: Resolve error";
     }
   }
@@ -230,20 +230,20 @@ void AsyncTCPServer::handle_connect(const boost::system::error_code& error,
     if (!error) {
         // The connection was successful. 
         // Add connection to stack
-        tcp::endpoint endpoint = conn->get_socket()->remote_endpoint();
+        tcp::endpoint endpoint = conn->get_socket().remote_endpoint();
         std::string conn_id = endpoint.address().to_string() + ":" + std::to_string(endpoint.port());
         this->tcp_connections[conn_id] = conn;
 
         // Send data
-        conn->write(datagram);
+        conn->write(*datagram);
     } else if (endpoint_iterator != tcp::resolver::iterator()) {
         // The connection failed. Try the next endpoint in the list.
-        socket_.close();
+        conn->get_socket().close();
         tcp::endpoint endpoint = *endpoint_iterator;
         conn->get_socket().async_connect(endpoint,
-                boost::bind(&client::handle_connect, this,
-                boost::asio::placeholders::error, ++endpoint_iterator,
-                conn, datagram));
+            boost::bind(&AsyncTCPServer::handle_connect, this,
+            boost::asio::placeholders::error, ++endpoint_iterator,
+            conn, datagram));
     } else {
         BOOST_LOG_TRIVIAL(error) << "AsyncTCPServer::handle_connect: Connect error";
     }

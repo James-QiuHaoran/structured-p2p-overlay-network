@@ -116,7 +116,8 @@ public:
 
     using Pointer = boost::shared_ptr<TCPConnection>;
 
-    static Pointer Create(boost::asio::io_service& io_service);
+    static Pointer Create(boost::asio::io_service& io_service,
+        const std::shared_ptr<AtomicQueue<BufferItemType>>& buffer);
 
     tcp::socket& get_socket();
 
@@ -127,8 +128,6 @@ public:
 private:
     using Header = unsigned long;
 
-    std::shared_ptr<AtomicQueue<BufferItemType>> buffer;
-
     tcp::socket socket;
     std::array<char, BUFFER_SIZE> read_buffer;
     unsigned long total_length;
@@ -136,6 +135,8 @@ private:
     
     // Clinet
     tcp::resolver resolver;
+
+    std::shared_ptr<AtomicQueue<BufferItemType>> buffer;
 
     TCPConnection(boost::asio::io_service& io_service,
         const std::shared_ptr<AtomicQueue<BufferItemType>>& buffer);
