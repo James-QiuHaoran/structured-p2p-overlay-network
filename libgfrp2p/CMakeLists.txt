@@ -39,9 +39,8 @@ if(WIN32)
     endif()
 endif()
 
-# For DLL platforms the DLL part of a shared library is treated as a 
-# runtime target and the corresponding import library is treated as an 
-# archive target.
+# For DLL platforms the DLL part of a shared library is treated as a runtime target 
+# and the corresponding import library is treated as an archive target.
 # For non-DLL platforms shared libraries are treated as library targets. 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
@@ -57,16 +56,17 @@ ${Boost_INCLUDE_DIRS}
 ${PROJECT_SOURCE_DIR}/include
 )
 
+# FindBoost doesn't seem to work on Windows: work around
+link_directories(
+${Boost_LIBRARY_DIRS}
+)
+
 add_library(${PROJECT_NAME} STATIC
 src/discovery.cpp
 src/node_table.cpp
 src/node.cpp
 src/transport.cpp
-)
-
-# FindBoost doesn't seem to work on Windows: work around
-link_directories(
-${Boost_LIBRARY_DIRS}
+# src/peer_manager.cpp
 )
 
 # target_link_libraries(${PROJECT_NAME}
@@ -76,10 +76,12 @@ ${Boost_LIBRARY_DIRS}
 # )
 
 
-# Make executable
+# Make executables
 
-# set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
+add_executable(test_udp
+test/udp.cpp
+)
 
-# add_executable(test
-# src/app.cpp
-# )
+target_link_libraries(test_udp
+${PROJECT_NAME}
+)
