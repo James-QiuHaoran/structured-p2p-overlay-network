@@ -1,22 +1,20 @@
 #include "node_table.h"
 
-/* Private functions */
-std::shared_ptr<Node> NodeTable::get_node(const std::string& id) {
-    for (const auto& r : table) {
-        auto contact_nodes_iter = r.contact_nodes.find(id),
-             predecessors_iter = r.predecessors.find(id),
-             successors_iter = r.successors.find(id),
-             peer_list_iter = r.peer_list.find(id);
+/* private functions */
+std::shared_ptr<Node> NodeTable::get_node(unsigned long level, const std::string& id) {
+    auto ring = tables[level];
 
-        if (contact_nodes_iter != r.contact_nodes.end()) 
-            return contact_nodes_iter->second;
-        if (predecessors_iter != r.predecessors.end()) 
-            return predecessors_iter->second;
-        if (successors_iter != r.successors.end()) 
-            return successors_iter->second;
-        if (peer_list_iter != r.peer_list.end())
-            return peer_list_iter->second;
-    }
+    // find from contact nodes
+    auto contact_nodes_iter = ring.contact_nodes.find(id);
+    if (contact_nodes_iter != ring.contact_nodes.end()) 
+        return contact_nodes_iter->second;
+    
+    // find from peer list
+    auto peer_set_iter = ring.peer_set.find(id);
+    if (peer_set_iter != ring.peer_set.end())
+        return peer_set_iter->second;
+    
+    // not found
     return std::shared_ptr<Node>();
 }
 
@@ -24,99 +22,158 @@ std::shared_ptr<Node> NodeTable::copy_node(const std::shared_ptr<Node>& node) {
     return std::make_shared<Node>(*node);
 }
 
-/* Public functions */
+/* public functions */
+NodeTable::NodeTable() {}
 NodeTable::NodeTable(const std::string& self_id):
-    self_id(self_id), self_level(0) { }
+    self_id(self_id) { }
 
 std::string NodeTable::get_self_id() const {
     return this->self_id;
 }
 
-unsigned long NodeTable::get_self_level() {
-    std::lock_guard<std::mutex> lock(this->mlock);
-    return this->self_level;
-}
-
-bool NodeTable::has_node(const std::string& id) {
-    std::lock_guard<std::mutex> lock(this->mlock);
-    for (const auto& r : table) {
-        if (r.contact_nodes.find(id) != r.contact_nodes.end() || 
-            r.predecessors.find(id) != r.predecessors.end() || 
-            r.successors.find(id) != r.successors.end() || 
-            r.peer_list.find(id) != r.peer_list.end())
-        
-            return true;
-    }
+bool NodeTable::has_node(unsigned long level, const std::string& id) {
+    std::lock_guard<std::mutex> lock(mlock);
+    auto ring = this->tables[level];
+    if (ring.contact_nodes.find(id) != ring.contact_nodes.end() || ring.peer_set.find(id) != ring.peer_set.end())
+        return true;
     return false;
 }
 
-std::shared_ptr<Node> NodeTable::get_node_copy(const std::string& id) {
-    std::lock_guard<std::mutex> lock(this->mlock);
-    auto node = this->get_node(id);
+std::shared_ptr<Node> NodeTable::get_node_copy(unsigned long level, const std::string& id) {
+    std::lock_guard<std::mutex> lock(mlock);
+    auto node = this->get_node(level, id);
     if (node)
         return this->copy_node(node);
     return std::shared_ptr<Node>();
 }
 
-void NodeTable::set_node_last_ping_now(const std::string& id) {
-    std::lock_guard<std::mutex> lock(this->mlock);
-    auto node = this->get_node(id);
+void NodeTable::set_node_last_ping_now(unsigned long level, const std::string& id) {
+    std::lock_guard<std::mutex> lock(mlock);
+    auto node = this->get_node(level, id);
     if (!node) return;
     node->set_last_ping_now();
 }
 
-void NodeTable::set_node_last_pong_now(const std::string& id) {
-    std::lock_guard<std::mutex> lock(this->mlock);
-    auto node = this->get_node(id);
+void NodeTable::set_node_last_pong_now(unsigned long level, const std::string& id) {
+    std::lock_guard<std::mutex> lock(mlock);
+    auto node = this->get_node(level, id);
     if (!node) return;
     node->set_last_pong_now();
 }
 
+/* domain logic functions */
 bool NodeTable::is_contact_node(unsigned long level) {
-    std::lock_guard<std::mutex> lock(this->mlock);
-    return level < this->self_level;
+    std::lock_guard<std::mutex> lock(mlock);
+    if (level > this->tables.size() - 1) {
+        return false;  // does not resides in the ring of that level
+    } else if (level < this->tables.size() - 1) {
+        return true;   // resides in higher levels -> must be one of the contact nodes of that level's ring
+    } else {
+        return false;  // does not resides in one level higher
+    }
 }
 
 std::unordered_set<std::shared_ptr<Node>> NodeTable::get_contact_nodes(unsigned long level) {
-    std::lock_guard<std::mutex> lock(this->mlock);
+    std::lock_guard<std::mutex> lock(mlock);
     std::unordered_set<std::shared_ptr<Node>> result;
-    if (level > this->self_level) return result;
 
-    for (const auto& kv: this->table.at(level).contact_nodes) {
+    // does not reside in that level's ring
+    if (level > this->tables.size() - 1)
+        return result;
+
+    // return contact nodes of the ring
+    auto ring = this->tables.at(level);
+    for (const auto& kv: ring.contact_nodes) {
         result.insert(this->copy_node(kv.second));
     }  
     return result;
 }
 
-std::unordered_set<std::shared_ptr<Node>> NodeTable::get_successors(unsigned long level) {
-    std::lock_guard<std::mutex> lock(this->mlock);
-    std::unordered_set<std::shared_ptr<Node>> result;
-    if (level > this->self_level) return result;
+std::shared_ptr<Node> NodeTable::get_successor(unsigned long level) {
+    std::lock_guard<std::mutex> lock(mlock);
+    std::shared_ptr<Node> result;
 
-    for (const auto& kv: this->table.at(level).successors) {
+    // does not reside in that level's ring
+    if (level > this->tables.size() - 1)
+        return result;
+
+    // return contact nodes of the ring
+    auto ring = this->tables.at(level);
+    result = this->copy_node(ring.successor);
+    return result;
+}
+
+std::shared_ptr<Node> NodeTable::get_predecessor(unsigned long level) {
+    std::lock_guard<std::mutex> lock(mlock);
+    std::shared_ptr<Node> result;
+    
+    // does not reside in that level's ring
+    if (level > this->tables.size() - 1)
+        return result;
+
+    // return contact nodes of the ring
+    auto ring = this->tables.at(level);
+    result = this->copy_node(ring.predecessor);
+    return result;
+}
+
+std::unordered_set<std::shared_ptr<Node>> NodeTable::get_peer_set(unsigned long level) {
+    std::lock_guard<std::mutex> lock(mlock);
+    std::unordered_set<std::shared_ptr<Node>> result;
+
+    // does not reside in that level's ring
+    if (level > this->tables.size() - 1)
+        return result;
+
+    // return contact nodes of the ring
+    auto ring = this->tables.at(level);
+    for (const auto& kv: ring.peer_set) {
         result.insert(this->copy_node(kv.second));
     }  
     return result;
 }
 
-std::unordered_set<std::shared_ptr<Node>> NodeTable::get_predecessors(unsigned long level) {
-    std::lock_guard<std::mutex> lock(this->mlock);
-    std::unordered_set<std::shared_ptr<Node>> result;
-    if (level > this->self_level) return result;
+std::shared_ptr<Node> NodeTable::get_peer(unsigned long level,  const std::string &id) {
+    // does not reside in that level's ring
+    if (level > this->tables.size() - 1)
+        return std::shared_ptr<Node>();
 
-    for (const auto& kv: this->table.at(level).predecessors) {
-        result.insert(this->copy_node(kv.second));
-    }  
-    return result;
+    // return the particular node
+    return this->get_node_copy(level, id);
 }
 
-std::unordered_set<std::shared_ptr<Node>> NodeTable::get_peer_list(unsigned long level) {
-    std::lock_guard<std::mutex> lock(this->mlock);
-    std::unordered_set<std::shared_ptr<Node>> result;
-    if (level > this->self_level) return result;
+std::shared_ptr<Node> NodeTable::get_peer_by_order(unsigned long level,  int order) {
+    // does not reside in that level's ring
+    if (level > this->tables.size() - 1)
+        return std::shared_ptr<Node>();
 
-    for (const auto& kv: this->table.at(level).peer_list) {
-        result.insert(this->copy_node(kv.second));
-    }  
-    return result;
+    // return the particular node
+    auto ring = tables[level];
+    return this->copy_node(ring.peer_list.at(order));
+}
+
+int NodeTable::get_node_id_in_vector(unsigned long level, const std::string& id) {
+    // does not reside in that level's ring
+    if (level > this->tables.size() - 1)
+        return -1;
+
+    auto ring = this->tables.at(level);
+    int i = 0;
+    for (auto& node : ring.peer_list) {
+        if (node->get_id() == id)
+            return i;
+        else
+            i++;
+    }
+    return -1;
+}
+
+int NodeTable::get_peer_list_size(unsigned long level) {
+    // does not reside in that level's ring
+    if (level > this->tables.size() - 1)
+        return -1;
+
+    // return the end id
+    auto ring = this->tables.at(level);
+    return ring.peer_list.size();
 }
