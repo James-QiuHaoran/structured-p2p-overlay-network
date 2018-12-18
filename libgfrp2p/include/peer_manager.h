@@ -6,10 +6,17 @@
 #include <cstdlib>
 #include <iostream>
 #include <math.h>
-#include <boost/thread/thread.hpp>
+#include <thread>
+#include <chrono>
+
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_int_distribution.hpp>
+
 #include "node.h"
 #include "node_table.h"
 #include "app.h"
+
+boost::random::mt19937 gen;  // seed for random number generator
 
 /* Message class
  * definition of messages transmitted among peers

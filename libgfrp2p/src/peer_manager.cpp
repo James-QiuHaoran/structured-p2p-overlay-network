@@ -213,19 +213,32 @@ void PeerManager::broadcast_down(Message msg, unsigned long current_level) {
 	return;
 }
 
+// random number generated uniformly from [low, high]
+int random_num_in_range(int low, int high) {
+	boost::random::uniform_int_distribution<> dist(low, high);
+	return dist(gen);
+}
+
 // on receiving a message
 void PeerManager::on_receive(const Message &msg) {
 	// simulate traffic control - delay according to ID difference
 	std::string sender = msg.get_sender()->get_id();
 	std::string receiver = this->node->get_id();
-	if (sender.substr(ID_CONTINENT_START, ID_CONTINENT_START+ID_CONTINENT_LEN) != receiver.substr(ID_CONTINENT_START, ID_CONTINENT_START+ID_CONTINENT_LEN))
-		boost::this_thread::sleep(boost::posix_time::milliseconds(150));
-        else if (sender.substr(ID_COUNTRY_START, ID_COUNTRY_START+ID_COUNTRY_LEN) != receiver.substr(ID_COUNTRY_START, ID_COUNTRY_START+ID_COUNTRY_LEN))
-                boost::this_thread::sleep(boost::posix_time::milliseconds(100));
-	else if (sender.substr(ID_STATE_START, ID_STATE_START+ID_STATE_LEN) != receiver.substr(ID_STATE_START, ID_STATE_START+ID_STATE_LEN))
-                boost::this_thread::sleep(boost::posix_time::milliseconds(50));
-	else if (sender.substr(ID_CITY_START, ID_CITY_START+ID_CITY_LEN) != receiver.substr(ID_CITY_START, ID_CITY_START+ID_CITY_LEN))
-                boost::this_thread::sleep(boost::posix_time::milliseconds(20));
+	int sleep_time = 0;
+	if (sender.substr(ID_CONTINENT_START, ID_CONTINENT_START+ID_CONTINENT_LEN) != receiver.substr(ID_CONTINENT_START, ID_CONTINENT_START+ID_CONTINENT_LEN)) {
+		sleep_time = random_num_in_range(150, 200);
+        	std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
+	} else if (sender.substr(ID_COUNTRY_START, ID_COUNTRY_START+ID_COUNTRY_LEN) != receiver.substr(ID_COUNTRY_START, ID_COUNTRY_START+ID_COUNTRY_LEN)) {
+		sleep_time = random_num_in_range(100, 150);
+                std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
+	} else if (sender.substr(ID_STATE_START, ID_STATE_START+ID_STATE_LEN) != receiver.substr(ID_STATE_START, ID_STATE_START+ID_STATE_LEN)) {
+		sleep_time = random_num_in_range(50, 100);
+                std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
+	} else if (sender.substr(ID_CITY_START, ID_CITY_START+ID_CITY_LEN) != receiver.substr(ID_CITY_START, ID_CITY_START+ID_CITY_LEN)) {
+		sleep_time = random_num_in_range(20, 50);
+                std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
+	}
+
 	// condition flow
 	switch(msg.get_type()) {
 		case 0 : {
