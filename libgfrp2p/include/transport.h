@@ -162,18 +162,22 @@ public:
 private:
     std::shared_ptr<Receiver> receiver;
 
+    boost::asio::io_service io_service;
+
     std::unordered_map<std::string, TCPConnection::Pointer> tcp_connections;
 
-    std::shared_ptr<AtomicQueue<BufferItemType>> buffer;
     std::thread handler;
 
-    boost::asio::io_service io_service;
     // Server
     tcp::acceptor acceptor;
     // Client
     tcp::resolver resolver;
 
+    std::shared_ptr<AtomicQueue<BufferItemType>> buffer;
+
+
     void accept();
+
     void handle_accept(TCPConnection::Pointer connection,
         const boost::system::error_code& error);
     

@@ -234,6 +234,8 @@ void AsyncTCPServer::handle_connect(const boost::system::error_code& error,
         std::string conn_id = endpoint.address().to_string() + ":" + std::to_string(endpoint.port());
         this->tcp_connections[conn_id] = conn;
 
+        conn->start();
+        
         // Send data
         conn->write(*datagram);
     } else if (endpoint_iterator != tcp::resolver::iterator()) {
