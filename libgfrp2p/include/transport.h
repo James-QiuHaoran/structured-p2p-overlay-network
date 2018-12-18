@@ -79,6 +79,9 @@ public:
     // run the receive loop
     void run();
 
+    // stop the server
+    void stop();
+
     // Encapsulate low-level mechanism
     void send(const std::string& ip, unsigned short port, const std::string& data);
 
