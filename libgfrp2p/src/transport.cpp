@@ -6,7 +6,10 @@ Receiver::~Receiver() { }
 // constructors
 AsyncUDPServer::AsyncUDPServer(const std::shared_ptr<Receiver>& receiver, unsigned short port):
     receiver(receiver), io_service(), socket(io_service, udp::endpoint(udp::v4(), port)),
-    buffer(new AtomicQueue<BufferItemType>()) { }
+    buffer(new AtomicQueue<BufferItemType>()) {
+
+    BOOST_LOG_TRIVIAL(debug) << "AsyncUDPServer::(constructor): Initialization done";
+}
 
 // member function implementation
 void AsyncUDPServer::run() {
@@ -16,9 +19,15 @@ void AsyncUDPServer::run() {
         BOOST_LOG_TRIVIAL(fatal) << "AsyncUDPServer::run: io_service fails to run";
     }
     
+    BOOST_LOG_TRIVIAL(debug) << "AsyncUDPServer::run: Before thread";
     this->handler = std::thread(&AsyncUDPServer::handle, this);
+    BOOST_LOG_TRIVIAL(debug) << "AsyncUDPServer::run: Handler thread started";
 
     this->receive();
+}
+
+void AsyncUDPServer::stop() {
+    this->handler.join();
 }
 
 void AsyncUDPServer::send(const std::string& ip, unsigned short port, const std::string& data) {
@@ -65,9 +74,11 @@ void AsyncUDPServer::handle_send(boost::shared_ptr<std::string> data,
 
 void AsyncUDPServer::handle() {
     // Copy and unlock immediately
-    auto front = this->buffer->wait_for_dequeue();
+    while (true) {
+        auto front = this->buffer->wait_for_dequeue();
 
-    this->receiver->receive(std::get<0>(front), std::get<1>(front), std::get<2>(front));
+        this->receiver->receive(std::get<0>(front), std::get<1>(front), std::get<2>(front));
+    }
 }
 
 TCPConnection::Pointer TCPConnection::Create(boost::asio::io_service& io_service,

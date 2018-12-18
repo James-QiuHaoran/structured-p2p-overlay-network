@@ -72,7 +72,7 @@ src/transport.cpp
 # target_link_libraries(${PROJECT_NAME}
 # ${Boost_SYSTEM_LIBRARY}
 # ${Boost_LOG_LIBRARY}
-# ${Boost_DATE_TIME_LIBRARIES}
+# ${Boost_DATE_TIME_LIBRARY}
 # )
 
 
@@ -84,4 +84,5 @@ test/udp.cpp
 
 target_link_libraries(test_udp
 ${PROJECT_NAME}
+${Boost_LIBRARIES}
 )
