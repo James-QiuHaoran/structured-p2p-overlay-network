@@ -1,0 +1,9 @@
+# Build folder
+build/
+
+# Output folders
+lib/
+bin/
+
+# Editor files
+.vscode/

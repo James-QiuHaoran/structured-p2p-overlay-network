@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.1)
 project(GFRRP2P)
 
 IF(NOT CMAKE_BUILD_TYPE)
@@ -7,41 +7,74 @@ ENDIF()
 
 MESSAGE("Build type: " ${CMAKE_BUILD_TYPE})
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O3")
-
 # Check C++11 support
-include(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-if(COMPILER_SUPPORTS_CXX11)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-    # add_definitions(-DCOMPILEDWITHC11)
-    message(STATUS "Using flag -std=c++11.")
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+# Cross-platform compiler flags
+if(MSVC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /O2")
 else()
-    message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O3")
+    # set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} some other flags")
+    # set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
+
 endif()
 
+if(WIN32)
+    # We have to set _WIN32_WINNT for Asio
+    if(${CMAKE_SYSTEM_VERSION} EQUAL 10) # Windows 10
+        add_definitions(-D _WIN32_WINNT=0x0A00)
+    elseif(${CMAKE_SYSTEM_VERSION} EQUAL 6.3) # Windows 8.1
+        add_definitions(-D _WIN32_WINNT=0x0603)
+    elseif(${CMAKE_SYSTEM_VERSION} EQUAL 6.2) # Windows 8
+        add_definitions(-D _WIN32_WINNT=0x0602)
+    elseif(${CMAKE_SYSTEM_VERSION} EQUAL 6.1) # Windows 7
+        add_definitions(-D _WIN32_WINNT=0x0601)
+    elseif(${CMAKE_SYSTEM_VERSION} EQUAL 6.0) # Windows Vista
+        add_definitions(-D _WIN32_WINNT=0x0600)
+    else() # Windows XP (5.1)
+        add_definitions(-D _WIN32_WINNT=0x0501)
+    endif()
+endif()
+
+# For DLL platforms the DLL part of a shared library is treated as a 
+# runtime target and the corresponding import library is treated as an 
+# archive target.
+# For non-DLL platforms shared libraries are treated as library targets. 
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
+
 # Check libboost-system and libboost-log
-find_package(Boost COMPONENTS system log REQUIRED)
+# find_package(Boost 1.58.0 COMPONENTS system log date_time REQUIRED)
+# FindBoost doesn't seem to work on Windows: work around
+find_package(Boost 1.58.0 REQUIRED)
 
 include_directories(
-${Boost_SYSTEM_INCLUDE_DIRS}
-${Boost_LOG_INCLUDE_DIRS}
+${Boost_INCLUDE_DIRS}
 ${PROJECT_SOURCE_DIR}/include
 )
 
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
-
-add_library(${PROJECT_NAME} SHARED
+add_library(${PROJECT_NAME} STATIC
 src/discovery.cpp
 src/node_table.cpp
 src/node.cpp
 src/transport.cpp
 )
 
-target_link_libraries(${PROJECT_NAME}
-${Boost_SYSTEM_LIBRARY}
-${Boost_LOG_LIBRARY}
+# FindBoost doesn't seem to work on Windows: work around
+link_directories(
+${Boost_LIBRARY_DIRS}
 )
+
+# target_link_libraries(${PROJECT_NAME}
+# ${Boost_SYSTEM_LIBRARY}
+# ${Boost_LOG_LIBRARY}
+# ${Boost_DATE_TIME_LIBRARIES}
+# )
+
 
 # Make executable
 
