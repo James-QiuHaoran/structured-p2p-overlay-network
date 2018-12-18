@@ -33,10 +33,6 @@ private:
     // store nodes in level-referenced sets
     std::vector<Ring> tables;
 
-    // moved out
-    // thread safty
-    // std::mutex mlock;
-
     // copy of pointer, use only when locked
     std::shared_ptr<Node> get_node(unsigned long level, const std::string& id);
     std::shared_ptr<Node> copy_node(const std::shared_ptr<Node>& node);

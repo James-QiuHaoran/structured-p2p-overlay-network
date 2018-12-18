@@ -17,8 +17,9 @@ std::string random_string(size_t length) {
 }
 
 // constructor
-PeerManager::PeerManager(const std::string& self_id) {
-	this->node_table = NodeTable(self_id);
+PeerManager::PeerManager(Node node, NodeTable node_table) {
+        this->node = node;
+	this->node_table = node_table;
 }
 
 Message::Message() {}
@@ -214,6 +215,18 @@ void PeerManager::broadcast_down(Message msg, unsigned long current_level) {
 
 // on receiving a message
 void PeerManager::on_receive(const Message &msg) {
+	// simulate traffic control - delay according to ID difference
+	std::string sender = msg.get_sender()->get_id();
+	std::string receiver = this->node->get_id();
+	if (sender.substr(ID_CONTINENT_START, ID_CONTINENT_START+ID_CONTINENT_LEN) != receiver.substr(ID_CONTINENT_START, ID_CONTINENT_START+ID_CONTINENT_LEN))
+		boost::this_thread::sleep(boost::posix_time::milliseconds(150));
+        else if (sender.substr(ID_COUNTRY_START, ID_COUNTRY_START+ID_COUNTRY_LEN) != receiver.substr(ID_COUNTRY_START, ID_COUNTRY_START+ID_COUNTRY_LEN))
+                boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+	else if (sender.substr(ID_STATE_START, ID_STATE_START+ID_STATE_LEN) != receiver.substr(ID_STATE_START, ID_STATE_START+ID_STATE_LEN))
+                boost::this_thread::sleep(boost::posix_time::milliseconds(50));
+	else if (sender.substr(ID_CITY_START, ID_CITY_START+ID_CITY_LEN) != receiver.substr(ID_CITY_START, ID_CITY_START+ID_CITY_LEN))
+                boost::this_thread::sleep(boost::posix_time::milliseconds(20));
+	// condition flow
 	switch(msg.get_type()) {
 		case 0 : {
 			std::cout << "Broadcast Upwards - from the lower level\n";
@@ -319,16 +332,6 @@ void on_new_connection(std::shared_ptr<Node> node) {
 
 // on a node leave
 void on_lost_connection(std::shared_ptr<Node> node) {
-
-}
-
-// create and initialize a peer
-void PeerManager::create_peer() {
-
-}
-
-// connect to the network
-void PeerManager::connect() {
 
 }
 

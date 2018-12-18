@@ -6,7 +6,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <math.h>
-
+#include <boost/thread/thread.hpp>
 #include "node.h"
 #include "node_table.h"
 #include "app.h"
@@ -79,7 +79,7 @@ private:
 
 public:
     // constructor
-    PeerManager(const std::string& self_id);
+    PeerManager(Node node, NodeTable node_table);
 
     // getters
     std::shared_ptr<Node> get_node();
@@ -89,12 +89,6 @@ public:
     void set_node(std::shared_ptr<Node> node);
     void set_node_table(NodeTable node_table);
     
-    // create and initialize a peer
-    void create_peer();
-
-    // connect to the network
-    void connect();
-
     // start the server
     void start();
 
