@@ -75,7 +75,7 @@ TCPConnection::Pointer TCPConnection::Create(boost::asio::io_service& io_service
     return Pointer(new TCPConnection(io_service, buffer));
 }
 
-tco::socket& TCPConnection::get_socket() { return this->socket(); }
+tcp::socket& TCPConnection::get_socket() { return this->socket; }
 
 void TCPConnection::start() {
     this->read();
@@ -95,12 +95,12 @@ void TCPConnection::write(const std::string& data) {
 
 TCPConnection::TCPConnection(boost::asio::io_service& io_service,
     const std::shared_ptr<AtomicQueue<BufferItemType>>& buffer):
-    socket(io_service), buffer(buffer) { }
+    socket(io_service), resolver(io_service), buffer(buffer) { }
 
 void TCPConnection::read() {
     boost::asio::async_read(this->socket, boost::asio::buffer(this->read_buffer),
         boost::bind(&TCPConnection::handle_write, this->shared_from_this(),
-        placeholders::error, placeholders::bytes_transferred));    
+        boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));    
 }
 
 void TCPConnection::handle_read(const boost::system::error_code& error,

@@ -8,12 +8,14 @@
 #include <iostream>
 #include <thread>
 #include <condition_variable>
+#include <unordered_map>
 
 #include <cstring>
 
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include <boost/log/trivial.hpp>
+#include <boost/enable_shared_from_this.hpp>
 
 using boost::asio::ip::tcp;
 using boost::asio::ip::udp;
@@ -135,7 +137,8 @@ private:
     // Clinet
     tcp::resolver resolver;
 
-    TCPConnection(boost::asio::io_service& io_service): socket(io_service), buffer(buffer);
+    TCPConnection(boost::asio::io_service& io_service,
+        const std::shared_ptr<AtomicQueue<BufferItemType>>& buffer);
     
     void read();
 
@@ -167,14 +170,14 @@ private:
     // Server
     tcp::acceptor acceptor;
     // Client
-    tcp;:resolver resolver;
+    tcp::resolver resolver;
 
     void accept();
     void handle_accept(TCPConnection::Pointer connection,
         const boost::system::error_code& error);
     
     void handle_resolve(const boost::system::error_code& error,
-        tcp::resolver::iterator endpoint_iterator
+        tcp::resolver::iterator endpoint_iterator,
         TCPConnection::Pointer conn,
         std::shared_ptr<std::string> datagram);
     void handle_connect(const boost::system::error_code& error,
