@@ -13,6 +13,8 @@ AsyncUDPServer::AsyncUDPServer(const std::shared_ptr<Receiver>& receiver, unsign
 
 // member function implementation
 void AsyncUDPServer::run() {
+    
+
     BOOST_LOG_TRIVIAL(debug) << "AsyncUDPServer::run: Starting handler thread";
     this->handler = std::thread(&AsyncUDPServer::handle, this);
     BOOST_LOG_TRIVIAL(debug) << "AsyncUDPServer::run: Starting io worker thread";
@@ -24,9 +26,9 @@ void AsyncUDPServer::run() {
 }
 
 void AsyncUDPServer::stop() {
-    this->io_service.stop();
     this->handler.join();
 
+    this->io_service.stop();
     this->work.reset();
     this->io_worker.join();
 }
