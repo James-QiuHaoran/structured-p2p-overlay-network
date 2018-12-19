@@ -80,16 +80,12 @@ else()
 endif()
 
 # Make executables
-add_executable(app
-    src/app.cpp
-)
+if(WIN32) 
+    add_executable(test_udp
+    test/udp.cpp
+    )
 
-add_library(node_table src/node_table.cpp)
-add_library(node src/node.cpp)
-add_library(peer_manager src/peer_manager.cpp)
-
-target_link_libraries(app
-    node
-    node_table
-    peer_manager
-)
+    target_link_libraries(test_udp
+    ${PROJECT_NAME}
+    )
+endif()
