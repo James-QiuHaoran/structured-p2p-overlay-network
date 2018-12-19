@@ -90,6 +90,9 @@ private:
     std::shared_ptr<Receiver> receiver;
 
     boost::asio::io_service io_service;
+    std::unique_ptr<boost::asio::io_service::work> work;
+    std::thread io_worker;
+
     udp::socket socket;
 
     // For incoming packets to queue up and unblock the socket
@@ -110,6 +113,7 @@ private:
 
     // Routine of the handling thread
     void handle();
+    void io_work();
 };
 
 // A class that implements asynchronous TCP send and receive
