@@ -17,14 +17,7 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /O2")
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O3")
-    # set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} some other flags")
-    # set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
-
-    # Boost-related 
-    # SET(GCC_BOOST_COMPILE_FLAGS "-DBOOST_LOG_DYN_LINK")
-    add_definitions(-D BOOST_ALL_DYN_LINK)
 endif()
-
 
 if(WIN32)
     # We have to set _WIN32_WINNT for Asio
@@ -43,6 +36,15 @@ if(WIN32)
     endif()
 endif()
 
+# Check Boost
+add_definitions(-D BOOST_ALL_DYN_LINK)
+find_package(Boost 1.58.0 COMPONENTS system log REQUIRED)
+
+include_directories(
+    ${Boost_INCLUDE_DIRS}
+    ${PROJECT_SOURCE_DIR}/include
+)
+
 # For DLL platforms the DLL part of a shared library is treated as a runtime target 
 # and the corresponding import library is treated as an archive target.
 # For non-DLL platforms shared libraries are treated as library targets. 
@@ -50,28 +52,8 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
-# Check Boost
-# FindBoost doesn't seem to work on Windows: work around
-if(WIN32) 
-    find_package(Boost 1.58.0 REQUIRED)
-else()
-    find_package(Boost 1.58.0 COMPONENTS system log REQUIRED)
-endif()
+# Make library
 
-include_directories(
-${Boost_INCLUDE_DIRS}
-${PROJECT_SOURCE_DIR}/include
-)
-
-if(WIN32)
-add_library(${PROJECT_NAME} STATIC
-    src/discovery.cpp
-    src/node_table.cpp
-    src/node.cpp
-    src/transport.cpp
-    src/peer_manager.cpp
-)
-else()
 add_library(${PROJECT_NAME} SHARED
     src/discovery.cpp
     src/node_table.cpp
@@ -79,36 +61,28 @@ add_library(${PROJECT_NAME} SHARED
     src/transport.cpp
     src/peer_manager.cpp
 )
-endif()
 
-# FindBoost doesn't seem to work on Windows: work around
-if(WIN32) 
-    link_directories(
-    ${Boost_LIBRARY_DIRS}
-    )
-else()
-    target_link_libraries(${PROJECT_NAME}
+target_link_libraries(${PROJECT_NAME}
     Boost::system
     Boost::log
-    )
-endif()
+)
 
 # Make executables
 
 add_executable(test_udp
-test/udp.cpp
+    test/udp.cpp
 )
 
 target_link_libraries(test_udp
-${PROJECT_NAME}
+    ${PROJECT_NAME}
 )
 
 add_executable(test_tcp
-test/tcp.cpp
+    test/tcp.cpp
 )
 
 target_link_libraries(test_tcp
-${PROJECT_NAME}
+    ${PROJECT_NAME}
 )
 
 add_executable(app
