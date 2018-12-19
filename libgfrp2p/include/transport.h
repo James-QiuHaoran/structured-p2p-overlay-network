@@ -126,6 +126,8 @@ public:
 
     void start();
 
+    void stop();
+
     void write(const std::string& data);
 
 private:
@@ -158,6 +160,9 @@ public:
     
     // run the receive loop
     void run();
+
+    // stop the server
+    void stop();
 
     // encapsulate low-level machanism
     void send(const std::string& ip, unsigned short port, const std::string& data);

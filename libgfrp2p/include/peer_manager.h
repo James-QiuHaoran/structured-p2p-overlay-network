@@ -25,32 +25,32 @@ boost::random::mt19937 gen;  // seed for random number generator
  */
 class Message {
 private:
-    std::string messageID;
-    int type, node_id;
+    std::string message_id;
+    int type, node_order;
     unsigned long from_level;
-    std::shared_ptr<Node> sender;
-    std::shared_ptr<Node> receiver;
+    std::string sender_id;
+    std::string receiver_id;
 
 public:
     // constructor
     Message();
-    Message(std::string messageID, int type, unsigned long from_level, std::shared_ptr<Node> sender, std::shared_ptr<Node> receiver);
+    Message(std::string messageID, int type, unsigned long from_level, std::string sender_id, std::string receiver_id);
 
     // getters
-    std::shared_ptr<Node> get_sender() const;
-    std::shared_ptr<Node> get_receiver() const;
+    std::string get_sender_id() const;
+    std::string get_receiver_id() const;
     unsigned long get_from_level() const;
     std::string get_messageID() const;
     int get_type() const;
-    int get_node_id() const;
+    int get_node_order() const;
 
     // setters
-    void set_sender(const std::shared_ptr<Node> &sender);
-    void set_receiver(const std::shared_ptr<Node> &receiver);
+    void set_sender_id(const std::string &sender_id);
+    void set_receiver_id(const std::string &receiver_id);
     void set_from_level(unsigned long level);
-    void set_messageID(std::string messageId);
+    void set_message_id(std::string message_id);
     void set_type(int type);
-    void set_node_id(int id);
+    void set_node_order(int order);
 };
 
 /* Error Class
@@ -78,7 +78,7 @@ public:
 /* PeerManager class
  * responsible for broadcasting messages
  */
-class PeerManager {
+class PeerManager: public Receiver {
 private:
     // contains node information
     std::shared_ptr<Node> node;
@@ -86,8 +86,12 @@ private:
     // contains peers and related information
     NodeTable node_table;
 
+    // TCP server
+    AsyncTCPServer* tcp_server;
+
 public:
-    // constructor
+    // constructors
+    PeerManager(unsigned short port);
     PeerManager(Node node, NodeTable node_table);
 
     // getters
