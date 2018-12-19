@@ -393,12 +393,19 @@ void on_lost_connection(std::shared_ptr<Node> node) {
 
 // start the server
 void PeerManager::start() {
-    this->tcp_server = new AsyncTCPServer(this->shared_from_this(), this->node->get_port());
+	if (DEBUG_PM)
+		std::cout << "Starting the TCP server on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]\n";
+    this->tcp_server = new AsyncTCPServer(std::make_shared<PeerManager>(*this), this->node->get_port());
+    
+    if (DEBUG_PM)
+		std::cout << "Running the TCP server on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]\n";
     this->tcp_server->run();
 }
 
 // stop the peer
 void PeerManager::stop() {
+	if (DEBUG_PM)
+		std::cout << "Stopping the TCP server on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]\n";
     this->tcp_server->stop();
 }
 

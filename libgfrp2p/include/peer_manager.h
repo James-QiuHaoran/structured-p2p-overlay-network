@@ -17,7 +17,7 @@
 #include "transport.h"
 #include "param_constants.h"
 
-#define DEBUG 0
+#define DEBUG_PM 1
 
 /* Message class
  * definition of messages transmitted among peers

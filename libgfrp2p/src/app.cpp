@@ -7,16 +7,21 @@ BaseApp::BaseApp(std::string ip, unsigned short port, std::string id) {
 }
 
 void BaseApp::start() {
+    if (DEBUG_APP)
+        std::cout << "Starting HGFR PeerManager on node [ID: " + this->node.get_id() + "] [IP: " + this->node.get_ip() + "] [" + std::to_string(this->node.get_port()) + "]\n";
     this->peer_manager.start();
 }
 
 void BaseApp::stop() {
+    if (DEBUG_APP)
+        std::cout << "Stopping HGFR PeerManager on node [ID: " + this->node.get_id() + "] [IP: " + this->node.get_ip() + "] [" + std::to_string(this->node.get_port()) + "]\n";
     this->peer_manager.stop();
 }
 
 int main(int argc, char** argv) {
     if (argc != 4) {
-        std::cout << "Wrong arguments. Correct usage: ./app ip_addr port_num id\n";
+        if (DEBUG_APP)
+            std::cout << "Wrong arguments. Correct usage: ./app ip_addr port_num id\n";
         return 0;
     }
 
@@ -25,12 +30,18 @@ int main(int argc, char** argv) {
     std::string id = argv[3];
 
     // initialize the app
+    if (DEBUG_APP)
+        std::cout << "Creating HGFR base application on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]\n";
     BaseApp app = BaseApp(ip, port, id);
 
     // start the app service
+    if (DEBUG_APP)
+        std::cout << "Starting HGFR base service on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]\n";
     app.start();
 
     // stop the app service
+    if (DEBUG_APP)
+        std::cout << "Stopping HGFR base service on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]\n";
     app.stop();
 
     return 0;

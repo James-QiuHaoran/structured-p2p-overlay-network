@@ -9,6 +9,8 @@
 #include "node.h"
 #include "node_table.h"
 
+#define DEBUG_APP 1
+
 class BaseApp {
 private:
     Node node;
@@ -19,6 +21,7 @@ public:
     BaseApp(std::string ip, unsigned short port, std::string id);
 
     void start();
+
     void stop();
 };
 
