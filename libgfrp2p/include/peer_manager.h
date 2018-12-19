@@ -9,8 +9,8 @@
 #include <thread>
 #include <chrono>
 
-#include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
+#include <boost/random/mersenne_twister.hpp>
 
 #include "node.h"
 #include "node_table.h"
@@ -18,8 +18,6 @@
 #include "param_constants.h"
 
 #define DEBUG 0
-
-boost::random::mt19937 gen;  // seed for random number generator
 
 /* Message class
  * definition of messages transmitted among peers
@@ -90,6 +88,8 @@ private:
     // TCP server
     AsyncTCPServer* tcp_server;
 
+    boost::random::mt19937 gen;  // seed for random number generator
+
 public:
     // constructors
     PeerManager();
@@ -113,6 +113,7 @@ public:
     void broadcast_within_ring(Message msg, unsigned long current_level, int k);
     void broadcast_down(Message msg, unsigned long current_level);
     void multicast_to_contact_nodes(Message msg, unsigned long current_level);
+    int random_num_in_range(int low, int high);
     void send(std::shared_ptr<Node> node, const Message &msg);
 
     void receive(const std::string& ip, unsigned short port, const std::string &data);

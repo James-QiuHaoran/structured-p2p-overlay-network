@@ -21,6 +21,10 @@ else()
     # set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 endif()
 
+SET(GCC_BOOST_COMPILE_FLAGS "-DBOOST_LOG_DYN_LINK")
+add_definitions(${GCC_BOOST_COMPILE_FLAGS})
+SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${GCC_BOOST_COMPILE_FLAGS}")
+
 if(WIN32)
     # We have to set _WIN32_WINNT for Asio
     if(${CMAKE_SYSTEM_VERSION} EQUAL 10) # Windows 10
@@ -89,3 +93,21 @@ if(WIN32)
     ${PROJECT_NAME}
     )
 endif()
+
+add_executable(app
+    src/app.cpp
+)
+
+add_library(node_table src/node_table.cpp)
+add_library(node src/node.cpp)
+add_library(peer_manager src/peer_manager.cpp)
+add_library(transport src/transport.cpp)
+
+target_link_libraries(app
+    node
+    node_table
+    peer_manager
+    transport
+    Boost::system
+    Boost::log
+)

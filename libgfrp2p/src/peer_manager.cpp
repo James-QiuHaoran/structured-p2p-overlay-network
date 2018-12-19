@@ -16,12 +16,6 @@ std::string random_string(size_t length) {
     return str;
 }
 
-// random number generated uniformly from [low, high]
-int random_num_in_range(int low, int high) {
-	boost::random::uniform_int_distribution<> dist(low, high);
-	return dist(gen);
-}
-
 // constructors
 PeerManager::PeerManager() {}
 
@@ -408,6 +402,11 @@ void PeerManager::stop() {
     this->tcp_server->stop();
 }
 
+// random number generated uniformly from [low, high]
+int PeerManager::random_num_in_range(int low, int high) {
+	boost::random::uniform_int_distribution<> dist(low, high);
+	return dist(gen);
+}
 
 /*
 // to be put in node_table.cpp
