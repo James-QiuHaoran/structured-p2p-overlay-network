@@ -11,10 +11,6 @@
 
 #include "node.h"
 
-// using boost::numeric_cast;
-// thread safty
-std::mutex mlock;
-
 // If an id exists in multiple maps, they must be the same object
 struct Ring {
     unsigned long ring_level;                                              // level of the ring
@@ -40,6 +36,9 @@ private:
 public:
     NodeTable();
     NodeTable(const std::string& self_id);
+
+    // thread safty
+    std::mutex *mlock;
 
     // all operations must get lock, except those involving const members only
     /* self operations */

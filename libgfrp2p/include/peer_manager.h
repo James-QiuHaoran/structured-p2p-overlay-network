@@ -85,23 +85,24 @@ private:
     std::shared_ptr<Node> node;
 
     // contains peers and related information
-    NodeTable node_table;
+    std::shared_ptr<NodeTable> node_table;
 
     // TCP server
     AsyncTCPServer* tcp_server;
 
 public:
     // constructors
+    PeerManager();
     PeerManager(unsigned short port);
     PeerManager(Node node, NodeTable node_table);
 
     // getters
     std::shared_ptr<Node> get_node();
-    NodeTable get_node_table();
+    std::shared_ptr<NodeTable> get_node_table();
 
     // setters
     void set_node(std::shared_ptr<Node> node);
-    void set_node_table(NodeTable node_table);
+    void set_node_table(std::shared_ptr<NodeTable> node_table);
     
     // start the server
     void start();

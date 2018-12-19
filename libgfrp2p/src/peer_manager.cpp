@@ -23,11 +23,13 @@ int random_num_in_range(int low, int high) {
 }
 
 // constructors
+PeerManager::PeerManager() {}
+
 PeerManager::PeerManager(unsigned short port) {}
 
 PeerManager::PeerManager(Node node, NodeTable node_table) {
 	this->node = std::make_shared<Node>(node);
-	this->node_table = node_table;
+	this->node_table = std::make_shared<NodeTable>(node_table);
 }
 
 Message::Message() {}
@@ -66,7 +68,7 @@ std::string PeerError::get_errorMessage() const { return this->errorMessage; }
 
 std::shared_ptr<Node> PeerManager::get_node() { return this->node; }
 
-NodeTable PeerManager::get_node_table() { return this->node_table; }
+std::shared_ptr<NodeTable> PeerManager::get_node_table() { return this->node_table; }
 
 // setters
 void Message::set_sender_id(const std::string &sender_id) { this->sender_id = sender_id; }
@@ -87,7 +89,7 @@ void PeerError::set_errorMessage(std::string message) { this->errorMessage = mes
 
 void PeerManager::set_node(std::shared_ptr<Node> node) { this->node = node; }
 
-void PeerManager::set_node_table(NodeTable node_table) { this->node_table = node_table; }
+void PeerManager::set_node_table(std::shared_ptr<NodeTable> node_table) { this->node_table = node_table; }
 
 // send message using transport layer 
 // using wire protcol - TCP Transportation
@@ -109,7 +111,7 @@ void PeerManager::send(std::shared_ptr<Node> node, const Message &msg) {
 // a node wants to broadcast a message
 void PeerManager::broadcast(Message msg, unsigned long current_level) {
 	// get all contact nodes of the current ring
-	std::unordered_set<std::shared_ptr<Node>> contact_nodes = this->node_table.get_contact_nodes(current_level);
+	std::unordered_set<std::shared_ptr<Node>> contact_nodes = this->node_table->get_contact_nodes(current_level);
 
 	// randomly select one contact from the contact nodes
 	int random_id = rand() % contact_nodes.size();
@@ -134,7 +136,7 @@ void PeerManager::broadcast(Message msg, unsigned long current_level) {
 // a node wants to multicast to the contact nodes of the current level
 void PeerManager::multicast_to_contact_nodes(Message msg, unsigned long current_level) {
 	// get all contact nodes of the current ring
-	std::unordered_set<std::shared_ptr<Node>> contact_nodes = this->node_table.get_contact_nodes(current_level);
+	std::unordered_set<std::shared_ptr<Node>> contact_nodes = this->node_table->get_contact_nodes(current_level);
 
 	// multicast to all contact nodes of the same level
 	for (auto node : contact_nodes) {
@@ -150,7 +152,7 @@ void PeerManager::multicast_to_contact_nodes(Message msg, unsigned long current_
 // recursive function
 void PeerManager::broadcast_up(Message msg, unsigned long current_level) {
 	// get all contact nodes from the upper level ring
-	std::unordered_set<std::shared_ptr<Node>> contact_nodes_upper = this->node_table.get_contact_nodes(current_level);
+	std::unordered_set<std::shared_ptr<Node>> contact_nodes_upper = this->node_table->get_contact_nodes(current_level);
 
 	// already reach the highest level, start to broadcast downwards
 	if (contact_nodes_upper.size() == 0) {
@@ -182,18 +184,18 @@ void PeerManager::broadcast_up(Message msg, unsigned long current_level) {
 // broadcast to the nodes within the ring (k-ary distributed spanning tree)
 void PeerManager::broadcast_within_ring(Message msg, unsigned long current_level, int k) {
 	// should be recursive
-	int end_ID = this->node_table.get_peer_list_size(current_level);
+	int end_ID = this->node_table->get_peer_list_size(current_level);
 	int i = 0;
 	int current_id;
 	int node_id = msg.get_node_order();
-	int node_id_in_vector = this->node_table.get_node_id_in_vector(current_level, this->node->get_id());
+	int node_id_in_vector = this->node_table->get_node_id_in_vector(current_level, this->node->get_id());
 	while (current_id <= end_ID) {
 		current_id = node_id + pow(k, i);
 		if (pow(k, i) <= node_id) {
 			i++;
 			continue;
 		} else {
-			std::shared_ptr<Node> node = this->node_table.get_peer_by_order(current_level, node_id_in_vector + pow(k, i));
+			std::shared_ptr<Node> node = this->node_table->get_peer_by_order(current_level, node_id_in_vector + pow(k, i));
 			std::shared_ptr<Node> receiver = node;
 			msg.set_receiver_id(receiver->get_id());
 			this->send(receiver, msg);
@@ -206,7 +208,7 @@ void PeerManager::broadcast_within_ring(Message msg, unsigned long current_level
 // recursive function
 void PeerManager::broadcast_down(Message msg, unsigned long current_level) {
 	// get all contact nodes from the lower level ring
-	std::unordered_set<std::shared_ptr<Node>> contact_nodes_lower = this->node_table.get_contact_nodes(current_level-1);
+	std::unordered_set<std::shared_ptr<Node>> contact_nodes_lower = this->node_table->get_contact_nodes(current_level-1);
 
 	// already the lowest level
 	if (contact_nodes_lower.size() != 0) {
@@ -290,11 +292,11 @@ void PeerManager::on_receive(const Message &msg) {
 	switch(msg.get_type()) {
 		case 0 : {
 			std::cout << "Broadcast Upwards - from the lower level\n";
-			if (!this->node_table.is_contact_node(msg.get_from_level()+1)) {
+			if (!this->node_table->is_contact_node(msg.get_from_level()+1)) {
 				// if not contact node
 				Message msg(random_string(MSG_HASH_LENGTH), 1, msg.get_from_level()+1, this->node->get_id(), NULL);
 				this->broadcast_up(msg, msg.get_from_level()+1);
-			} else if (this->node_table.get_contact_nodes(msg.get_from_level()+2).size() == 0) {
+			} else if (this->node_table->get_contact_nodes(msg.get_from_level()+2).size() == 0) {
 				// has been the top ring, start to broadcast downwards
 				Message msg(random_string(MSG_HASH_LENGTH), 2, msg.get_from_level()+1, this->node->get_id(), NULL);
 				int k = 2;
@@ -307,11 +309,11 @@ void PeerManager::on_receive(const Message &msg) {
 			break;
 		} case 1 : {
 			std::cout << "Broadcast Upwards - from the same level\n";
-			if (!this->node_table.is_contact_node(msg.get_from_level())) {
+			if (!this->node_table->is_contact_node(msg.get_from_level())) {
 				// if not contact node
 				Message msg(random_string(MSG_HASH_LENGTH), 1, msg.get_from_level(), this->node->get_id(), NULL);
 				this->broadcast_up(msg, msg.get_from_level());
-			} else if (this->node_table.get_contact_nodes(msg.get_from_level()+1).size() == 0) {
+			} else if (this->node_table->get_contact_nodes(msg.get_from_level()+1).size() == 0) {
 				// has been the top ring, start to broadcast downwards
 				Message msg(random_string(MSG_HASH_LENGTH), 2, msg.get_from_level(), this->node->get_id(), NULL);
 				int k = 2;
@@ -359,7 +361,7 @@ void PeerManager::on_receive(const Message &msg) {
 void PeerManager::contact_node_election(unsigned long level) {
 	std::unordered_set<int> random_IDs;
 	int num = 0;
-	int num_peers = this->node_table.get_peer_list_size(level);
+	int num_peers = this->node_table->get_peer_list_size(level);
 	while (num < NUM_CONTACT_NODES) {
 		int random_ID = rand() % num_peers;
 		if (random_IDs.find(random_ID) == random_IDs.end()) {
@@ -374,7 +376,7 @@ void PeerManager::contact_node_election(unsigned long level) {
 	broadcast_within_ring(within_ring_msg, level, k);
 
 	// get all contact nodes from the upper level ring
-        std::unordered_set<std::shared_ptr<Node>> contact_nodes_upper = this->node_table.get_contact_nodes(level);
+        std::unordered_set<std::shared_ptr<Node>> contact_nodes_upper = this->node_table->get_contact_nodes(level);
         if (contact_nodes_upper.size() != 0) {
 		Message upper_ring_msg(random_string(MSG_HASH_LENGTH), 3, level, this->node->get_id(), NULL);
 		multicast_to_contact_nodes(upper_ring_msg, level+1);
