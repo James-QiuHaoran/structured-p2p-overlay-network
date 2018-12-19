@@ -75,6 +75,9 @@ src/transport.cpp
 # src/peer_manager.cpp
 )
 
+target_link_libraries(${PROJECT_NAME}
+${Boost_LIBRARIES}
+)
 
 # Make executables
 
@@ -83,30 +86,20 @@ test/udp.cpp
 )
 
 # FindBoost doesn't seem to work on Windows: work around
-if(WIN32) 
-    link_directories(
-    ${Boost_LIBRARY_DIRS}
-    )
+# if(WIN32) 
+link_directories(
+${Boost_LIBRARY_DIRS}
+)
 
-    target_link_libraries(test_udp
-    ${PROJECT_NAME}
-    ${Boost_LIBRARIES}
-    )
-else()
-    target_link_libraries(${PROJECT_NAME}
-    ${Boost_LIBRARIES}
-    )
+    # target_link_libraries(test_udp
+    # ${PROJECT_NAME}
+    # ${Boost_LIBRARIES}
+    # )
+# else()
 
-    target_link_libraries(test_udp
-    ${PROJECT_NAME}
-    ${Boost_LIBRARIES}
-    )
-
-    target_link_libraries(test_udp
-    ${PROJECT_NAME}
-    ${Boost_SYSTEM_LIBRARY}
-    ${Boost_LOG_LIBRARY}
-    ${Boost_DATE_TIME_LIBRARY}
-    )
-endif()
+target_link_libraries(test_udp
+${PROJECT_NAME}
+${Boost_LIBRARIES}
+)
+# endif()
 
