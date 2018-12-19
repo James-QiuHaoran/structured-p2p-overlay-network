@@ -81,13 +81,17 @@ endif()
 
 # Make executables
 
-add_executable(test_udp
-test/udp.cpp
-)
+# add_executable(test_udp
+# test/udp.cpp
+# )
 
 add_dependencies(test_udp ${PROJECT_NAME})
 
 target_link_libraries(test_udp
 ${PROJECT_NAME}
 )
+<<<<<<< HEAD
 
+=======
+# endif()
+>>>>>>> 5bb0454ca96d795bfb0153fc372b29544e0bb50d
