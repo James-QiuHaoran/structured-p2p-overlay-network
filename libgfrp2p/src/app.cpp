@@ -7,17 +7,95 @@ BaseApp::BaseApp(std::string ip, unsigned short port, std::string id) {
     this->peer_manager = PeerManager(node, node_table);
 }
 
-BaseApp::BaseApp(std::string ip, unsigned short port, std::string id, int num_nodes, int num_dists, int num_cities, int num_states, int num_countries, int num_continents) {
+BaseApp::BaseApp(std::string ip, unsigned short port, std::string id, 
+    int num_nodes_in_dist, int num_cnodes_in_dist, 
+        int num_nodes_in_city, int num_cnodes_in_city, 
+        int num_nodes_in_state, int num_cnodes_in_state, 
+        int num_nodes_in_country, int num_cnodes_in_country, 
+        int num_nodes_in_continent) {
     this->node = Node(id, ip, port);
     this->node_table = NodeTable(id);
     this->peer_manager = PeerManager(node, node_table);
 
-    this->form_structure(num_nodes, num_dists, num_cities, num_states, num_countries, num_continents);
+    this->form_structure(num_nodes_in_dist, num_cnodes_in_dist, 
+        num_nodes_in_city, num_cnodes_in_city, 
+        num_nodes_in_state, num_cnodes_in_state, 
+        num_nodes_in_country, num_cnodes_in_country, 
+        num_nodes_in_continent);
 }
 
 // public functions
-void BaseApp::form_structure(int num_nodes, int num_dists, int num_cities, int num_states, int num_countries, int num_continents) {
+void BaseApp::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist, 
+        int num_nodes_in_city, int num_cnodes_in_city, 
+        int num_nodes_in_state, int num_cnodes_in_state, 
+        int num_nodes_in_country, int num_cnodes_in_country, 
+        int num_nodes_in_continent) {
+    // form network topology based ID
+    std::string id_in_dist = this->node.get_id().substr(ID_SINGLE_START, ID_SINGLE_START+ID_SINGLE_LEN);
+    std::stringstream str_stream(id_in_dist);
+    int node_id_in_dist = 0;
+    str_stream >> node_id_in_dist;
 
+    std::vector<Ring> tables;
+
+    // normal nodes - peer level
+    Ring table_peer;
+    table_peer.ring_level = 0;
+
+    // add other peers
+    for (int i = 0; i < num_nodes_in_dist; i++) {
+
+    }
+
+    tables.push_back(table_peer);
+    
+    // contact nodes - dist level
+    if (node_id_in_dist < num_cnodes_in_dist) {
+        // should be the contact node of the dist level ring
+        Ring table_dist;
+        table_dist.ring_level = 1;
+
+        // add other peers in that level
+        for (int i = 0; i < num_cnodes_in_dist; i++) {
+
+        }
+
+        tables.push_back(table_dist);
+    }
+
+    // contact nodes - city level
+    int num_dists_in_city = num_nodes_in_city/num_cnodes_in_dist;
+    if (node_id_in_dist < num_cnodes_in_city/num_dists_in_city) {
+        // should be the contact node of the city level ring
+        Ring table_city;
+        table_city.ring_level = 2;
+
+        // add other peers in that level
+        for (int i = 0; i < num_cnodes_in_city; i++) {
+
+        }
+
+        tables.push_back(table_city);
+    }
+
+    // contact nodes - state level
+    int num_cities_in_state = num_nodes_in_state/num_cnodes_in_dist;
+    if (node_id_in_dist < num_cnodes_in_state/num_cities_in_state) {
+        // should be the contact node of the state level ring
+        Ring table_state;
+        table_state.ring_level = 3;
+
+        // add other peers in that level
+        for (int i = 0; i < num_cnodes_in_state; i++) {
+
+        }
+
+        tables.push_back(table_state);
+    }
+
+    // [TODO]
+    // contact nodes - country level
+    // contact nodes - continent level
 }
 
 void BaseApp::start() {
@@ -44,9 +122,25 @@ int main(int argc, char** argv) {
     unsigned short port = (unsigned short) std::atoi(argv[2]);
     std::string id = argv[3];
 
+    // information used for network topology establishment (only used for evaluation)
+    int num_nodes_in_dist = std::atoi(argv[4]);
+    int num_cnodes_in_dist = std::atoi(argv[5]);
+    int num_nodes_in_city = std::atoi(argv[6]);
+    int num_cnodes_in_city = std::atoi(argv[7]); 
+    int num_nodes_in_state = std::atoi(argv[8]);
+    int num_cnodes_in_state = std::atoi(argv[9]); 
+    int num_nodes_in_country = std::atoi(argv[10]);
+    int num_cnodes_in_country = std::atoi(argv[11]); 
+    int num_nodes_in_continent = std::atoi(argv[12]);
+
     // initialize the app
     BOOST_LOG_TRIVIAL(debug) << "Creating HGFR base application on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]";
-    BaseApp app = BaseApp(ip, port, id);
+    BaseApp app = BaseApp(ip, port, id, 
+        num_nodes_in_dist, num_cnodes_in_dist, 
+        num_nodes_in_city, num_cnodes_in_city, 
+        num_nodes_in_state, num_cnodes_in_state,
+        num_nodes_in_country, num_cnodes_in_country,
+        num_nodes_in_continent);
 
     // start the app service
     BOOST_LOG_TRIVIAL(debug) << "Starting HGFR base service on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]";
