@@ -13,7 +13,7 @@
 #define ID_STATE_LEN       5
 #define ID_CITY_LEN        6
 #define ID_DISTRICT_LEN    5
-#define ID_SINGLE_LEN     11
+#define ID_SINGLE_LEN      9
 #define ID_CONTINENT_START 0
 #define ID_COUNTRY_START   3
 #define ID_STATE_START     7
