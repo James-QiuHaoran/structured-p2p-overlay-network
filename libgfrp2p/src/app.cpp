@@ -16,7 +16,7 @@ void BaseApp::stop() {
 
 int main(int argc, char** argv) {
     if (argc != 4) {
-        cout << "Wrong arguments. Correct usage: ./app ip_addr port_num id\n";
+        std::cout << "Wrong arguments. Correct usage: ./app ip_addr port_num id\n";
         return 0;
     }
 

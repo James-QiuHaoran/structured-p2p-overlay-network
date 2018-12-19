@@ -19,7 +19,8 @@ private:
     std::chrono::time_point<std::chrono::system_clock> last_pong;
     
 public:
-    // Constructor
+    // Constructors
+    Node();
     Node(std::string id, std::string ip, unsigned short port);
 
     // Getters

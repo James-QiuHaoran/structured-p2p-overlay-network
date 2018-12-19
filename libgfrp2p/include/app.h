@@ -3,7 +3,11 @@
 
 #include <string>
 #include <cstdlib>
+#include <iostream>
+
 #include "peer_manager.h"
+#include "node.h"
+#include "node_table.h"
 
 class BaseApp {
 private:
