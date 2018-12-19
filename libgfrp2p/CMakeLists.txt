@@ -80,14 +80,12 @@ else()
 endif()
 
 # Make executables
+if(WIN32) 
+    add_executable(test_udp
+    test/udp.cpp
+    )
 
-add_executable(test_udp
-test/udp.cpp
-)
-
-add_dependencies(test_udp ${PROJECT_NAME})
-
-target_link_libraries(test_udp
-${PROJECT_NAME}
-)
-
+    target_link_libraries(test_udp
+    ${PROJECT_NAME}
+    )
+endif()
