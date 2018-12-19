@@ -26,14 +26,14 @@ public:
     	int num_nodes_in_city, int num_cnodes_in_city, 
     	int num_nodes_in_state, int num_cnodes_in_state, 
     	int num_nodes_in_country, int num_cnodes_in_country, 
-    	int num_nodes_in_continent);
+    	int num_nodes_in_continent, unsigned short starting_port_number);
 
     // form the network topology
     void form_structure(int num_nodes_in_dist, int num_cnodes_in_dist, 
     	int num_nodes_in_city, int num_cnodes_in_city, 
     	int num_nodes_in_state, int num_cnodes_in_state, 
     	int num_nodes_in_country, int num_cnodes_in_country, 
-    	int num_nodes_in_continent);
+    	int num_nodes_in_continent, unsigned short starting_port_number);
 
     // start the application
     void start();
