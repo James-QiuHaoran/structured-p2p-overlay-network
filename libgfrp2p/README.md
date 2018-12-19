@@ -3,6 +3,7 @@
 ## TODO List
 
 - Implement time recording, number of messages recording functions (data retrieval)
+	- log all message transactions in local files
 - Bootstrap nodes implementation
 	- docker configurations
 	- distribute IDs and construct the network (only for evaluation: use a central server)

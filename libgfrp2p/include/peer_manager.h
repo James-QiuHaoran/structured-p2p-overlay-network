@@ -88,7 +88,8 @@ private:
     // TCP server
     AsyncTCPServer* tcp_server;
 
-    boost::random::mt19937 gen;  // seed for random number generator
+    // seed for random number generator
+    boost::random::mt19937 gen;
 
 public:
     // constructors
@@ -116,7 +117,7 @@ public:
     int random_num_in_range(int low, int high);
     void send(std::shared_ptr<Node> node, const Message &msg);
 
-    void receive(const std::string& ip, unsigned short port, const std::string &data);
+    virtual void receive(const std::string& ip, unsigned short port, const std::string &data) override;
 
     void on_receive(const Message &msg);
 

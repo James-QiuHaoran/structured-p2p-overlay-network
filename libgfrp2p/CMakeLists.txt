@@ -115,13 +115,6 @@ add_executable(app
     src/app.cpp
 )
 
-#add_library(node_table src/node_table.cpp)
-#add_library(node src/node.cpp)
-#add_library(peer_manager src/peer_manager.cpp)
-#add_library(transport src/transport.cpp)
-
 target_link_libraries(app
     ${PROJECT_NAME}
-    #Boost::system
-    #Boost::log
 )
