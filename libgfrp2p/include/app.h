@@ -3,7 +3,13 @@
 
 #include <string>
 #include <cstdlib>
+#include <iostream>
+
 #include "peer_manager.h"
+#include "node.h"
+#include "node_table.h"
+
+#define DEBUG_APP 1
 
 class BaseApp {
 private:
@@ -15,6 +21,7 @@ public:
     BaseApp(std::string ip, unsigned short port, std::string id);
 
     void start();
+
     void stop();
 };
 

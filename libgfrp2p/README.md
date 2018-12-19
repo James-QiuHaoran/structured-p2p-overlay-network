@@ -1,4 +1,15 @@
-# Geographical Fractal Random Ring (GFRR) P2P Network
+# Hidden Geographical Fractal Random Ring (HGFRR) P2P Network
+
+## TODO List
+
+- Implement time recording, number of messages recording functions (data retrieval)
+- Bootstrap nodes implementation
+	- docker configurations
+	- distribute IDs and construct the network (only for evaluation: use a central server)
+- Chord, Pastry, Tapestry Implementation
+	- form structure
+	- broadcast (gossip)
+	- insert time recording, number of messages recording functions (data retrieval)
 
 ## Dependencies
 - libboost-system-dev
@@ -15,5 +26,3 @@
     |0x01|ping|n/a|
     |0x02|pong|n/a|
     TODO: add more
-
-
