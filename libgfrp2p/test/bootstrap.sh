@@ -112,7 +112,13 @@ do
 	num_nodes_in_country=0
 	num_cnodes_in_country=0
 	num_nodes_in_continent=0
-	../bin/app $ip $port $id $num_nodes_in_dist $num_cnodes_in_dist $num_nodes_in_city $num_cnodes_in_city $num_nodes_in_state $num_cnodes_in_state $num_nodes_in_country $num_cnodes_in_country $num_nodes_in_continent &
+	../bin/app $ip $port $id \
+		$num_nodes_in_dist $num_cnodes_in_dist \
+		$num_nodes_in_city $num_cnodes_in_city \
+		$num_nodes_in_state $num_cnodes_in_state \
+		$num_nodes_in_country $num_cnodes_in_country \
+		$num_nodes_in_continent \
+		$starting_port_num &
 done
 
 sleep 5
