@@ -18,7 +18,7 @@ std::string random_string(size_t length) {
 
 // constructor
 PeerManager::PeerManager(Node node, NodeTable node_table) {
-        this->node = node;
+	this->node = std::make_shared<Node>(node);
 	this->node_table = node_table;
 }
 
@@ -115,6 +115,7 @@ void PeerManager::multicast_to_contact_nodes(Message msg, unsigned long current_
 	}
 }
 
+// send message using transport layer
 void PeerManager::send(std::shared_ptr<Node> node, const Message &msg) {
 	// using wire protcol - TCP Transportation
 	// AsyncTCPServer tcp_server = new AsyncTCPServer();
