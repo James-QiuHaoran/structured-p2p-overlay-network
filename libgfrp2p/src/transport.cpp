@@ -190,11 +190,11 @@ AsyncTCPServer::AsyncTCPServer(const std::shared_ptr<Receiver>& receiver, unsign
 
 
 void AsyncTCPServer::run() {
-    BOOST_LOG_TRIVIAL(debug) << "AsyncUDPServer::run: Starting handler thread";
+    BOOST_LOG_TRIVIAL(debug) << "AsyncTCPServer::run: Starting handler thread";
     this->handler = std::thread(&AsyncTCPServer::handle, this);
-    BOOST_LOG_TRIVIAL(debug) << "AsyncUDPServer::run: Starting io worker thread";
+    BOOST_LOG_TRIVIAL(debug) << "AsyncTCPServer::run: Starting io worker thread";
     this->io_worker = std::thread(&AsyncTCPServer::io_work, this);
-    BOOST_LOG_TRIVIAL(debug) << "AsyncUDPServer::run: Threads started";
+    BOOST_LOG_TRIVIAL(debug) << "AsyncTCPServer::run: Threads started";
     
     this->accept();
 }
@@ -326,4 +326,3 @@ void AsyncTCPServer::stop() {
     this->work.reset();
     this->io_worker.join();
 }
-

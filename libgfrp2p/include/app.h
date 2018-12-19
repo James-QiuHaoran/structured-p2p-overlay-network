@@ -18,10 +18,13 @@ private:
     PeerManager peer_manager;
 
 public:
+	// constructor
     BaseApp(std::string ip, unsigned short port, std::string id);
 
+    // start the application
     void start();
 
+    // stop the application
     void stop();
 };
 
