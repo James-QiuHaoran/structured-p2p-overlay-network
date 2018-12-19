@@ -1,9 +1,23 @@
 #include "app.h"
 
+// constructors
 BaseApp::BaseApp(std::string ip, unsigned short port, std::string id) {
     this->node = Node(id, ip, port);
     this->node_table = NodeTable(id);
     this->peer_manager = PeerManager(node, node_table);
+}
+
+BaseApp::BaseApp(std::string ip, unsigned short port, std::string id, int num_nodes, int num_dists, int num_cities, int num_states, int num_countries, int num_continents) {
+    this->node = Node(id, ip, port);
+    this->node_table = NodeTable(id);
+    this->peer_manager = PeerManager(node, node_table);
+
+    this->form_structure(num_nodes, num_dists, num_cities, num_states, num_countries, num_continents);
+}
+
+// public functions
+void BaseApp::form_structure(int num_nodes, int num_dists, int num_cities, int num_states, int num_countries, int num_continents) {
+
 }
 
 void BaseApp::start() {
