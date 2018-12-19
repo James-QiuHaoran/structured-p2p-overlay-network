@@ -15,15 +15,17 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Cross-platform compiler flags
 if(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /O2")
-else()
+elseif(GNU)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O3")
     # set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} some other flags")
     # set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
+
+    # Boost-related 
+    SET(GCC_BOOST_COMPILE_FLAGS "-DBOOST_LOG_DYN_LINK")
+    add_definitions(${GCC_BOOST_COMPILE_FLAGS})
+    SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${GCC_BOOST_COMPILE_FLAGS}")
 endif()
 
-SET(GCC_BOOST_COMPILE_FLAGS "-DBOOST_LOG_DYN_LINK")
-add_definitions(${GCC_BOOST_COMPILE_FLAGS})
-SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${GCC_BOOST_COMPILE_FLAGS}")
 
 if(WIN32)
     # We have to set _WIN32_WINNT for Asio
@@ -51,7 +53,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
 # Check Boost
 # FindBoost doesn't seem to work on Windows: work around
-
 if(WIN32) 
     find_package(Boost 1.58.0 REQUIRED)
 else()
