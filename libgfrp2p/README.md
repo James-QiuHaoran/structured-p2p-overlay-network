@@ -2,12 +2,14 @@
 
 ## TODO List
 
-- implement time recording, number of messages recording functions
-- Boostrap Server Implementation
-	- docker
-	- distribute IDs and construct the network
+- Implement time recording, number of messages recording functions (data retrieval)
+- Bootstrap nodes implementation
+	- docker configurations
+	- distribute IDs and construct the network (only for evaluation: use a central server)
 - Chord, Pastry, Tapestry Implementation
-	- insert time recording, number of messages recording functions
+	- form structure
+	- broadcast (gossip)
+	- insert time recording, number of messages recording functions (data retrieval)
 
 ## Dependencies
 - libboost-system-dev
