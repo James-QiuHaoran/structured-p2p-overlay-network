@@ -7,11 +7,11 @@
 class UDPTest: public Receiver {
 public:
 
-    AsyncUDPServer* udp_server;
+    std::unique_ptr<AsyncUDPServer> udp_server;
 
-    UDPTest(unsigned short port) {
-        BOOST_LOG_TRIVIAL(debug) << "UDPTest::(constructor): Constructng";
-        udp_server = new AsyncUDPServer(this->shared_from_this(), port);
+    void start(unsigned short port) {
+        BOOST_LOG_TRIVIAL(debug) << "UDPTest::start: Allocating udp_server";
+        udp_server.reset(new AsyncUDPServer(this->shared_from_this(), port));
         this->udp_server->run();
     }
 
@@ -29,7 +29,8 @@ int main(int argc, char* argv[]) {
     BOOST_LOG_TRIVIAL(debug) << "main: Starting with " << argc << " arguments";
     unsigned short port = std::stoi(argv[1]);
     BOOST_LOG_TRIVIAL(debug) << "main: Port number " << port;
-    UDPTest udp_test(port);
-    udp_test.udp_server->stop();
+    std::shared_ptr<UDPTest> udp_test(new UDPTest());
+    udp_test->start(port);
+    udp_test->udp_server->stop();
     return 0;
 }

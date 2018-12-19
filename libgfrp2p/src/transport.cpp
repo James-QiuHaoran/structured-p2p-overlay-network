@@ -5,7 +5,7 @@ Receiver::~Receiver() { }
 
 // constructors
 AsyncUDPServer::AsyncUDPServer(const std::shared_ptr<Receiver>& receiver, unsigned short port):
-    receiver(receiver), io_service(), socket(io_service, udp::endpoint(udp::v4(), port)),
+    receiver(receiver), io_service(), work(new boost::asio::io_service::work(io_service)), socket(io_service, udp::endpoint(udp::v4(), port)),
     buffer(new AtomicQueue<BufferItemType>()) {
 
     BOOST_LOG_TRIVIAL(debug) << "AsyncUDPServer::(constructor): Initialization done";
@@ -13,21 +13,24 @@ AsyncUDPServer::AsyncUDPServer(const std::shared_ptr<Receiver>& receiver, unsign
 
 // member function implementation
 void AsyncUDPServer::run() {
-    try {
-        this->io_service.run();
-    } catch (const std::exception& e) {
-        BOOST_LOG_TRIVIAL(fatal) << "AsyncUDPServer::run: io_service fails to run";
-    }
     
-    BOOST_LOG_TRIVIAL(debug) << "AsyncUDPServer::run: Before thread";
-    this->handler = std::thread(&AsyncUDPServer::handle, this);
-    BOOST_LOG_TRIVIAL(debug) << "AsyncUDPServer::run: Handler thread started";
 
+    BOOST_LOG_TRIVIAL(debug) << "AsyncUDPServer::run: Starting handler thread";
+    this->handler = std::thread(&AsyncUDPServer::handle, this);
+    BOOST_LOG_TRIVIAL(debug) << "AsyncUDPServer::run: Starting io worker thread";
+    this->io_worker = std::thread(&AsyncUDPServer::io_work, this);
+    BOOST_LOG_TRIVIAL(debug) << "AsyncUDPServer::run: Threads started";
+
+    // Add first async work
     this->receive();
 }
 
 void AsyncUDPServer::stop() {
     this->handler.join();
+
+    this->io_service.stop();
+    this->work.reset();
+    this->io_worker.join();
 }
 
 void AsyncUDPServer::send(const std::string& ip, unsigned short port, const std::string& data) {
@@ -49,7 +52,9 @@ void AsyncUDPServer::receive() {
 
 void AsyncUDPServer::handle_receive(const boost::system::error_code& error,
     std::size_t bytes_transferred) {
-    
+    // Continue receive asap
+    this->receive();
+
     if (!error || error == boost::asio::error::message_size) {
         // Call back to the receiver
         std::string data(this->recv_buffer.begin(), this->recv_buffer.begin() + bytes_transferred);
@@ -59,7 +64,7 @@ void AsyncUDPServer::handle_receive(const boost::system::error_code& error,
     } else {
         BOOST_LOG_TRIVIAL(error) << "AsyncUDPServer::handle_receive: receive error, packet ignored";
     }
-    this->receive();
+    
 }
 
 void AsyncUDPServer::handle_send(boost::shared_ptr<std::string> data,
@@ -78,6 +83,16 @@ void AsyncUDPServer::handle() {
         auto front = this->buffer->wait_for_dequeue();
 
         this->receiver->receive(std::get<0>(front), std::get<1>(front), std::get<2>(front));
+    }
+}
+
+void AsyncUDPServer::io_work() {
+    try {
+        BOOST_LOG_TRIVIAL(debug) << "AsyncUDPServer::io_work: Running io_service";
+        this->io_service.run();
+        BOOST_LOG_TRIVIAL(debug) << "AsyncUDPServer::io_work: io_service has stopped";
+    } catch (const std::exception& e) {
+        BOOST_LOG_TRIVIAL(fatal) << "AsyncUDPServer::receive: io_service fails to run";
     }
 }
 
