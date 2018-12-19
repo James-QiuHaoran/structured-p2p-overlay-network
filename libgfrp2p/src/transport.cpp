@@ -288,3 +288,7 @@ void AsyncTCPServer::handle() {
     }
 }
 
+void AsyncTCPServer::stop() {
+    this->handler.join();
+}
+
