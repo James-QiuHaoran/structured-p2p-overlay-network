@@ -49,16 +49,15 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 # Check libboost-system and libboost-log
 # find_package(Boost 1.58.0 COMPONENTS system log date_time REQUIRED)
 # FindBoost doesn't seem to work on Windows: work around
-find_package(Boost 1.58.0 REQUIRED)
+if(WIN32) 
+    find_package(Boost 1.58.0 REQUIRED)
+else()
+    find_package(Boost 1.58.0 COMPONENTS system log date_time REQUIRED)
+endif()
 
 include_directories(
 ${Boost_INCLUDE_DIRS}
 ${PROJECT_SOURCE_DIR}/include
-)
-
-# FindBoost doesn't seem to work on Windows: work around
-link_directories(
-${Boost_LIBRARY_DIRS}
 )
 
 add_library(${PROJECT_NAME} STATIC
@@ -69,11 +68,18 @@ src/transport.cpp
 # src/peer_manager.cpp
 )
 
-# target_link_libraries(${PROJECT_NAME}
-# ${Boost_SYSTEM_LIBRARY}
-# ${Boost_LOG_LIBRARY}
-# ${Boost_DATE_TIME_LIBRARY}
-# )
+# FindBoost doesn't seem to work on Windows: work around
+if(WIN32) 
+    link_directories(
+    ${Boost_LIBRARY_DIRS}
+    )
+else()
+    target_link_libraries(${PROJECT_NAME}
+    ${Boost_SYSTEM_LIBRARY}
+    ${Boost_LOG_LIBRARY}
+    ${Boost_DATE_TIME_LIBRARY}
+    )
+endif()
 
 
 # Make executables
@@ -82,7 +88,15 @@ add_executable(test_udp
 test/udp.cpp
 )
 
-target_link_libraries(test_udp
-${PROJECT_NAME}
-${Boost_LIBRARIES}
-)
+if(WIN32) 
+    target_link_libraries(test_udp
+    ${PROJECT_NAME}
+    ${Boost_LIBRARIES}
+    )
+else()
+    target_link_libraries(${PROJECT_NAME}
+    ${Boost_SYSTEM_LIBRARY}
+    ${Boost_LOG_LIBRARY}
+    ${Boost_DATE_TIME_LIBRARY}
+    )
+endif()
