@@ -44,6 +44,12 @@ public:
     /* self operations */
     std::string get_self_id() const;
 
+    // set-up (used for evaluation)
+    void add_table(Ring ring);
+    void remove_table(unsigned long level);
+    void set_tables(std::vector<Ring> tables);
+    void reset_tables();
+
     /* storage operations */
     bool has_node(unsigned long level, const std::string& id);
     // deep copy of node information

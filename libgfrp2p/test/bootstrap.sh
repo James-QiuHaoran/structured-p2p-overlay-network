@@ -87,7 +87,7 @@ do
 	eval "port=\$(( $starting_port_num + $i ))"
 	printf "Port: $port\n\n"
 
-	../bin/app $ip $port $id
+	../bin/app $ip $port $id &
 done
 
 echo "== Successfully boostrapped!"

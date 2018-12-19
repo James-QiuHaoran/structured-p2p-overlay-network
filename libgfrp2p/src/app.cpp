@@ -7,6 +7,10 @@ BaseApp::BaseApp(std::string ip, unsigned short port, std::string id) {
 }
 
 void BaseApp::start() {
+    BOOST_LOG_TRIVIAL(debug) << "Setting up NodeTable for node [ID: " + this->node.get_id() + "] [IP: " + this->node.get_ip() + "] [" + std::to_string(this->node.get_port()) + "]";
+    std::vector<Ring> tables;
+    this->node_table.set_tables(tables);
+
     BOOST_LOG_TRIVIAL(debug) << "Starting HGFR PeerManager on node [ID: " + this->node.get_id() + "] [IP: " + this->node.get_ip() + "] [" + std::to_string(this->node.get_port()) + "]";
     this->peer_manager.start();
 }
