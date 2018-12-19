@@ -101,5 +101,12 @@ else()
     ${PROJECT_NAME}
     ${Boost_LIBRARIES}
     )
+
+    target_link_libraries(test_udp
+    ${PROJECT_NAME}
+    ${Boost_SYSTEM_LIBRARY}
+    ${Boost_LOG_LIBRARY}
+    ${Boost_DATE_TIME_LIBRARY}
+    )
 endif()
 
