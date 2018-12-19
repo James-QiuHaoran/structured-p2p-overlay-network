@@ -92,7 +92,7 @@ ${Boost_LIBRARY_DIRS}
 )
 
 # else()
-target_link_libraries(test_udp
+target_link_libraries(# test_udp
 ${PROJECT_NAME}
 ${Boost_SYSTEM_LIBRARY}
 ${Boost_LOG_LIBRARY}
