@@ -54,12 +54,13 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
 # Make library
 
-add_library(${PROJECT_NAME} SHARED
+add_library(${PROJECT_NAME} STATIC
     src/discovery.cpp
     src/node_table.cpp
     src/node.cpp
     src/transport.cpp
     src/peer_manager.cpp
+    src/message.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}
