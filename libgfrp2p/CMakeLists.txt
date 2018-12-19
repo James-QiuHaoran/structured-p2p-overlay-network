@@ -88,4 +88,12 @@ if(WIN32)
     target_link_libraries(test_udp
     ${PROJECT_NAME}
     )
+
+    add_executable(test_tcp
+    test/tcp.cpp
+    )
+
+    target_link_libraries(test_tcp
+    ${PROJECT_NAME}
+    )
 endif()

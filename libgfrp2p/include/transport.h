@@ -153,7 +153,7 @@ private:
     void read();
 
     void handle_read(const boost::system::error_code& error, size_t bytes_transferred);
-    void handle_write(const boost::system::error_code& error, size_t bytes_transferred);
+    void handle_write(boost::shared_ptr<std::string> data, const boost::system::error_code& error, size_t bytes_transferred);
 };
 
 
@@ -175,8 +175,10 @@ private:
     std::shared_ptr<Receiver> receiver;
 
     boost::asio::io_service io_service;
+    std::unique_ptr<boost::asio::io_service::work> work;
+    std::thread io_worker;
 
-    std::unordered_map<std::string, TCPConnection::Pointer> tcp_connections;
+    // std::unordered_map<std::string, TCPConnection::Pointer> tcp_connections;
 
     std::thread handler;
 
@@ -204,6 +206,8 @@ private:
     
     // Buffer handler
     void handle();
+
+    void io_work();
 };
 
 

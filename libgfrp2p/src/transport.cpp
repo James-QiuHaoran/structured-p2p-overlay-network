@@ -87,12 +87,14 @@ void AsyncUDPServer::handle() {
 }
 
 void AsyncUDPServer::io_work() {
-    try {
-        BOOST_LOG_TRIVIAL(debug) << "AsyncUDPServer::io_work: Running io_service";
-        this->io_service.run();
-        BOOST_LOG_TRIVIAL(debug) << "AsyncUDPServer::io_work: io_service has stopped";
-    } catch (const std::exception& e) {
-        BOOST_LOG_TRIVIAL(fatal) << "AsyncUDPServer::receive: io_service fails to run";
+    for (;;) {
+        try {
+            BOOST_LOG_TRIVIAL(debug) << "AsyncUDPServer::io_work: Running io_service";
+            this->io_service.run();
+            BOOST_LOG_TRIVIAL(debug) << "AsyncUDPServer::io_work: io_service has stopped";
+        } catch (const std::exception& e) {
+            BOOST_LOG_TRIVIAL(fatal) << "AsyncUDPServer::io_work: io_service fails to run";
+        }
     }
 }
 
@@ -110,11 +112,12 @@ void TCPConnection::start() {
 void TCPConnection::write(const std::string& data) {
     Header length = data.length();
     char header[sizeof(Header)];
-    std::memcpy(header, &length, sizeof(length));
-    std::string packet = std::string(header) + data;
+    std::memcpy(header, &length, sizeof(Header));
+    boost::shared_ptr<std::string> packet(new std::string(header, sizeof(Header)));
+    *packet = *packet + data;
     
-    boost::asio::async_write(this->socket, boost::asio::buffer(packet),
-        boost::bind(&TCPConnection::handle_write, this->shared_from_this(),
+    boost::asio::async_write(this->socket, boost::asio::buffer(*packet),
+        boost::bind(&TCPConnection::handle_write, this->shared_from_this(), packet,
             boost::asio::placeholders::error,
             boost::asio::placeholders::bytes_transferred));
 }
@@ -125,7 +128,7 @@ TCPConnection::TCPConnection(boost::asio::io_service& io_service,
 
 void TCPConnection::read() {
     boost::asio::async_read(this->socket, boost::asio::buffer(this->read_buffer),
-        boost::bind(&TCPConnection::handle_write, this->shared_from_this(),
+        boost::bind(&TCPConnection::handle_read, this->shared_from_this(),
         boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));    
 }
 
@@ -154,46 +157,56 @@ void TCPConnection::handle_read(const boost::system::error_code& error,
             std::string ip = endpoint.address().to_string();
             unsigned short port = endpoint.port();
             this->buffer->enqueue_and_notify(BufferItemType(ip, port, this->datagram));
+            // this->datagram.clear();
         } else {
             this->read();
         }
     } else  {
-        BOOST_LOG_TRIVIAL(error) << "TCPConnection::handle_read: Read error";
+        BOOST_LOG_TRIVIAL(error) << "TCPConnection::handle_read: Read error " << error;
     }
 }
 
-void TCPConnection::handle_write(const boost::system::error_code& error,
+void TCPConnection::handle_write(boost::shared_ptr<std::string> data,
+    const boost::system::error_code& error,
     std::size_t bytes_transferred) {
     
     if (error) {
-        BOOST_LOG_TRIVIAL(error) << "TCPConnection::handle_write: Write error";
+        BOOST_LOG_TRIVIAL(error) << "TCPConnection::handle_write: Write error " << error;
+    } else {
+        tcp::endpoint endpoint = this->socket.remote_endpoint();
+        BOOST_LOG_TRIVIAL(debug) << "AsyncTCPServer::handle_write: Data sent to " 
+            << endpoint.address().to_string() << ':' << std::to_string(endpoint.port());
     }
+
+    boost::system::error_code error_code;
+    this->socket.shutdown(tcp::socket::shutdown_both, error_code);
+    this->socket.close();
 }
 
 
 AsyncTCPServer::AsyncTCPServer(const std::shared_ptr<Receiver>& receiver, unsigned short port):
-    receiver(receiver), io_service(), acceptor(io_service, tcp::endpoint(tcp::v4(), port)),
-    resolver(io_service), buffer(new AtomicQueue<BufferItemType>()) { }
+    receiver(receiver), io_service(), work(new boost::asio::io_service::work(io_service)),
+    acceptor(io_service, tcp::endpoint(tcp::v4(), port)), resolver(io_service), buffer(new AtomicQueue<BufferItemType>()) { }
 
 
 void AsyncTCPServer::run() {
-    try {
-        this->io_service.run();
-    } catch (const std::exception& e) {
-        BOOST_LOG_TRIVIAL(fatal) << "AsyncTCPServer::run: io_service fails to run";
-    }
-
+    BOOST_LOG_TRIVIAL(debug) << "AsyncUDPServer::run: Starting handler thread";
     this->handler = std::thread(&AsyncTCPServer::handle, this);
+    BOOST_LOG_TRIVIAL(debug) << "AsyncUDPServer::run: Starting io worker thread";
+    this->io_worker = std::thread(&AsyncTCPServer::io_work, this);
+    BOOST_LOG_TRIVIAL(debug) << "AsyncUDPServer::run: Threads started";
     
     this->accept();
 }
 
 void AsyncTCPServer::send(const std::string& ip, unsigned short port, const std::string& data) {
     // if  found in current thread pool
-    auto conn_iter = tcp_connections.find(ip + std::to_string(port));
-    if (conn_iter != this->tcp_connections.end()) {
-        conn_iter->second->write(data);
-    } else {
+    // auto conn_iter = this->tcp_connections.find(ip + ':' + std::to_string(port));
+    // if (conn_iter != this->tcp_connections.end()) {
+    //     this->tcp_connections.erase(conn_iter)
+    //     conn_iter->second->write(data);
+    // } else {
+        BOOST_LOG_TRIVIAL(debug) << "AsyncTCPServer::send: Establishing connection with " << ip << ':' << port;
         std::shared_ptr<std::string> datagram(new std::string(data));
         TCPConnection::Pointer conn = TCPConnection::Create(this->io_service, this->buffer);
         tcp::resolver::query query(ip, std::to_string(port));
@@ -202,7 +215,7 @@ void AsyncTCPServer::send(const std::string& ip, unsigned short port, const std:
             boost::asio::placeholders::error,
             boost::asio::placeholders::iterator,
             conn, datagram));
-    }
+    // }
     
 }
 
@@ -217,17 +230,19 @@ void AsyncTCPServer::accept() {
 
 void AsyncTCPServer::handle_accept(TCPConnection::Pointer connection,
     const boost::system::error_code& error) {
+        
+    this->accept();
+
     if (!error) {
-        tcp::endpoint endpoint = connection->get_socket().remote_endpoint();
-        std::string conn_id = endpoint.address().to_string() + ":" + std::to_string(endpoint.port());
-        this->tcp_connections[conn_id] = connection;
+        // tcp::endpoint endpoint = connection->get_socket().remote_endpoint();
+        // std::string conn_id = endpoint.address().to_string() + ':' + std::to_string(endpoint.port());
+        // this->tcp_connections[conn_id] = connection;
 
         connection->start();
     } else {
-        BOOST_LOG_TRIVIAL(error) << "AsyncTCPServer::handle_accept: Accept error";
+        BOOST_LOG_TRIVIAL(error) << "AsyncTCPServer::handle_accept: Accept error " << error;
     }
 
-    this->accept();
 }
 
 void AsyncTCPServer::handle_resolve(const boost::system::error_code& error,
@@ -236,15 +251,16 @@ void AsyncTCPServer::handle_resolve(const boost::system::error_code& error,
     std::shared_ptr<std::string> datagram) {
 
     if (!error) {
-      // Attempt a connection to the first endpoint in the list. Each endpoint
-      // will be tried until we successfully establish a connection.
+        // Attempt a connection to the first endpoint in the list. Each endpoint
+        // will be tried until we successfully establish a connection.
+        conn->get_socket().close();
         tcp::endpoint endpoint = *endpoint_iterator;
         conn->get_socket().async_connect(endpoint,
                 boost::bind(&AsyncTCPServer::handle_connect, this,
                 boost::asio::placeholders::error, ++endpoint_iterator,
                 conn, datagram));
     } else {
-        BOOST_LOG_TRIVIAL(error) << "AsyncTCPServer::handle_resolve: Resolve error";
+        BOOST_LOG_TRIVIAL(error) << "AsyncTCPServer::handle_resolve: Resolve error " << error;
     }
   }
 
@@ -256,11 +272,12 @@ void AsyncTCPServer::handle_connect(const boost::system::error_code& error,
     if (!error) {
         // The connection was successful. 
         // Add connection to stack
-        tcp::endpoint endpoint = conn->get_socket().remote_endpoint();
-        std::string conn_id = endpoint.address().to_string() + ":" + std::to_string(endpoint.port());
-        this->tcp_connections[conn_id] = conn;
+        // tcp::endpoint endpoint = conn->get_socket().remote_endpoint();
+        // std::string conn_id = endpoint.address().to_string() + ":" + std::to_string(endpoint.port());
+        // this->tcp_connections[conn_id] = conn;
 
-        conn->start();
+        // Active side does not read
+        // conn->start();
         
         // Send data
         conn->write(*datagram);
@@ -278,17 +295,35 @@ void AsyncTCPServer::handle_connect(const boost::system::error_code& error,
   }
 
 void AsyncTCPServer::handle() {
-    auto front = this->buffer->wait_for_dequeue();
-    this->receiver->receive(std::get<0>(front), std::get<1>(front), std::get<2>(front));
+    while (true) {
+        auto front = this->buffer->wait_for_dequeue();
+        this->receiver->receive(std::get<0>(front), std::get<1>(front), std::get<2>(front));
 
-    std::string conn_id = std::get<0>(front) + ":" + std::to_string(std::get<1>(front));
-    auto conn = tcp_connections.find(conn_id);
-    if (conn != tcp_connections.end()) {
-        tcp_connections.erase(conn);
+        std::string conn_id = std::get<0>(front) + ":" + std::to_string(std::get<1>(front));
+        // auto conn = tcp_connections.find(conn_id);
+        // if (conn != tcp_connections.end()) {
+        //     tcp_connections.erase(conn);
+        // }
+    }
+}
+
+void AsyncTCPServer::io_work() {
+    for (;;) {
+        try {
+            BOOST_LOG_TRIVIAL(debug) << "AsyncTCPServer::io_work: Running io_service";
+            this->io_service.run();
+            BOOST_LOG_TRIVIAL(debug) << "AsyncTCPServer::io_work: io_service has stopped";
+        } catch (const std::exception& e) {
+            BOOST_LOG_TRIVIAL(error) << "AsyncTCPServer::io_work: io_service throws exception: " << e.what();
+        }
     }
 }
 
 void AsyncTCPServer::stop() {
     this->handler.join();
+
+    this->io_service.stop();
+    this->work.reset();
+    this->io_worker.join();
 }
 
