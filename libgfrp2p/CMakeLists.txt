@@ -13,17 +13,16 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Cross-platform compiler flags
-if(MSVC)
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /O2")
-elseif(GNU)
+elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O3")
     # set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} some other flags")
     # set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 
     # Boost-related 
-    SET(GCC_BOOST_COMPILE_FLAGS "-DBOOST_LOG_DYN_LINK")
-    add_definitions(${GCC_BOOST_COMPILE_FLAGS})
-    SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${GCC_BOOST_COMPILE_FLAGS}")
+    # SET(GCC_BOOST_COMPILE_FLAGS "-DBOOST_LOG_DYN_LINK")
+    add_definitions(-D BOOST_ALL_DYN_LINK)
 endif()
 
 
@@ -64,6 +63,7 @@ ${Boost_INCLUDE_DIRS}
 ${PROJECT_SOURCE_DIR}/include
 )
 
+if(WIN32)
 add_library(${PROJECT_NAME} STATIC
     src/discovery.cpp
     src/node_table.cpp
@@ -71,6 +71,15 @@ add_library(${PROJECT_NAME} STATIC
     src/transport.cpp
     src/peer_manager.cpp
 )
+else()
+add_library(${PROJECT_NAME} SHARED
+    src/discovery.cpp
+    src/node_table.cpp
+    src/node.cpp
+    src/transport.cpp
+    src/peer_manager.cpp
+)
+endif()
 
 # FindBoost doesn't seem to work on Windows: work around
 if(WIN32) 
@@ -85,38 +94,34 @@ else()
 endif()
 
 # Make executables
-if(WIN32) 
-    add_executable(test_udp
-    test/udp.cpp
-    )
 
-    target_link_libraries(test_udp
-    ${PROJECT_NAME}
-    )
+add_executable(test_udp
+test/udp.cpp
+)
 
-    add_executable(test_tcp
-    test/tcp.cpp
-    )
+target_link_libraries(test_udp
+${PROJECT_NAME}
+)
 
-    target_link_libraries(test_tcp
-    ${PROJECT_NAME}
-    )
-endif()
+add_executable(test_tcp
+test/tcp.cpp
+)
+
+target_link_libraries(test_tcp
+${PROJECT_NAME}
+)
 
 add_executable(app
     src/app.cpp
 )
 
-add_library(node_table src/node_table.cpp)
-add_library(node src/node.cpp)
-add_library(peer_manager src/peer_manager.cpp)
-add_library(transport src/transport.cpp)
+#add_library(node_table src/node_table.cpp)
+#add_library(node src/node.cpp)
+#add_library(peer_manager src/peer_manager.cpp)
+#add_library(transport src/transport.cpp)
 
 target_link_libraries(app
-    node
-    node_table
-    peer_manager
-    transport
-    Boost::system
-    Boost::log
+    ${PROJECT_NAME}
+    #Boost::system
+    #Boost::log
 )
