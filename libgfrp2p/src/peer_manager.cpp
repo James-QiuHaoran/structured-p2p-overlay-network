@@ -1,6 +1,6 @@
 #include "peer_manager.h"
 
-// generate a random alpha-numeric string of length len
+// HASH - generate a random alpha-numeric string of length len
 std::string random_string(size_t length) {
     auto randchar = []() -> char
     {
@@ -196,6 +196,8 @@ void PeerManager::broadcast_within_ring(Message msg, unsigned long current_level
 			i++;
 		}
 	}
+
+	return;
 }
 
 // broadcast downwards to the contact nodes of the lower level ring
@@ -231,7 +233,7 @@ void PeerManager::broadcast_down(Message msg, unsigned long current_level) {
 
 // on receiving a packet
 void PeerManager::receive(const std::string& ip, unsigned short port, const std::string &data) {
-	BOOST_LOG_TRIVIAL(info) << "TCP - receive: Packet received from " + ip + ":" + std::to_string(port) + "\nData: " + data;
+	BOOST_LOG_TRIVIAL(debug) << "TCP - receive: Packet received from " + ip + ":" + std::to_string(port) + "\nData: " + data;
 
 	// parsing data
 	std::size_t pos_start = 0;
@@ -264,22 +266,26 @@ void PeerManager::receive(const std::string& ip, unsigned short port, const std:
 
 // on receiving a message
 void PeerManager::on_receive(const Message &msg) {
-	// simulate traffic control - delay according to ID difference
 	std::string sender_id = msg.get_sender_id();
 	std::string receiver_id = this->node->get_id();
+
+	// simulate traffic control - delay according to ID difference
 	int sleep_time = 0;
 	if (sender_id.substr(ID_CONTINENT_START, ID_CONTINENT_START+ID_CONTINENT_LEN) != receiver_id.substr(ID_CONTINENT_START, ID_CONTINENT_START+ID_CONTINENT_LEN)) {
-		sleep_time = random_num_in_range(150, 200);
-        	std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
+		sleep_time = random_num_in_range(160, 200);
+        std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
 	} else if (sender_id.substr(ID_COUNTRY_START, ID_COUNTRY_START+ID_COUNTRY_LEN) != receiver_id.substr(ID_COUNTRY_START, ID_COUNTRY_START+ID_COUNTRY_LEN)) {
-		sleep_time = random_num_in_range(100, 150);
-                std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
+		sleep_time = random_num_in_range(120, 160);
+        std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
 	} else if (sender_id.substr(ID_STATE_START, ID_STATE_START+ID_STATE_LEN) != receiver_id.substr(ID_STATE_START, ID_STATE_START+ID_STATE_LEN)) {
-		sleep_time = random_num_in_range(50, 100);
-                std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
+		sleep_time = random_num_in_range(80, 120);
+        std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
 	} else if (sender_id.substr(ID_CITY_START, ID_CITY_START+ID_CITY_LEN) != receiver_id.substr(ID_CITY_START, ID_CITY_START+ID_CITY_LEN)) {
-		sleep_time = random_num_in_range(20, 50);
-                std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
+		sleep_time = random_num_in_range(40, 80);
+        std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
+	} else if (sender_id.substr(ID_DISTRICT_START, ID_DISTRICT_START+ID_DISTRICT_LEN) != receiver_id.substr(ID_DISTRICT_START, ID_DISTRICT_START+ID_DISTRICT_LEN)) {
+		sleep_time = random_num_in_range(0, 40);
+		std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
 	}
 
 	// control flow
@@ -379,34 +385,37 @@ void PeerManager::contact_node_election(unsigned long level) {
 	Message lower_ring_msg(random_string(MSG_HASH_LENGTH), 3, level, this->node->get_id(), NULL);
 	if (level != 0)
 		broadcast_within_ring(lower_ring_msg, level-1, k);
+
+	return;
 }
 
 // on a node join
 void on_new_connection(std::shared_ptr<Node> node) {
-
+	return;
 }
 
 // on a node leave
 void on_lost_connection(std::shared_ptr<Node> node) {
-
+	return;
 }
 
 // start the server
 void PeerManager::start() {
-	if (DEBUG_PM)
-		std::cout << "Starting the TCP server on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]\n";
+	BOOST_LOG_TRIVIAL(debug) << "Starting the TCP server on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
     this->tcp_server = new AsyncTCPServer(std::make_shared<PeerManager>(*this), this->node->get_port());
     
-    if (DEBUG_PM)
-		std::cout << "Running the TCP server on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]\n";
+	BOOST_LOG_TRIVIAL(debug) << "Running the TCP server on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
     this->tcp_server->run();
+
+    return;
 }
 
 // stop the peer
 void PeerManager::stop() {
-	if (DEBUG_PM)
-		std::cout << "Stopping the TCP server on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]\n";
+	BOOST_LOG_TRIVIAL(debug) << "Stopping the TCP server on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
     this->tcp_server->stop();
+
+    return;
 }
 
 // random number generated uniformly from [low, high]
@@ -414,6 +423,7 @@ int PeerManager::random_num_in_range(int low, int high) {
 	boost::random::uniform_int_distribution<> dist(low, high);
 	return dist(gen);
 }
+
 
 /*
 // to be put in node_table.cpp

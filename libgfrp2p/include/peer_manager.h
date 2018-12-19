@@ -17,8 +17,6 @@
 #include "transport.h"
 #include "param_constants.h"
 
-#define DEBUG_PM 1
-
 /* Message class
  * definition of messages transmitted among peers
  */
@@ -114,11 +112,12 @@ public:
     void broadcast_within_ring(Message msg, unsigned long current_level, int k);
     void broadcast_down(Message msg, unsigned long current_level);
     void multicast_to_contact_nodes(Message msg, unsigned long current_level);
-    int random_num_in_range(int low, int high);
     void send(std::shared_ptr<Node> node, const Message &msg);
 
+    // override the receive() func inherited from Receiver
     virtual void receive(const std::string& ip, unsigned short port, const std::string &data) override;
 
+    // on receive a message
     void on_receive(const Message &msg);
 
     // on a node join
@@ -132,9 +131,13 @@ public:
 
     // stop the peer
     void stop();
+
+    // helper classes (if any)
+    int random_num_in_range(int low, int high);
 };
 
 #endif
+
 
 /*
     // To be put in node_table

@@ -10,6 +10,7 @@
 - Chord, Pastry, Tapestry Implementation
 	- form structure
 	- broadcast (gossip)
+	- insert traffic control simulation
 	- insert time recording, number of messages recording functions (data retrieval)
 
 ## Dependencies

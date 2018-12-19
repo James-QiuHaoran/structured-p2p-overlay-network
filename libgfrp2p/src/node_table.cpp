@@ -29,10 +29,27 @@ NodeTable::NodeTable() {
 NodeTable::NodeTable(const std::string& self_id):
     self_id(self_id) { 
         this->mlock = new std::mutex();
+        BOOST_LOG_TRIVIAL(debug) << "NodeTable is created for node with ID " + self_id;
     }
 
 std::string NodeTable::get_self_id() const {
     return this->self_id;
+}
+
+void NodeTable::add_table(Ring ring) {
+    this->tables.push_back(ring);
+}
+
+void NodeTable::remove_table(unsigned long level) {
+    this->tables.erase(this->tables.begin() + level);
+}
+
+void NodeTable::set_tables(std::vector<Ring> tables) {
+    this->tables = tables;
+}
+
+void NodeTable::reset_tables() {
+    this->tables.clear();
 }
 
 bool NodeTable::has_node(unsigned long level, const std::string& id) {
