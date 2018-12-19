@@ -46,8 +46,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
-# Check libboost-system and libboost-log
-# find_package(Boost 1.58.0 COMPONENTS system log date_time REQUIRED)
+# Check Boost
 # FindBoost doesn't seem to work on Windows: work around
 
 if(WIN32) 
@@ -76,7 +75,8 @@ src/transport.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}
-${Boost_LIBRARIES}
+${Boost_SYSTEM_LIBRARY}
+${Boost_LOG_LIBRARY}
 )
 
 # Make executables
@@ -91,15 +91,11 @@ link_directories(
 ${Boost_LIBRARY_DIRS}
 )
 
-    # target_link_libraries(test_udp
-    # ${PROJECT_NAME}
-    # ${Boost_LIBRARIES}
-    # )
 # else()
-
 target_link_libraries(test_udp
 ${PROJECT_NAME}
-${Boost_LIBRARIES}
+${Boost_SYSTEM_LIBRARY}
+${Boost_LOG_LIBRARY}
 )
 # endif()
 
