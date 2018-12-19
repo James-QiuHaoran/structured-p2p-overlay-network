@@ -14,6 +14,7 @@
 
 #include "node.h"
 #include "node_table.h"
+#include "transport.h"
 #include "param_constants.h"
 
 #define DEBUG 0
@@ -40,7 +41,7 @@ public:
     std::string get_sender_id() const;
     std::string get_receiver_id() const;
     unsigned long get_from_level() const;
-    std::string get_messageID() const;
+    std::string get_message_id() const;
     int get_type() const;
     int get_node_order() const;
 
@@ -112,6 +113,9 @@ public:
     void broadcast_down(Message msg, unsigned long current_level);
     void multicast_to_contact_nodes(Message msg, unsigned long current_level);
     void send(std::shared_ptr<Node> node, const Message &msg);
+
+    void receive(const std::string& ip, unsigned short port, const std::string &data);
+
     void on_receive(const Message &msg);
 
     // on a node join

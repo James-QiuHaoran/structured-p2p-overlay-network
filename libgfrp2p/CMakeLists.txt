@@ -66,7 +66,7 @@ src/discovery.cpp
 src/node_table.cpp
 src/node.cpp
 src/transport.cpp
-# src/peer_manager.cpp
+src/peer_manager.cpp
 )
 
 # target_link_libraries(${PROJECT_NAME}
@@ -78,11 +78,11 @@ src/transport.cpp
 
 # Make executables
 
-add_executable(test_udp
-test/udp.cpp
-)
+# add_executable(test_udp
+# test/udp.cpp
+# )
 
-target_link_libraries(test_udp
+target_link_libraries(# test_udp
 ${PROJECT_NAME}
 ${Boost_LIBRARIES}
 )
