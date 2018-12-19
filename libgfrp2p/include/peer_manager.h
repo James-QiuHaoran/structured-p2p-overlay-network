@@ -14,7 +14,9 @@
 
 #include "node.h"
 #include "node_table.h"
-#include "app.h"
+#include "param_constants.h"
+
+#define DEBUG 0
 
 boost::random::mt19937 gen;  // seed for random number generator
 
