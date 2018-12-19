@@ -60,16 +60,32 @@ do
 	eval "continent_id=\$(( $continent0 + $i/$num_nodes_in_a_continent ))"
 	continent_id=$(printf "%03d" $continent_id)
 
-	eval "country_id=\$(( $country0 + $i/$num_nodes_in_a_country ))"
+	eval "country_id=\$(( $country0 + ($i/$num_nodes_in_a_country)%$num_continents ))"
+	if [ "$num_continents" -eq "1" ]
+	then
+		eval "country_id=\$(( $country0 + $i/$num_nodes_in_a_country ))"
+	fi
 	country_id=$(printf "%04d" $country_id)
 
-	eval "state_id=\$(( $state0 + $i/$num_nodes_in_a_state ))"
+	eval "state_id=\$(( $state0 + ($i/$num_nodes_in_a_state)%$num_countries_total ))"
+	if [ "$num_countries_total" -eq "1" ]
+	then
+		eval "state_id=\$(( $state0 + $i/$num_nodes_in_a_state ))"
+	fi
 	state_id=$(printf "%05d" $state_id)
 
-	eval "city_id=\$(( $city0 + $i/$num_nodes_in_a_city ))"
+	eval "city_id=\$(( $city0 + ($i/$num_nodes_in_a_city)%$num_states_total ))"
+	if [ "$num_states_total" -eq "1" ]
+	then
+		eval "city_id=\$(( $city0 + $i/$num_nodes_in_a_city ))"
+	fi
 	city_id=$(printf "%06d" $city_id)
 
-	eval "district_id=\$(( $district0 + $i/num_nodes_in_a_district ))"
+	eval "district_id=\$(( $district0 + ($i/$num_nodes_in_a_district)%$num_cities_total ))"
+	if [ "$num_cities_total" -eq "1" ]
+	then
+		eval "district_id=\$(( $district0 + $i/$num_nodes_in_a_district ))"
+	fi
 	district_id=$(printf "%05d" $district_id)
 
 	eval "node_id=\$(( $node0 + $i % $num_nodes_in_a_district ))"
@@ -85,9 +101,11 @@ do
 
 	# set port
 	eval "port=\$(( $starting_port_num + $i ))"
-	printf "Port: $port\n\n"
+	printf "Port: $port\n"
 
 	../bin/app $ip $port $id &
 done
 
-echo "== Successfully boostrapped!"
+sleep 5
+
+printf "\n== Successfully boostrapped for $num_nodes_total nodes! ==\n"
