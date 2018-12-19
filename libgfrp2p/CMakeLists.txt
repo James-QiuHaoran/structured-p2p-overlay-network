@@ -19,7 +19,6 @@ else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O3")
     # set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} some other flags")
     # set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
-
 endif()
 
 if(WIN32)
@@ -60,24 +59,25 @@ ${Boost_INCLUDE_DIRS}
 ${PROJECT_SOURCE_DIR}/include
 )
 
-if (WIN32)
-    set(LINK_TYPE STATIC)
-else()
-    set(LINK_TYPE SHARED)
-endif()
-
-add_library(${PROJECT_NAME} ${LINK_TYPE}
+add_library(${PROJECT_NAME} STATIC
 src/discovery.cpp
 src/node_table.cpp
 src/node.cpp
 src/transport.cpp
-# src/peer_manager.cpp
+src/peer_manager.cpp
 )
 
-target_link_libraries(${PROJECT_NAME}
-${Boost_SYSTEM_LIBRARY}
-${Boost_LOG_LIBRARY}
-)
+# FindBoost doesn't seem to work on Windows: work around
+if(WIN32) 
+    link_directories(
+    ${Boost_LIBRARY_DIRS}
+    )
+else()
+    target_link_libraries(${PROJECT_NAME}
+    Boost::system
+    Boost::log
+    )
+endif()
 
 # Make executables
 
@@ -85,17 +85,9 @@ add_executable(test_udp
 test/udp.cpp
 )
 
-# FindBoost doesn't seem to work on Windows: work around
-# if(WIN32) 
-link_directories(
-${Boost_LIBRARY_DIRS}
-)
+add_dependencies(test_udp ${PROJECT_NAME})
 
-# else()
 target_link_libraries(test_udp
 ${PROJECT_NAME}
-${Boost_SYSTEM_LIBRARY}
-${Boost_LOG_LIBRARY}
 )
-# endif()
 
