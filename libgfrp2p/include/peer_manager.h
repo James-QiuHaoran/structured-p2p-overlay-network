@@ -78,7 +78,7 @@ public:
     void start();
 
     // broadcast/multicast a message
-    void broadcast(Message msg, unsigned long current_level);
+    void broadcast(const std::string &data);
     void broadcast_up(Message msg, unsigned long current_level);
     void broadcast_within_ring(Message msg, unsigned long current_level, int k);
     void broadcast_down(Message msg, unsigned long current_level);

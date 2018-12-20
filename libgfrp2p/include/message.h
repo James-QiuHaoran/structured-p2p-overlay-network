@@ -4,11 +4,11 @@
 #include <string>
 #include <utility>
 #include <unordered_map>
-
+#include <chrono>
 #include <cstdio>
 
 
-using message_key_t = std::pair<std::string, std::string>;
+using message_key_t = unsigned long;
 
 /* Message class
  * definition of messages transmitted among peers
@@ -16,18 +16,19 @@ using message_key_t = std::pair<std::string, std::string>;
 class Message {
     friend class MessageTable;
 private:
-    unsigned short io_type;
     unsigned long io_timestamp;
+    unsigned short io_type;
     
     std::string message_id;
     int type, node_order;
     unsigned long from_level;
     std::string sender_id;
     std::string receiver_id;
+    // std::string data;
 
 
 public:
-    static constexpr const char* csv_header = "sender_id,message_id,receiver_id,io_type_str,type,from_level,node_order";
+    static constexpr const char* csv_header = "io_timestamp,io_type,sender_id,message_id,receiver_id,type,from_level,node_order";
 
     static const unsigned short IO_TYPE_RECEIVED = 0;
     static const unsigned short IO_TYPE_SENT = 1;
@@ -36,7 +37,6 @@ public:
     Message();
     Message(std::string messageID, int type, unsigned long from_level, std::string sender_id, std::string receiver_id);
     Message(unsigned short io_type, std::string messageID, int type, unsigned long from_level, std::string sender_id, std::string receiver_id);
-
 
     // DB semantic
     message_key_t get_key() const;
@@ -49,6 +49,7 @@ public:
     std::string get_message_id() const;
     int get_type() const;
     int get_node_order() const;
+    std::string get_data() const;
 
     // setters
     void set_sender_id(const std::string &sender_id);
@@ -57,26 +58,27 @@ public:
     void set_message_id(std::string message_id);
     void set_type(int type);
     void set_node_order(int order);
+    void set_data(const std::string &data);
 };
 
 // Define hash for message key
-namespace std {
-    template <>
-    struct hash<message_key_t> {
-        size_t operator()(const message_key_t& msg) const {
-            // Compute individual hash values for two data members and combine them using XOR and bit shifting
-            return std::hash<std::string>{}(msg.first) ^ (std::hash<std::string>{}(msg.second) << 1) ;
-        }
-    };
+// namespace std {
+//     template <>
+//     struct hash<message_key_t> {
+//         size_t operator()(const message_key_t& msg) const {
+//             // Compute individual hash values for two data members and combine them using XOR and bit shifting
+//             return std::hash<std::string>{}(msg.first) ^ (std::hash<std::string>{}(msg.second) << 1) ;
+//         }
+//     };
 
-    // template <>
-    // struct hash<Message> {
-    //     size_t operator()(const Message& msg) const {
-    //         // Compute individual hash values for two data members and combine them using XOR and bit shifting
-    //         return std::hash<std::string>{}(msg.get_sender_id()) ^ (std::hash<std::string>{}(msg.get_message_id()) << 1) ;
-    //     }
-    // };
-}
+//     // template <>
+//     // struct hash<Message> {
+//     //     size_t operator()(const Message& msg) const {
+//     //         // Compute individual hash values for two data members and combine them using XOR and bit shifting
+//     //         return std::hash<std::string>{}(msg.get_sender_id()) ^ (std::hash<std::string>{}(msg.get_message_id()) << 1) ;
+//     //     }
+//     // };
+// }
 
 class MessageTable {
 private:

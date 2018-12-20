@@ -71,9 +71,13 @@ void PeerManager::send(std::shared_ptr<Node> node, const Message &msg) {
 }
 
 // a node wants to broadcast a message
-void PeerManager::broadcast(Message msg, unsigned long current_level) {
+void PeerManager::broadcast(const std::string &data) {
+	// wrap the data into a Message
+	Message msg(random_string(MSG_HASH_LENGTH), 1, 0, this->node->get_id(), NULL);
+	msg.set_data(data);
+
 	// get all contact nodes of the current ring
-	std::unordered_set<std::shared_ptr<Node>> contact_nodes = this->node_table->get_contact_nodes(current_level);
+	std::unordered_set<std::shared_ptr<Node>> contact_nodes = this->node_table->get_contact_nodes(0);
 
 	// randomly select one contact from the contact nodes
 	int random_id = rand() % contact_nodes.size();
@@ -90,6 +94,7 @@ void PeerManager::broadcast(Message msg, unsigned long current_level) {
 
 	// ask contact node to broadcast
 	msg.set_receiver_id(receiver->get_id());
+
 	this->send(receiver, msg);
 
 	return;

@@ -54,7 +54,7 @@ echo "== Boostrap Stage =="
 starting_port_num="2000"
 for (( i=0; i<$num_nodes_total; i++ ))
 do
-	printf "Boostrapping node #$i ... \n"
+	printf "\nBoostrapping node #$i ... \n"
 
 	# set id
 	eval "continent_id=\$(( $continent0 + $i/$num_nodes_in_a_continent ))"
@@ -118,7 +118,7 @@ do
 		$num_nodes_in_state $num_cnodes_in_state \
 		$num_nodes_in_country $num_cnodes_in_country \
 		$num_nodes_in_continent \
-		$starting_port_num
+		$starting_port_num &
 done
 
 sleep 5

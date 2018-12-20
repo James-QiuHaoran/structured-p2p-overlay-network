@@ -1,5 +1,8 @@
 #include "message.h"
 
+unsigned long get_milliseconds_since_epoch() {
+    return static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count());
+}
 // Message member 
 // const char* Message::csv_header = ;
 // Constructors
@@ -24,14 +27,14 @@ Message::Message(unsigned short io_type, std::string messageID, int type, unsign
 		this->node_order = 0;
 	}
 
-message_key_t Message::get_key() const { return message_key_t(this->sender_id, this->message_id); }
+message_key_t Message::get_key() const { return this->io_timestamp; }
 
 std::string Message::to_csv_string() const { 
-    std::string io_type_str = this->io_type == IO_TYPE_RECEIVED ? "received" : "sent";
-    return sender_id + ','+ 
+    return std::to_string(io_timestamp) + ',' +
+        std::to_string(io_type) + ',' +
+        sender_id + ','+ 
         message_id + ',' + 
         receiver_id + ',' +
-        io_type_str + ',' +
         std::to_string(type) + ',' + 
         std::to_string(from_level) + ',' +         
         std::to_string(node_order);        
@@ -49,6 +52,8 @@ std::string Message::get_message_id() const { return this->message_id; }
 int Message::get_node_order() const { return this->node_order; }
 
 int Message::get_type() const { return this->type; }
+
+// std::string Message::get_data() const { return this->data; }
 
 void Message::set_sender_id(const std::string &sender_id) { this->sender_id = sender_id; }
 
@@ -68,15 +73,19 @@ bool MessageTable::exist(const message_key_t& msg_key) const {
 }
 
 void MessageTable::insert_received(const Message& msg) {
-    message_key_t key = msg.get_key();
-    this->table[key] = msg;
-    this->table[key].io_type = Message::IO_TYPE_RECEIVED;
+    Message to_insert = msg;
+    to_insert.io_timestamp = get_milliseconds_since_epoch();
+    to_insert.io_type = Message::IO_TYPE_RECEIVED;
+
+    this->table[msg.get_key()] = to_insert;
 }
 
 void MessageTable::insert_sent(const Message& msg) {
-    message_key_t key = msg.get_key();
-    this->table[key] = msg;
-    this->table[key].io_type = Message::IO_TYPE_SENT;
+    Message to_insert = msg;
+    to_insert.io_timestamp = get_milliseconds_since_epoch();
+    to_insert.io_type = Message::IO_TYPE_SENT;
+
+    this->table[msg.get_key()] = to_insert;
 }
 
 std::string MessageTable::to_csv_string() const {
@@ -88,3 +97,5 @@ std::string MessageTable::to_csv_string() const {
 
     return result;
 }
+// void Message::set_data(const std::string &data) { this->data = data; }
+

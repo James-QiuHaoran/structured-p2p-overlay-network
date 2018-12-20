@@ -367,6 +367,10 @@ void BaseApp::stop() {
     this->peer_manager.stop();
 }
 
+void BaseApp::broadcast(const std::string &data) {
+    this->peer_manager.broadcast(data);
+}
+
 int main(int argc, char** argv) {
     if (argc != 14) {
         BOOST_LOG_TRIVIAL(info) << "Wrong arguments. Correct usage: ./app ip_addr port_num id num_nodes_in_dist num_cnodes_in_dist num_nodes_in_city num_cnodes_in_city num_nodes_in_state num_cnodes_in_state num_nodes_in_country num_cnodes_in_country num_nodes_in_continent starting_port_num\n";
@@ -402,9 +406,16 @@ int main(int argc, char** argv) {
     BOOST_LOG_TRIVIAL(debug) << "Starting HGFR base service on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]";
     app.start();
 
+    if (id == "00000000000000000000000000000000") {
+        std::this_thread::sleep_for (std::chrono::seconds(10));
+        BOOST_LOG_TRIVIAL(debug) << "Slept for 10 seconds";
+        BOOST_LOG_TRIVIAL(debug) << "Broadcasting message ...";
+        app.broadcast("Hello World!");
+    }
+
     // stop the app service
-    BOOST_LOG_TRIVIAL(debug) << "Stopping HGFR base service on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]";
-    app.stop();
+    // BOOST_LOG_TRIVIAL(debug) << "Stopping HGFR base service on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]";
+    // app.stop();
 
     return 0;
 }
