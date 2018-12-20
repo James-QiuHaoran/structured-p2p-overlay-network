@@ -128,11 +128,17 @@ void BaseApp::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
     tables.push_back(table_peer);
     
     // contact nodes - dist level
-    // [TODO] reset stringstream and ring variables
     if (node_id_in_dist < num_cnodes_in_dist) {
         // should be the contact node of the dist level ring
         Ring table_dist;
         table_dist.ring_level = 1;
+
+        // reset stringstream and ring variables
+        contact_nodes.clear();
+        peer_set.clear();
+        peer_list.clear();
+        ss.str("");
+        ss.clear();
 
         // add other peers in that level
         for (int i = 0; i < num_cnodes_in_dist; i++) {
@@ -148,6 +154,13 @@ void BaseApp::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
         Ring table_city;
         table_city.ring_level = 2;
 
+        // reset stringstream and ring variables
+        contact_nodes.clear();
+        peer_set.clear();
+        peer_list.clear();
+        ss.str("");
+        ss.clear();
+
         // add other peers in that level
         for (int i = 0; i < num_cnodes_in_city; i++) {
 
@@ -161,6 +174,13 @@ void BaseApp::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
         // should be the contact node of the state level ring
         Ring table_state;
         table_state.ring_level = 3;
+
+        // reset stringstream and ring variables
+        contact_nodes.clear();
+        peer_set.clear();
+        peer_list.clear();
+        ss.str("");
+        ss.clear();
 
         // add other peers in that level
         for (int i = 0; i < num_cnodes_in_state; i++) {
