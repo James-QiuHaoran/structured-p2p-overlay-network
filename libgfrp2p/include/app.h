@@ -49,6 +49,9 @@ public:
 
     // stop the application
     void stop();
+
+    // broadcast
+    void broadcast(const std::string &data);
 };
 
 #endif
