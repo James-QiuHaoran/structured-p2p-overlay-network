@@ -179,6 +179,7 @@ private:
     std::thread io_worker;
 
     // std::unordered_map<std::string, TCPConnection::Pointer> tcp_connections;
+        TCPConnection::Pointer recv_conn;
 
     std::thread handler;
 
@@ -197,11 +198,9 @@ private:
     
     void handle_resolve(const boost::system::error_code& error,
         tcp::resolver::iterator endpoint_iterator,
-        TCPConnection::Pointer conn,
         std::shared_ptr<std::string> datagram);
     void handle_connect(const boost::system::error_code& error,
         tcp::resolver::iterator endpoint_iterator,
-        TCPConnection::Pointer conn,
         std::shared_ptr<std::string> datagram);
     
     // Buffer handler
