@@ -406,8 +406,12 @@ int main(int argc, char** argv) {
     BOOST_LOG_TRIVIAL(debug) << "Starting HGFR base service on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]";
     app.start();
 
-    if (id == "00000000000000000000000000000000")
+    if (id == "00000000000000000000000000000000") {
+        std::this_thread::sleep_for (std::chrono::seconds(10));
+        BOOST_LOG_TRIVIAL(debug) << "Slept for 10 seconds";
+        BOOST_LOG_TRIVIAL(debug) << "Broadcasting message ...";
         app.broadcast("Hello World!");
+    }
 
     // stop the app service
     // BOOST_LOG_TRIVIAL(debug) << "Stopping HGFR base service on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]";

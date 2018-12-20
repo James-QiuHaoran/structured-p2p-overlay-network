@@ -103,6 +103,7 @@ void PeerManager::broadcast(const std::string &data) {
 
 	// ask contact node to broadcast
 	msg.set_receiver_id(receiver->get_id());
+
 	this->send(receiver, msg);
 
 	return;
