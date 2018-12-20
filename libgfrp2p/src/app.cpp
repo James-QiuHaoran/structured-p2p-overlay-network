@@ -78,6 +78,9 @@ void BaseApp::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
     std::unordered_map<std::string, std::shared_ptr<Node>> peer_set;       // peers in an unordered map
     std::vector<std::shared_ptr<Node>> peer_list;                          // used for broadcast within ring
 
+    // used locally for structure establishment
+    std::unordered_map<std::string, std::shared_ptr<Node>> contact_nodes_next; 
+
     // normal nodes - peer level
     Ring table_peer;
     table_peer.ring_level = 0;
@@ -198,7 +201,7 @@ void BaseApp::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
         ss.clear();
 
         // peers should be the contact node of level two, which form a city
-        // contact nodes at this level should be the nodes with node_id < ceil(num_cnodes_in_state/num_cities_in_state/num_dists_in_city)
+        // contact nodes at this level should be the nodes with node_id < num_cnodes_in_state/num_cities_in_state
 
         // add other peers in that level
         for (int i = 0; i < num_cities_in_state; i++) {
@@ -238,33 +241,12 @@ void BaseApp::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
                         if (node_id_in_dist < num_cnodes_in_state/num_cities_in_state) {
                             contact_nodes.insert({node_id, std::make_shared<Node>(node)});
                         }
+
+                        // contact nodes for the next level
+                        if (j == 0 && k == 0) {
+                            contact_nodes_next.insert({node_id, std::make_shared<Node>(node)});
+                        }
                     }
-                }
-            }
-
-            for (int j = 0; j < num_cnodes_in_city; j++) {
-                ss.str("");
-                ss.clear();
-                ss << std::setw(9) << std::setfill('0') << j;
-                std::string peer_id_in_dist = ss.str();
-                node_id += peer_id_in_dist;
-                unsigned short port = this->convert_ID_to_port(starting_port_number, node_id,
-                    num_nodes_in_dist, num_cnodes_in_dist, 
-                    num_nodes_in_city, num_cnodes_in_city, 
-                    num_nodes_in_state, num_cnodes_in_state, 
-                    num_nodes_in_country, num_cnodes_in_country, 
-                    num_nodes_in_continent);
-                Node node(node_id, "127.0.0.1", port);
-
-                // insert into peer list
-                peer_set.insert({node_id, std::make_shared<Node>(node)});
-                peer_list.push_back(std::make_shared<Node>(node));
-
-                // predecessor & successor (No Need?)
-
-                // contact nodes
-                if (node_id_in_dist < num_cnodes_in_city/num_dists_in_city) {
-                    contact_nodes.insert({node_id, std::make_shared<Node>(node)});
                 }
             }
         }
@@ -285,19 +267,20 @@ void BaseApp::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
         table_state.ring_level = 3;
 
         // reset stringstream and ring variables
-        contact_nodes.clear();
         peer_set.clear();
         peer_list.clear();
         ss.str("");
         ss.clear();
 
         // peers should be the contact node of level three, which form a state
-        // contact nodes at this level should be the peers with node_id < ceil(num_condes_in_country/num_states_in_country/num_cities_in_state/num_dists_in_city)
-
-        // add other peers in that level
-        for (int i = 0; i < num_cnodes_in_state; i++) {
-
+        for (auto contact_node : contact_nodes) {
+            peer_set.insert({contact_node.first, contact_node.second});
+            peer_list.push_back(contact_node.second);
         }
+
+        // contact nodes are set during the above stage
+        contact_nodes.clear();
+        contact_nodes = contact_nodes_next;
 
         tables.push_back(table_state);
     }
