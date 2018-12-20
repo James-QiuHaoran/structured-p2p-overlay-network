@@ -280,6 +280,7 @@ void AsyncTCPServer::handle_connect(const boost::system::error_code& error,
         // conn->start();
         
         // Send data
+        BOOST_LOG_TRIVIAL(debug) << "AsyncTCPServer::send: Connection established";
         conn->write(*datagram);
     } else if (endpoint_iterator != tcp::resolver::iterator()) {
         // The connection failed. Try the next endpoint in the list.
@@ -299,7 +300,7 @@ void AsyncTCPServer::handle() {
         auto front = this->buffer->wait_for_dequeue();
         this->receiver->receive(std::get<0>(front), std::get<1>(front), std::get<2>(front));
 
-        std::string conn_id = std::get<0>(front) + ":" + std::to_string(std::get<1>(front));
+        // std::string conn_id = std::get<0>(front) + ":" + std::to_string(std::get<1>(front));
         // auto conn = tcp_connections.find(conn_id);
         // if (conn != tcp_connections.end()) {
         //     tcp_connections.erase(conn);
