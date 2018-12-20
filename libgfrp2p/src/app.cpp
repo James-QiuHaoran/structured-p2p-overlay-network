@@ -355,7 +355,7 @@ void BaseApp::start(int num_nodes_in_dist, int num_cnodes_in_dist,
 }
 
 void BaseApp::stop() {
-    BOOST_LOG_TRIVIAL(debug) << "Stopping HGFR PeerManager on node [ID: " + this->node.get_id() + "] [IP: " + this->node.get_ip() + "] [" + std::to_string(this->node.get_port()) + "]";
+    // BOOST_LOG_TRIVIAL(debug) << "Stopping HGFR PeerManager on node [ID: " + this->node.get_id() + "] [IP: " + this->node.get_ip() + "] [" + std::to_string(this->node.get_port()) + "]";
     this->peer_manager.stop();
 }
 
@@ -398,15 +398,15 @@ int main(int argc, char** argv) {
         num_nodes_in_continent, starting_port_number);
 
     if (id == "00000000000000000000000000000000") {
-        std::this_thread::sleep_for (std::chrono::seconds(5));
-        BOOST_LOG_TRIVIAL(debug) << "Slept for 5 seconds";
+        std::this_thread::sleep_for (std::chrono::seconds(3));
+        BOOST_LOG_TRIVIAL(debug) << "Slept for 3 seconds";
         BOOST_LOG_TRIVIAL(debug) << "Broadcasting message ...";
         app.broadcast("Hello World!");
     }
 
     // stop the app service
     // BOOST_LOG_TRIVIAL(debug) << "Stopping HGFR base service on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]";
-    // app.stop();
+    app.stop();
 
     return 0;
 }
