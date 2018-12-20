@@ -54,34 +54,8 @@ void BaseApp::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
     int node_id_in_dist = 0;
     ss_node >> node_id_in_dist;
 
-    std::stringstream ss_dist(dist_id);
-    int dist_id_int = 0;
-    ss_dist >> dist_id_int;
-    int num_nodes_in_one_dist = num_nodes_in_dist;
-
     int num_dists_in_city = num_nodes_in_city/num_cnodes_in_dist;
-    std::stringstream ss_city(city_id);
-    int city_id_int = 0;
-    ss_city >> city_id_int;
-    int num_nodes_in_one_city = num_nodes_in_one_dist * num_dists_in_city;
-
     int num_cities_in_state = num_nodes_in_state/num_cnodes_in_dist;
-    std::stringstream ss_state(state_id);
-    int state_id_int = 0;
-    ss_state >> state_id_int;
-    int num_nodes_in_one_state = num_nodes_in_one_city * num_cities_in_state;
-
-    int num_states_in_country = num_nodes_in_country/num_cnodes_in_state;
-    std::stringstream ss_country(country_id);
-    int country_id_int = 0;
-    ss_country >> country_id_int;
-    int num_nodes_in_one_country = num_nodes_in_one_state * num_states_in_country;
-
-    int num_countries_in_continent = num_nodes_in_continent/num_cnodes_in_country;
-    std::stringstream ss_continent(continent_id);
-    int continent_id_int = 0;
-    ss_continent >> continent_id_int;
-    int num_nodes_in_one_continent = num_nodes_in_one_country * num_countries_in_continent;
 
     std::vector<Ring> tables;
     std::unordered_map<std::string, std::shared_ptr<Node>> contact_nodes;  // contact nodes of the ring
@@ -99,19 +73,18 @@ void BaseApp::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
 
     // add other peers
     std::stringstream ss;
-    int starting_port_number_in_dist = starting_port_number + 
-                                       num_nodes_in_one_continent * continent_id_int +
-                                       num_nodes_in_one_country * country_id_int +
-                                       num_nodes_in_one_state * state_id_int +
-                                       num_nodes_in_one_city * city_id_int +
-                                       num_nodes_in_one_dist * dist_id_int;
     for (int i = 0; i < num_nodes_in_dist; i++) {
         ss.str("");
         ss.clear();
         ss << std::setw(9) << std::setfill('0') << i;
         std::string peer_id_in_dist = ss.str();
         std::string node_id = this->node.get_id().substr(0, ID_SINGLE_START) + peer_id_in_dist;
-        unsigned short port = starting_port_number_in_dist + i;
+        unsigned short port = this->convert_ID_to_port(starting_port_number, node_id,
+                            num_nodes_in_dist, num_cnodes_in_dist, 
+                            num_nodes_in_city, num_cnodes_in_city, 
+                            num_nodes_in_state, num_cnodes_in_state, 
+                            num_nodes_in_country, num_cnodes_in_country, 
+                            num_nodes_in_continent);
         Node node(node_id, "127.0.0.1", port);
 
         // insert into contact node list
