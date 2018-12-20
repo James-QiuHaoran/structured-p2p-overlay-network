@@ -106,6 +106,8 @@ void BaseApp::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
                                        num_nodes_in_one_city * city_id_int +
                                        num_nodes_in_one_dist * dist_id_int;
     for (int i = 0; i < num_nodes_in_dist; i++) {
+        ss.str("");
+        ss.clear();
         ss << std::setw(9) << std::setfill('0') << i;
         std::string peer_id_in_dist = ss.str();
         std::string node_id = this->node.get_id().substr(0, ID_SINGLE_START) + peer_id_in_dist;
@@ -373,8 +375,8 @@ void BaseApp::stop() {
 }
 
 int main(int argc, char** argv) {
-    if (argc != 4) {
-        BOOST_LOG_TRIVIAL(info) << "Wrong arguments. Correct usage: ./app ip_addr port_num id\n";
+    if (argc != 14) {
+        BOOST_LOG_TRIVIAL(info) << "Wrong arguments. Correct usage: ./app ip_addr port_num id num_nodes_in_dist num_cnodes_in_dist num_nodes_in_city num_cnodes_in_city num_nodes_in_state num_cnodes_in_state num_nodes_in_country num_cnodes_in_country num_nodes_in_continent starting_port_num\n";
         return 0;
     }
 
