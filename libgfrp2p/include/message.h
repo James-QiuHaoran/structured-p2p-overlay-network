@@ -49,7 +49,7 @@ public:
     std::string get_message_id() const;
     int get_type() const;
     int get_node_order() const;
-    std::string get_data() const;
+    // std::string get_data() const;
 
     // setters
     void set_sender_id(const std::string &sender_id);
@@ -58,7 +58,7 @@ public:
     void set_message_id(std::string message_id);
     void set_type(int type);
     void set_node_order(int order);
-    void set_data(const std::string &data);
+    // void set_data(const std::string &data);
 };
 
 // Define hash for message key
