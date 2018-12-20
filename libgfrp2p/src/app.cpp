@@ -90,7 +90,6 @@ void BaseApp::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
                                        num_nodes_in_one_state * state_id_int +
                                        num_nodes_in_one_city * city_id_int +
                                        num_nodes_in_one_dist * dist_id_int;
-
     for (int i = 0; i < num_nodes_in_dist; i++) {
         ss << std::setw(9) << std::setfill('0') << i;
         std::string peer_id_in_dist = ss.str();
@@ -140,9 +139,29 @@ void BaseApp::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
         ss.str("");
         ss.clear();
 
-        // add other peers in that level
-        for (int i = 0; i < num_cnodes_in_dist; i++) {
+        // peers should be the contact node of level one, which form a dist
+        // contact nodes at this level should be the nodes with node_id < num_cnodes_in_city/num_dists_in_city
 
+        // add other peers in this level
+        for (int i = 0; i < num_dists_in_city; i++) {
+            std::string node_id = this->node.get_id().substr(0, ID_DISTRICT_START);
+            ss << std::setw(5) << std::setfill('0') << i;
+            std::string dist_id_in_city = ss.str();
+            node_id += dist_id_in_city;
+            for (int j = 0; j < num_cnodes_in_city/num_dists_in_city; j++) {
+                ss.str("");
+                ss.clear();
+                ss << std::setw(9) << std::setfill('0') << j;
+                std::string node_id_in_dist = ss.str();
+                node_id += node_id_in_dist;
+                unsigned short port = this->convert_ID_to_port(starting_port_number, node_id,
+                    num_nodes_in_dist, num_cnodes_in_dist, 
+                    num_nodes_in_city, num_cnodes_in_city, 
+                    num_nodes_in_state, num_cnodes_in_state, 
+                    num_nodes_in_country, num_cnodes_in_country, 
+                    num_nodes_in_continent);
+                Node node(node_id, "127.0.0.1", port);
+            }
         }
 
         tables.push_back(table_dist);
@@ -161,6 +180,9 @@ void BaseApp::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
         ss.str("");
         ss.clear();
 
+        // peers should be the contact node of level two, which form a city
+        // contact nodes at this level should be the nodes with node_id < ceil(num_cnodes_in_state/num_cities_in_state/num_dists_in_city)
+
         // add other peers in that level
         for (int i = 0; i < num_cnodes_in_city; i++) {
 
@@ -169,7 +191,7 @@ void BaseApp::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
         tables.push_back(table_city);
     }
 
-    // contact nodes - state level
+    // contact nodes - state level [currently the top level]
     if (node_id_in_dist < num_cnodes_in_state/num_cities_in_state) {
         // should be the contact node of the state level ring
         Ring table_state;
@@ -182,6 +204,9 @@ void BaseApp::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
         ss.str("");
         ss.clear();
 
+        // peers should be the contact node of level three, which form a state
+        // contact nodes at this level should be the peers with node_id < ceil(num_condes_in_country/num_states_in_country/num_cities_in_states/num_dists_in_city)
+
         // add other peers in that level
         for (int i = 0; i < num_cnodes_in_state; i++) {
 
@@ -193,6 +218,60 @@ void BaseApp::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
     // [TODO]
     // contact nodes - country level
     // contact nodes - continent level
+}
+
+// convert ID to port
+unsigned short BaseApp::convert_ID_to_port(unsigned short starting_port_number, const std::string& id,
+    int num_nodes_in_dist, int num_cnodes_in_dist, 
+    int num_nodes_in_city, int num_cnodes_in_city, 
+    int num_nodes_in_state, int num_cnodes_in_state, 
+    int num_nodes_in_country, int num_cnodes_in_country, 
+    int num_nodes_in_continent) {
+    std::string id_in_dist = this->node.get_id().substr(ID_SINGLE_START, ID_SINGLE_START+ID_SINGLE_LEN);
+    std::string dist_id = this->node.get_id().substr(ID_DISTRICT_START, ID_DISTRICT_START+ID_DISTRICT_LEN);
+    std::string city_id = this->node.get_id().substr(ID_CITY_START, ID_CITY_START+ID_CITY_LEN);
+    std::string state_id = this->node.get_id().substr(ID_STATE_START, ID_STATE_START+ID_STATE_LEN);
+    std::string country_id = this->node.get_id().substr(ID_COUNTRY_START, ID_COUNTRY_START+ID_COUNTRY_LEN);
+    std::string continent_id = this->node.get_id().substr(ID_CONTINENT_START, ID_CONTINENT_START+ID_CONTINENT_LEN);
+
+    int node_id_in_dist = 0, dist_id_int = 0, city_id_int = 0, state_id_int = 0, country_id_int = 0, continent_id_int = 0;
+    
+    std::stringstream ss_node(id_in_dist);
+    ss_node >> node_id_in_dist;
+
+    std::stringstream ss_dist(dist_id);
+    ss_dist >> dist_id_int;
+    int num_nodes_in_one_dist = num_nodes_in_dist;
+
+    int num_dists_in_city = num_nodes_in_city/num_cnodes_in_dist;
+    std::stringstream ss_city(city_id);
+    ss_city >> city_id_int;
+    int num_nodes_in_one_city = num_nodes_in_one_dist * num_dists_in_city;
+
+    int num_cities_in_state = num_nodes_in_state/num_cnodes_in_dist;
+    std::stringstream ss_state(state_id);
+    ss_state >> state_id_int;
+    int num_nodes_in_one_state = num_nodes_in_one_city * num_cities_in_state;
+
+    int num_states_in_country = num_nodes_in_country/num_cnodes_in_state;
+    std::stringstream ss_country(country_id);
+    ss_country >> country_id_int;
+    int num_nodes_in_one_country = num_nodes_in_one_state * num_states_in_country;
+
+    int num_countries_in_continent = num_nodes_in_continent/num_cnodes_in_country;
+    std::stringstream ss_continent(continent_id);
+    ss_continent >> continent_id_int;
+    int num_nodes_in_one_continent = num_nodes_in_one_country * num_countries_in_continent;
+
+    int port_num = starting_port_number + 
+                                       num_nodes_in_one_continent * continent_id_int +
+                                       num_nodes_in_one_country * country_id_int +
+                                       num_nodes_in_one_state * state_id_int +
+                                       num_nodes_in_one_city * city_id_int +
+                                       num_nodes_in_one_dist * dist_id_int +
+                                       node_id_in_dist;
+
+    return port_num;
 }
 
 void BaseApp::start() {
