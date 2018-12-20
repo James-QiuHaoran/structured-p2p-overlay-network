@@ -2,22 +2,45 @@
 #define MESSAGE_H
 
 #include <string>
+#include <utility>
+#include <unordered_map>
+
+#include <cstdio>
+
+
+using message_key_t = std::pair<std::string, std::string>;
 
 /* Message class
  * definition of messages transmitted among peers
  */
 class Message {
+    friend class MessageTable;
 private:
+    unsigned short io_type;
+    unsigned long io_timestamp;
+    
     std::string message_id;
     int type, node_order;
     unsigned long from_level;
     std::string sender_id;
     std::string receiver_id;
 
+
 public:
+    static constexpr const char* csv_header = "sender_id,message_id,receiver_id,io_type_str,type,from_level,node_order";
+
+    static const unsigned short IO_TYPE_RECEIVED = 0;
+    static const unsigned short IO_TYPE_SENT = 1;
+
     // constructor
     Message();
     Message(std::string messageID, int type, unsigned long from_level, std::string sender_id, std::string receiver_id);
+    Message(unsigned short io_type, std::string messageID, int type, unsigned long from_level, std::string sender_id, std::string receiver_id);
+
+
+    // DB semantic
+    message_key_t get_key() const;
+    std::string to_csv_string() const;
 
     // getters
     std::string get_sender_id() const;
@@ -34,6 +57,46 @@ public:
     void set_message_id(std::string message_id);
     void set_type(int type);
     void set_node_order(int order);
+};
+
+// Define hash for message key
+namespace std {
+    template <>
+    struct hash<message_key_t> {
+        size_t operator()(const message_key_t& msg) const {
+            // Compute individual hash values for two data members and combine them using XOR and bit shifting
+            return std::hash<std::string>{}(msg.first) ^ (std::hash<std::string>{}(msg.second) << 1) ;
+        }
+    };
+
+    // template <>
+    // struct hash<Message> {
+    //     size_t operator()(const Message& msg) const {
+    //         // Compute individual hash values for two data members and combine them using XOR and bit shifting
+    //         return std::hash<std::string>{}(msg.get_sender_id()) ^ (std::hash<std::string>{}(msg.get_message_id()) << 1) ;
+    //     }
+    // };
+}
+
+class MessageTable {
+private:
+    std::unordered_map<message_key_t, Message> table;
+
+    // std::unordered_map<message_key_t, std::size_t> sender_id_counter;
+
+    // std::size_t receive_counter;
+
+    // std::size_t send_counter;
+
+
+public:
+    
+    bool exist(const message_key_t& msg_key) const;
+
+    void insert_received(const Message& msg);
+    void insert_sent(const Message& msg);
+
+    std::string to_csv_string() const;
 };
 
 #endif

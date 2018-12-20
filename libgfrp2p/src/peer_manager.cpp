@@ -26,17 +26,6 @@ PeerManager::PeerManager(Node node, NodeTable node_table) {
 	this->node_table = std::make_shared<NodeTable>(node_table);
 }
 
-Message::Message() {}
-
-Message::Message(std::string messageID, int type, unsigned long from_level, std::string sender_id, std::string receiver_id):
-	message_id(messageID),
-	type(type),
-	from_level(from_level),
-	sender_id(sender_id),
-	receiver_id(receiver_id) {
-		this->node_order = 0;
-	}
-
 PeerError::PeerError() {}
 
 PeerError::PeerError(std::string errorType, std::string errorMessage):
@@ -74,6 +63,8 @@ void PeerManager::send(std::shared_ptr<Node> node, const Message &msg) {
 					   std::to_string(msg.get_node_order());
 
 	// send
+	this->msg_table.insert_sent(msg);
+
 	this->tcp_server->send(node->get_ip(), node->get_port(), data);
 
 	return;
@@ -235,6 +226,8 @@ void PeerManager::receive(const std::string& ip, unsigned short port, const std:
 	Message msg = Message(messageID, message_type, message_from_level, sender_id, receiver_id);
 	msg.set_node_order(data_node_id);
 
+	msg_table.insert_received(msg);
+	
 	// enter control flow
 	this->on_receive(msg);
 

@@ -58,6 +58,8 @@ private:
     // seed for random number generator
     boost::random::mt19937 gen;
 
+    MessageTable msg_table;
+
 public:
     // constructors
     PeerManager();
