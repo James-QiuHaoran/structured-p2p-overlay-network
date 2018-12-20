@@ -4,36 +4,7 @@
 BaseApp::BaseApp(std::string ip, unsigned short port, std::string id) {
     this->node = Node(id, ip, port);
     this->node_table = NodeTable(id);
-    this->peer_manager = PeerManager(node, node_table);
-}
-
-BaseApp::BaseApp(std::string ip, unsigned short port, std::string id, 
-    int num_nodes_in_dist, int num_cnodes_in_dist, 
-        int num_nodes_in_city, int num_cnodes_in_city, 
-        int num_nodes_in_state, int num_cnodes_in_state, 
-        int num_nodes_in_country, int num_cnodes_in_country, 
-        int num_nodes_in_continent, unsigned short starting_port_number) {
-    this->node = Node(id, ip, port);
-    this->node_table = NodeTable(id);
-    this->peer_manager = PeerManager(node, node_table);
-
-    BOOST_LOG_TRIVIAL(debug) << "Establishing structure on node [ID: " + this->node.get_id() + "] [IP: " + this->node.get_ip() + "] [" + std::to_string(this->node.get_port()) + "]";
-    this->form_structure(num_nodes_in_dist, num_cnodes_in_dist, 
-        num_nodes_in_city, num_cnodes_in_city, 
-        num_nodes_in_state, num_cnodes_in_state, 
-        num_nodes_in_country, num_cnodes_in_country, 
-        num_nodes_in_continent, starting_port_number);
-    BOOST_LOG_TRIVIAL(debug) << "Structure established on node [ID: " + this->node.get_id() + "] [IP: " + this->node.get_ip() + "] [" + std::to_string(this->node.get_port()) + "]";
-    BOOST_LOG_TRIVIAL(debug) << "Node Tables on node [ID: " + this->node.get_id() + "] [IP: " + this->node.get_ip() + "] [" + std::to_string(this->node.get_port()) + "]";
-    for (auto table : this->node_table.get_tables()) {
-        BOOST_LOG_TRIVIAL(debug) << "Level: " + std::to_string(table.ring_level);
-        for (auto peer : table.peer_set) {
-            BOOST_LOG_TRIVIAL(debug) << "Peer - " + peer.first + " " + peer.second->get_ip() + ":" + std::to_string(peer.second->get_port());
-        }
-        for (auto contact_node : table.contact_nodes) {
-            BOOST_LOG_TRIVIAL(debug) << "Contact node - " + contact_node.first + " " + contact_node.second->get_ip() + ":" + std::to_string(contact_node.second->get_port());
-        }
-    }
+    // this->peer_manager = PeerManager(node, node_table);
 }
 
 // public functions
@@ -353,10 +324,31 @@ unsigned short BaseApp::convert_ID_to_port(unsigned short starting_port_number, 
     return port_num;
 }
 
-void BaseApp::start() {
+void BaseApp::start(int num_nodes_in_dist, int num_cnodes_in_dist, 
+        int num_nodes_in_city, int num_cnodes_in_city, 
+        int num_nodes_in_state, int num_cnodes_in_state, 
+        int num_nodes_in_country, int num_cnodes_in_country, 
+        int num_nodes_in_continent, unsigned short starting_port_number) {
     BOOST_LOG_TRIVIAL(debug) << "Setting up NodeTable for node [ID: " + this->node.get_id() + "] [IP: " + this->node.get_ip() + "] [" + std::to_string(this->node.get_port()) + "]";
-    std::vector<Ring> tables;
-    this->node_table.set_tables(tables);
+    BOOST_LOG_TRIVIAL(debug) << "Establishing structure on node [ID: " + this->node.get_id() + "] [IP: " + this->node.get_ip() + "] [" + std::to_string(this->node.get_port()) + "]";
+    this->form_structure(num_nodes_in_dist, num_cnodes_in_dist, 
+        num_nodes_in_city, num_cnodes_in_city, 
+        num_nodes_in_state, num_cnodes_in_state, 
+        num_nodes_in_country, num_cnodes_in_country, 
+        num_nodes_in_continent, starting_port_number);
+    BOOST_LOG_TRIVIAL(debug) << "Structure established on node [ID: " + this->node.get_id() + "] [IP: " + this->node.get_ip() + "] [" + std::to_string(this->node.get_port()) + "]";
+    BOOST_LOG_TRIVIAL(debug) << "Node Tables on node [ID: " + this->node.get_id() + "] [IP: " + this->node.get_ip() + "] [" + std::to_string(this->node.get_port()) + "]";
+    for (auto table : this->node_table.get_tables()) {
+        BOOST_LOG_TRIVIAL(debug) << "Level: " + std::to_string(table.ring_level);
+        for (auto peer : table.peer_set) {
+            BOOST_LOG_TRIVIAL(debug) << "Peer - " + peer.first + " " + peer.second->get_ip() + ":" + std::to_string(peer.second->get_port());
+        }
+        for (auto contact_node : table.contact_nodes) {
+            BOOST_LOG_TRIVIAL(debug) << "Contact node - " + contact_node.first + " " + contact_node.second->get_ip() + ":" + std::to_string(contact_node.second->get_port());
+        }
+    }
+
+    this->peer_manager = PeerManager(node, node_table);
 
     BOOST_LOG_TRIVIAL(debug) << "Starting HGFR PeerManager on node [ID: " + this->node.get_id() + "] [IP: " + this->node.get_ip() + "] [" + std::to_string(this->node.get_port()) + "]";
     this->peer_manager.start();
@@ -395,20 +387,19 @@ int main(int argc, char** argv) {
 
     // initialize the app
     BOOST_LOG_TRIVIAL(debug) << "Creating HGFR base application on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]";
-    BaseApp app = BaseApp(ip, port, id, 
-        num_nodes_in_dist, num_cnodes_in_dist, 
+    BaseApp app = BaseApp(ip, port, id);
+
+    // start the app service
+    BOOST_LOG_TRIVIAL(debug) << "Starting HGFR base service on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]";
+    app.start(num_nodes_in_dist, num_cnodes_in_dist, 
         num_nodes_in_city, num_cnodes_in_city, 
         num_nodes_in_state, num_cnodes_in_state,
         num_nodes_in_country, num_cnodes_in_country,
         num_nodes_in_continent, starting_port_number);
 
-    // start the app service
-    BOOST_LOG_TRIVIAL(debug) << "Starting HGFR base service on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]";
-    app.start();
-
     if (id == "00000000000000000000000000000000") {
-        std::this_thread::sleep_for (std::chrono::seconds(10));
-        BOOST_LOG_TRIVIAL(debug) << "Slept for 10 seconds";
+        std::this_thread::sleep_for (std::chrono::seconds(5));
+        BOOST_LOG_TRIVIAL(debug) << "Slept for 5 seconds";
         BOOST_LOG_TRIVIAL(debug) << "Broadcasting message ...";
         app.broadcast("Hello World!");
     }

@@ -121,6 +121,6 @@ do
 		$starting_port_num &
 done
 
-sleep 5
+sleep 2
 
 printf "\n== Successfully boostrapped for $num_nodes_total nodes! ==\n"

@@ -66,6 +66,8 @@ void PeerManager::send(std::shared_ptr<Node> node, const Message &msg, const std
 	// send
 	this->msg_table.insert_sent(msg);
 
+	BOOST_LOG_TRIVIAL(trace) << "Send msg - (" << msg.get_type() << ") | Data: " << data << " | " << msg.get_sender_id() << " -> " << msg.get_receiver_id();
+
 	this->tcp_server->send(node->get_ip(), node->get_port(), data_string);
 
 	return;
@@ -74,7 +76,7 @@ void PeerManager::send(std::shared_ptr<Node> node, const Message &msg, const std
 // a node wants to broadcast a message
 void PeerManager::broadcast(const std::string &data) {
 	// wrap the data into a Message
-	Message msg(random_string(MSG_HASH_LENGTH), 1, 0, this->node->get_id(), NULL);
+	Message msg(random_string(MSG_HASH_LENGTH), 1, 0, this->node->get_id(), "");
 
 	// get all contact nodes of the current ring
 	std::unordered_set<std::shared_ptr<Node>> contact_nodes = this->node_table->get_contact_nodes(0);
@@ -95,7 +97,7 @@ void PeerManager::broadcast(const std::string &data) {
 	// ask contact node to broadcast
 	msg.set_receiver_id(receiver->get_id());
 
-	BOOST_LOG_TRIVIAL(trace) << "Broadcast message - type: " << msg.get_type() << " | Data: " << data << " - " << msg.get_sender_id() << " -> " << msg.get_receiver_id();
+	BOOST_LOG_TRIVIAL(trace) << "Broadcast msg - (" << msg.get_type() << ") | Data: " << data << " | " << msg.get_sender_id() << " -> " << msg.get_receiver_id();
 	this->send(receiver, msg, data);
 
 	return;
@@ -232,7 +234,10 @@ void PeerManager::receive(const std::string& ip, unsigned short port, const std:
 	std::string data_in_msg = data.substr(pos_start);
 
 	Message msg = Message(messageID, message_type, message_from_level, sender_id, receiver_id);
+
 	msg.set_node_order(data_node_id);
+
+	BOOST_LOG_TRIVIAL(trace) << "Received msg - (" << msg.get_type() << ") | Data: " << data_in_msg << " | " << msg.get_sender_id() << " -> " << msg.get_receiver_id();
 
 	msg_table.insert_received(msg);
 	
@@ -272,16 +277,16 @@ void PeerManager::on_receive(const Message &msg, const std::string &data) {
 			std::cout << "Broadcast Upwards - from the lower level\n";
 			if (!this->node_table->is_contact_node(msg.get_from_level()+1)) {
 				// if not contact node
-				Message msg(random_string(MSG_HASH_LENGTH), 1, msg.get_from_level()+1, this->node->get_id(), NULL);
+				Message msg(random_string(MSG_HASH_LENGTH), 1, msg.get_from_level()+1, this->node->get_id(), "");
 				this->broadcast_up(msg, msg.get_from_level()+1, data);
 			} else if (this->node_table->get_contact_nodes(msg.get_from_level()+2).size() == 0) {
 				// has been the top ring, start to broadcast downwards
-				Message msg(random_string(MSG_HASH_LENGTH), 2, msg.get_from_level()+1, this->node->get_id(), NULL);
+				Message msg(random_string(MSG_HASH_LENGTH), 2, msg.get_from_level()+1, this->node->get_id(), "");
 				int k = 2;
 				this->broadcast_within_ring(msg, msg.get_from_level()+1, k, data);
 			} else {
 				// keep broadcast upwards
-				Message msg(random_string(MSG_HASH_LENGTH), 0, msg.get_from_level()+1, this->node->get_id(), NULL);
+				Message msg(random_string(MSG_HASH_LENGTH), 0, msg.get_from_level()+1, this->node->get_id(), "");
 				this->broadcast_up(msg, msg.get_from_level()+1, data);
 			}
 			break;
@@ -289,16 +294,16 @@ void PeerManager::on_receive(const Message &msg, const std::string &data) {
 			std::cout << "Broadcast Upwards - from the same level\n";
 			if (!this->node_table->is_contact_node(msg.get_from_level())) {
 				// if not contact node
-				Message msg(random_string(MSG_HASH_LENGTH), 1, msg.get_from_level(), this->node->get_id(), NULL);
+				Message msg(random_string(MSG_HASH_LENGTH), 1, msg.get_from_level(), this->node->get_id(), "");
 				this->broadcast_up(msg, msg.get_from_level(), data);
 			} else if (this->node_table->get_contact_nodes(msg.get_from_level()+1).size() == 0) {
 				// has been the top ring, start to broadcast downwards
-				Message msg(random_string(MSG_HASH_LENGTH), 2, msg.get_from_level(), this->node->get_id(), NULL);
+				Message msg(random_string(MSG_HASH_LENGTH), 2, msg.get_from_level(), this->node->get_id(), "");
 				int k = 2;
 				this->broadcast_within_ring(msg, msg.get_from_level(), k, data);
 			} else {
 				// keep broadcast upwards
-				Message msg(random_string(MSG_HASH_LENGTH), 0, msg.get_from_level(), this->node->get_id(), NULL);
+				Message msg(random_string(MSG_HASH_LENGTH), 0, msg.get_from_level(), this->node->get_id(), "");
 				this->broadcast_up(msg, msg.get_from_level(), data);
 			}
 			break;
@@ -309,7 +314,7 @@ void PeerManager::on_receive(const Message &msg, const std::string &data) {
 				std::cout << "Message Received [touch the end-point]\n";
 			} else {
 				// keep broadcast downwards
-				Message msg(random_string(MSG_HASH_LENGTH), 2, msg.get_from_level()-1, this->node->get_id(), NULL);
+				Message msg(random_string(MSG_HASH_LENGTH), 2, msg.get_from_level()-1, this->node->get_id(), "");
 				int k = 2;
 				this->broadcast_within_ring(msg, msg.get_from_level()-1, k, data);
 			}
@@ -319,7 +324,7 @@ void PeerManager::on_receive(const Message &msg, const std::string &data) {
 			// continue to broadcast within ring
 
 			// downwards to all nodes of the lower level ring
-			Message lower_ring_msg(random_string(MSG_HASH_LENGTH), 3, msg.get_from_level(), this->node->get_id(), NULL);
+			Message lower_ring_msg(random_string(MSG_HASH_LENGTH), 3, msg.get_from_level(), this->node->get_id(), "");
 			int k = 2;
 			if (msg.get_from_level() != 0)
 				this->broadcast_within_ring(lower_ring_msg, msg.get_from_level()-1, k, data);
@@ -350,18 +355,18 @@ void PeerManager::contact_node_election(unsigned long level) {
 
 	// after contact nodes are elected, broadcast the result
 	int k = 2;
-	Message within_ring_msg(random_string(MSG_HASH_LENGTH), 3, level, this->node->get_id(), NULL);
+	Message within_ring_msg(random_string(MSG_HASH_LENGTH), 3, level, this->node->get_id(), "");
 	std::string data = "Election Result";
 	broadcast_within_ring(within_ring_msg, level, k, data);
 
 	// get all contact nodes from the upper level ring
         std::unordered_set<std::shared_ptr<Node>> contact_nodes_upper = this->node_table->get_contact_nodes(level);
         if (contact_nodes_upper.size() != 0) {
-		Message upper_ring_msg(random_string(MSG_HASH_LENGTH), 3, level, this->node->get_id(), NULL);
+		Message upper_ring_msg(random_string(MSG_HASH_LENGTH), 3, level, this->node->get_id(), "");
 		multicast_to_contact_nodes(upper_ring_msg, level+1, data);
 	}
 
-	Message lower_ring_msg(random_string(MSG_HASH_LENGTH), 3, level, this->node->get_id(), NULL);
+	Message lower_ring_msg(random_string(MSG_HASH_LENGTH), 3, level, this->node->get_id(), "");
 	if (level != 0)
 		broadcast_within_ring(lower_ring_msg, level-1, k, data);
 

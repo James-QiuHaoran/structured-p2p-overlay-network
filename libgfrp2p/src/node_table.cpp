@@ -45,6 +45,17 @@ void NodeTable::remove_table(unsigned long level) {
 }
 
 void NodeTable::set_tables(std::vector<Ring> tables) {
+    /*this->reset_tables();
+    for (auto table : tables) {
+        Ring ring;
+        ring.ring_level = table.ring_level;
+        ring.contact_nodes = table.contact_nodes;
+        ring.peer_set = table.peer_set;
+        ring.peer_list = table.peer_list;
+        ring.successor = table.successor;
+        ring.predecessor = table.predecessor;
+        this->tables.push_back(ring);
+    }*/
     this->tables = tables;
 }
 
