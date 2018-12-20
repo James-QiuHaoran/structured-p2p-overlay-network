@@ -160,7 +160,7 @@ void BaseApp::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
                 // predecessor & successor (No Need?)
 
                 // contact nodes
-                if (node_id_in_dist < num_cnodes_in_city/num_dists_in_city) {
+                if (j < num_cnodes_in_city/num_dists_in_city) {
                     contact_nodes.insert({peer_id, std::make_shared<Node>(node)});
                 }
             }
@@ -226,7 +226,7 @@ void BaseApp::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
                         // predecessor & successor (No Need?)
 
                         // contact nodes
-                        if (node_id_in_dist < num_cnodes_in_state/num_cities_in_state) {
+                        if (j < num_cnodes_in_state/num_cities_in_state) {
                             contact_nodes.insert({node_id, std::make_shared<Node>(node)});
                         }
 
@@ -252,6 +252,7 @@ void BaseApp::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
     }
 
     // contact nodes - state level [currently the top level]
+    /*
     if (node_id_in_dist < num_cnodes_in_state/num_cities_in_state) {
         // should be the contact node of the state level ring
         Ring table_state;
@@ -280,7 +281,7 @@ void BaseApp::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
         table_state.peer_list = peer_list;
 
         tables.push_back(table_state);
-    }
+    }*/
 
     this->node_table.set_tables(tables);
 
