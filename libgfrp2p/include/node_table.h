@@ -50,6 +50,9 @@ public:
     void set_tables(std::vector<Ring> tables);
     void reset_tables();
 
+    // only for debug
+    std::vector<Ring> get_tables();
+
     /* storage operations */
     bool has_node(unsigned long level, const std::string& id);
     // deep copy of node information

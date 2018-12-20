@@ -17,11 +17,23 @@ BaseApp::BaseApp(std::string ip, unsigned short port, std::string id,
     this->node_table = NodeTable(id);
     this->peer_manager = PeerManager(node, node_table);
 
+    BOOST_LOG_TRIVIAL(debug) << "Establishing structure on node [ID: " + this->node.get_id() + "] [IP: " + this->node.get_ip() + "] [" + std::to_string(this->node.get_port()) + "]";
     this->form_structure(num_nodes_in_dist, num_cnodes_in_dist, 
         num_nodes_in_city, num_cnodes_in_city, 
         num_nodes_in_state, num_cnodes_in_state, 
         num_nodes_in_country, num_cnodes_in_country, 
         num_nodes_in_continent, starting_port_number);
+    BOOST_LOG_TRIVIAL(debug) << "Structure established on node [ID: " + this->node.get_id() + "] [IP: " + this->node.get_ip() + "] [" + std::to_string(this->node.get_port()) + "]";
+    BOOST_LOG_TRIVIAL(debug) << "Node Tables on node [ID: " + this->node.get_id() + "] [IP: " + this->node.get_ip() + "] [" + std::to_string(this->node.get_port()) + "]";
+    for (auto table : this->node_table.get_tables()) {
+        BOOST_LOG_TRIVIAL(debug) << "Level: " + std::to_string(table.ring_level);
+        for (auto peer : table.peer_set) {
+            BOOST_LOG_TRIVIAL(debug) << "Peer - " + peer.first + " " + peer.second->get_ip() + ":" + std::to_string(peer.second->get_port());
+        }
+        for (auto contact_node : table.contact_nodes) {
+            BOOST_LOG_TRIVIAL(debug) << "Contact node - " + contact_node.first + " " + contact_node.second->get_ip() + ":" + std::to_string(contact_node.second->get_port());
+        }
+    }
 }
 
 // public functions
@@ -284,6 +296,8 @@ void BaseApp::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
 
         tables.push_back(table_state);
     }
+
+    this->node_table.set_tables(tables);
 
     // [TODO]
     // contact nodes - country level

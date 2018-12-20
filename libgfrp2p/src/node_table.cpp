@@ -52,6 +52,10 @@ void NodeTable::reset_tables() {
     this->tables.clear();
 }
 
+std::vector<Ring> NodeTable::get_tables() {
+    return this->tables;
+}
+
 bool NodeTable::has_node(unsigned long level, const std::string& id) {
     std::lock_guard<std::mutex> lock(*mlock);
     auto ring = this->tables[level];
