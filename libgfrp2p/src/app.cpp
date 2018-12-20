@@ -201,9 +201,79 @@ void BaseApp::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
         // contact nodes at this level should be the nodes with node_id < ceil(num_cnodes_in_state/num_cities_in_state/num_dists_in_city)
 
         // add other peers in that level
-        for (int i = 0; i < num_cnodes_in_city; i++) {
+        for (int i = 0; i < num_cities_in_state; i++) {
+            std::string node_id = this->node.get_id().substr(0, ID_CITY_START);
+            ss << std::setw(6) << std::setfill('0') << i;
+            std::string city_id_in_state = ss.str();
+            node_id += city_id_in_state;
 
+            for (int j = 0; j < num_dists_in_city; j++) {
+                ss.str("");
+                ss.clear();
+                ss << std::setw(5) << std::setfill('0') << j;
+                std::string dist_id_in_city = ss.str();
+                node_id += dist_id_in_city;
+                for (int k = 0; k < num_cnodes_in_dist; k++) {
+                    if (k < num_cnodes_in_city/num_dists_in_city) {
+                        ss.str("");
+                        ss.clear();
+                        ss << std::setw(9) << std::setfill('0') << k;
+                        std::string peer_id_in_dist = ss.str();
+                        node_id += peer_id_in_dist;
+                        unsigned short port = this->convert_ID_to_port(starting_port_number, node_id,
+                            num_nodes_in_dist, num_cnodes_in_dist, 
+                            num_nodes_in_city, num_cnodes_in_city, 
+                            num_nodes_in_state, num_cnodes_in_state, 
+                            num_nodes_in_country, num_cnodes_in_country, 
+                            num_nodes_in_continent);
+                        Node node(node_id, "127.0.0.1", port);
+
+                        // insert into peer list
+                        peer_set.insert({node_id, std::make_shared<Node>(node)});
+                        peer_list.push_back(std::make_shared<Node>(node));
+
+                        // predecessor & successor (No Need?)
+
+                        // contact nodes
+                        if (node_id_in_dist < num_cnodes_in_state/num_cities_in_state) {
+                            contact_nodes.insert({node_id, std::make_shared<Node>(node)});
+                        }
+                    }
+                }
+            }
+
+            for (int j = 0; j < num_cnodes_in_city; j++) {
+                ss.str("");
+                ss.clear();
+                ss << std::setw(9) << std::setfill('0') << j;
+                std::string peer_id_in_dist = ss.str();
+                node_id += peer_id_in_dist;
+                unsigned short port = this->convert_ID_to_port(starting_port_number, node_id,
+                    num_nodes_in_dist, num_cnodes_in_dist, 
+                    num_nodes_in_city, num_cnodes_in_city, 
+                    num_nodes_in_state, num_cnodes_in_state, 
+                    num_nodes_in_country, num_cnodes_in_country, 
+                    num_nodes_in_continent);
+                Node node(node_id, "127.0.0.1", port);
+
+                // insert into peer list
+                peer_set.insert({node_id, std::make_shared<Node>(node)});
+                peer_list.push_back(std::make_shared<Node>(node));
+
+                // predecessor & successor (No Need?)
+
+                // contact nodes
+                if (node_id_in_dist < num_cnodes_in_city/num_dists_in_city) {
+                    contact_nodes.insert({node_id, std::make_shared<Node>(node)});
+                }
+            }
         }
+
+        table_peer.contact_nodes = contact_nodes;
+        table_peer.predecessor = NULL;
+        table_peer.successor = NULL;
+        table_peer.peer_set = peer_set;
+        table_peer.peer_list = peer_list;
 
         tables.push_back(table_city);
     }
@@ -222,7 +292,7 @@ void BaseApp::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
         ss.clear();
 
         // peers should be the contact node of level three, which form a state
-        // contact nodes at this level should be the peers with node_id < ceil(num_condes_in_country/num_states_in_country/num_cities_in_states/num_dists_in_city)
+        // contact nodes at this level should be the peers with node_id < ceil(num_condes_in_country/num_states_in_country/num_cities_in_state/num_dists_in_city)
 
         // add other peers in that level
         for (int i = 0; i < num_cnodes_in_state; i++) {
