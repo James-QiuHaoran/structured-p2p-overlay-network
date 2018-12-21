@@ -127,6 +127,7 @@ public:
         const std::shared_ptr<AtomicQueue<BufferItemType>>& buffer);
 
     tcp::socket& get_socket();
+    void reset_socket(boost::asio::io_service& io_service);
 
     void start();
 
@@ -137,7 +138,7 @@ public:
 private:
     using Header = unsigned long;
 
-    tcp::socket socket;
+    std::unique_ptr<tcp::socket> socket;
     std::array<char, BUFFER_SIZE> read_buffer;
     unsigned long total_length;
     std::string datagram;

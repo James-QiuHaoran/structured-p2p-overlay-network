@@ -103,7 +103,12 @@ TCPConnection::Pointer TCPConnection::Create(boost::asio::io_service& io_service
     return Pointer(new TCPConnection(io_service, buffer));
 }
 
-tcp::socket& TCPConnection::get_socket() { return this->socket; }
+tcp::socket& TCPConnection::get_socket() { return *(this->socket); }
+
+void TCPConnection::reset_socket(boost::asio::io_service& io_service) { 
+    this->socket->close();
+    this->socket.reset(new tcp::socket(io_service));
+}
 
 void TCPConnection::start() {
     this->read();
@@ -116,7 +121,7 @@ void TCPConnection::write(const std::string& data) {
     boost::shared_ptr<std::string> packet(new std::string(header, sizeof(Header)));
     *packet = *packet + data;
     
-    boost::asio::async_write(this->socket, boost::asio::buffer(*packet),
+    boost::asio::async_write(this->get_socket(), boost::asio::buffer(*packet),
         boost::bind(&TCPConnection::handle_write, this->shared_from_this(), packet,
             boost::asio::placeholders::error,
             boost::asio::placeholders::bytes_transferred));
@@ -124,10 +129,10 @@ void TCPConnection::write(const std::string& data) {
 
 TCPConnection::TCPConnection(boost::asio::io_service& io_service,
     const std::shared_ptr<AtomicQueue<BufferItemType>>& buffer):
-    socket(io_service), resolver(io_service), buffer(buffer) { }
+    socket(new tcp::socket(io_service)), resolver(io_service), buffer(buffer) { }
 
 void TCPConnection::read() {
-    boost::asio::async_read(this->socket, boost::asio::buffer(this->read_buffer),
+    boost::asio::async_read(this->get_socket(), boost::asio::buffer(this->read_buffer),
         boost::bind(&TCPConnection::handle_read, this->shared_from_this(),
         boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));    
 }
@@ -146,12 +151,12 @@ void TCPConnection::handle_read(const boost::system::error_code& error,
         }
 
         if (this->datagram.length() >= total_length || error == boost::asio::error::eof || error == boost::asio::error::connection_reset) {
-            tcp::endpoint endpoint = this->socket.remote_endpoint();
+            tcp::endpoint endpoint = this->socket->remote_endpoint();
             
             // Expected length or disconnection
             boost::system::error_code error_code;
-            this->socket.shutdown(tcp::socket::shutdown_both, error_code);
-            this->socket.close();
+            this->socket->shutdown(tcp::socket::shutdown_both, error_code);
+            this->socket->close();
             
             // Push up whatever is got
             std::string ip = endpoint.address().to_string();
@@ -173,14 +178,14 @@ void TCPConnection::handle_write(boost::shared_ptr<std::string> data,
     if (error) {
         BOOST_LOG_TRIVIAL(error) << "TCPConnection::handle_write: Write error " << error;
     } else {
-        tcp::endpoint endpoint = this->socket.remote_endpoint();
+        tcp::endpoint endpoint = this->socket->remote_endpoint();
         BOOST_LOG_TRIVIAL(debug) << "AsyncTCPServer::handle_write: Data sent to " 
             << endpoint.address().to_string() << ':' << std::to_string(endpoint.port());
     }
 
     boost::system::error_code error_code;
-    this->socket.shutdown(tcp::socket::shutdown_both, error_code);
-    this->socket.close();
+    this->socket->shutdown(tcp::socket::shutdown_both, error_code);
+    this->socket->close();
 }
 
 
@@ -211,8 +216,8 @@ void AsyncTCPServer::send(const std::string& ip, unsigned short port, const std:
         if (!send_conn) 
             send_conn = TCPConnection::Create(this->io_service, this->buffer);
         else {
-            send_conn.reset();
-            send_conn = TCPConnection::Create(this->io_service, this->buffer);
+            BOOST_LOG_TRIVIAL(debug) << "AsyncTCPServer::send: Resetting socket";
+            send_conn->reset_socket(this->io_service);
         }
         BOOST_LOG_TRIVIAL(debug) << "AsyncTCPServer::send: Creating address query on " << ip << ':' << port;
         tcp::resolver::query query(ip, std::to_string(port));
