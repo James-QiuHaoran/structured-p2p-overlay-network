@@ -133,7 +133,7 @@ public:
 
     void stop();
 
-    void write(const std::string& data);
+    void write(const std::string& ip, unsigned short port, const const std::string& data);
 
 private:
     using Header = unsigned long;
