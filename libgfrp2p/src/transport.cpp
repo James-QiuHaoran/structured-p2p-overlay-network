@@ -108,6 +108,7 @@ tcp::socket& TCPConnection::get_socket() { return *(this->socket); }
 void TCPConnection::reset_socket(boost::asio::io_service& io_service) { 
     this->socket->close();
     this->socket.reset(new tcp::socket(io_service));
+    this->socket->set_option(boost::asio::socket_base::reuse_address(true));
 }
 
 void TCPConnection::start() {
@@ -129,7 +130,10 @@ void TCPConnection::write(const std::string& data) {
 
 TCPConnection::TCPConnection(boost::asio::io_service& io_service,
     const std::shared_ptr<AtomicQueue<BufferItemType>>& buffer):
-    socket(new tcp::socket(io_service)), resolver(io_service), buffer(buffer) { }
+    socket(new tcp::socket(io_service)), resolver(io_service), buffer(buffer) {
+        socket->set_option(boost::asio::socket_base::reuse_address(true));
+
+    }
 
 void TCPConnection::read() {
     boost::asio::async_read(this->get_socket(), boost::asio::buffer(this->read_buffer),
@@ -192,8 +196,6 @@ void TCPConnection::handle_write(boost::shared_ptr<std::string> data,
 AsyncTCPServer::AsyncTCPServer(const std::shared_ptr<Receiver>& receiver, unsigned short port):
     receiver(receiver), io_service(), work(new boost::asio::io_service::work(io_service)),
     acceptor(io_service), resolver(io_service), buffer(new AtomicQueue<BufferItemType>()) {
-        this->acceptor.set_option(boost::asio::socket_base::reuse_address(true));
-        acceptor.bind(tcp::endpoint(tcp::v4(), port));
     }
 
 
@@ -221,7 +223,6 @@ void AsyncTCPServer::send(const std::string& ip, unsigned short port, const std:
             BOOST_LOG_TRIVIAL(debug) << "AsyncTCPServer::send: Resetting socket";
             send_conn->reset_socket(this->io_service);
         }
-        send_conn->get_socket().set_option(boost::asio::socket_base::reuse_address(true));
 
         BOOST_LOG_TRIVIAL(debug) << "AsyncTCPServer::send: Creating address query on " << ip << ':' << port;
         tcp::resolver::query query(ip, std::to_string(port));
