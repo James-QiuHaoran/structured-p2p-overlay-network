@@ -129,10 +129,7 @@ void TCPConnection::write(const std::string& data) {
 
 TCPConnection::TCPConnection(boost::asio::io_service& io_service,
     const std::shared_ptr<AtomicQueue<BufferItemType>>& buffer):
-    socket(new tcp::socket(io_service)), resolver(io_service), buffer(buffer) {
-        this->socket->open(boost::asio::ip::tcp::v4());
-        this->socket->set_option(boost::asio::socket_base::reuse_address(true));
-    }
+    socket(new tcp::socket(io_service)), resolver(io_service), buffer(buffer) { }
 
 void TCPConnection::read() {
     boost::asio::async_read(this->get_socket(), boost::asio::buffer(this->read_buffer),
@@ -221,6 +218,8 @@ void AsyncTCPServer::send(const std::string& ip, unsigned short port, const std:
         else {
             BOOST_LOG_TRIVIAL(debug) << "AsyncTCPServer::send: Resetting socket";
             send_conn->reset_socket(this->io_service);
+            send_conn->get_socket().open(tcp::v4());
+            send_conn->get_socket().set_option(boost::asio::socket_base::reuse_address(true));
         }
 
         BOOST_LOG_TRIVIAL(debug) << "AsyncTCPServer::send: Creating address query on " << ip << ':' << port;
@@ -237,6 +236,8 @@ void AsyncTCPServer::send(const std::string& ip, unsigned short port, const std:
 void AsyncTCPServer::accept() {
     // Create a new connection on accept
     TCPConnection::Pointer connection = TCPConnection::Create(acceptor.get_io_service(), this->buffer);
+    this->acceptor.open(tcp::v4());
+    this->acceptor.set_option(tcp::acceptor::reuse_address(true));
 
     this->acceptor.async_accept(connection->get_socket(),
         boost::bind(&AsyncTCPServer::handle_accept, this, connection,
