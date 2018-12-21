@@ -433,7 +433,7 @@ void PeerManager::log_messages() {
 	std::ofstream myfile;
 	myfile.open("../log/"+this->node->get_id()+"-"+this->start_time+".csv");
 
-	myfile << csv_header;
+	myfile << Message::csv_header;
 	myfile << this->msg_table.to_csv_string();
 
 	myfile.close();
