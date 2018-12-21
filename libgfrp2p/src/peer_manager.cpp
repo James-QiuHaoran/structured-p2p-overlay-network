@@ -402,7 +402,7 @@ void on_lost_connection(std::shared_ptr<Node> node) {
 // start the server
 void PeerManager::start() {
 	BOOST_LOG_TRIVIAL(debug) << "Starting the TCP server on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
-    this->tcp_server = new AsyncUDPServer(std::make_shared<PeerManager>(*this), this->node->get_port());
+    this->tcp_server = new AsyncTCPServer(std::make_shared<PeerManager>(*this), this->node->get_port());
     
 	BOOST_LOG_TRIVIAL(debug) << "Running the TCP server on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
     this->tcp_server->run();
