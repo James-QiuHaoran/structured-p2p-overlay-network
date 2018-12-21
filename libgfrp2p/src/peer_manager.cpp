@@ -21,9 +21,10 @@ PeerManager::PeerManager() {}
 
 PeerManager::PeerManager(unsigned short port) {}
 
-PeerManager::PeerManager(Node node, NodeTable node_table) {
+PeerManager::PeerManager(Node node, NodeTable node_table, const std::string &start_time) {
 	this->node = std::make_shared<Node>(node);
 	this->node_table = std::make_shared<NodeTable>(node_table);
+	this->start_time = start_time;
 }
 
 PeerError::PeerError() {}
@@ -425,6 +426,17 @@ void PeerManager::stop() {
 int PeerManager::random_num_in_range(int low, int high) {
 	boost::random::uniform_int_distribution<> dist(low, high);
 	return dist(gen);
+}
+
+// write messages received and sent to the file system
+void log_messages() {
+	std::ofstream myfile;
+	myfile.open("../log/"+this->node->get_id()+"-"+this->start_time+".csv");
+
+	myfile << csv_header;
+	myfile << this->msg_table.to_csv_string();
+
+	myfile.close();
 }
 
 

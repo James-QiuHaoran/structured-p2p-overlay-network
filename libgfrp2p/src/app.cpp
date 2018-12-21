@@ -324,7 +324,7 @@ unsigned short BaseApp::convert_ID_to_port(unsigned short starting_port_number, 
     return port_num;
 }
 
-void BaseApp::start(int num_nodes_in_dist, int num_cnodes_in_dist, 
+void BaseApp::start(const std::string &start_time, int num_nodes_in_dist, int num_cnodes_in_dist, 
         int num_nodes_in_city, int num_cnodes_in_city, 
         int num_nodes_in_state, int num_cnodes_in_state, 
         int num_nodes_in_country, int num_cnodes_in_country, 
@@ -348,7 +348,7 @@ void BaseApp::start(int num_nodes_in_dist, int num_cnodes_in_dist,
         }
     }
 
-    this->peer_manager = PeerManager(node, node_table);
+    this->peer_manager = PeerManager(node, node_table, start_time);
 
     BOOST_LOG_TRIVIAL(debug) << "Starting HGFR PeerManager on node [ID: " + this->node.get_id() + "] [IP: " + this->node.get_ip() + "] [" + std::to_string(this->node.get_port()) + "]";
     this->peer_manager.start();
@@ -364,8 +364,8 @@ void BaseApp::broadcast(const std::string &data) {
 }
 
 int main(int argc, char** argv) {
-    if (argc != 14) {
-        BOOST_LOG_TRIVIAL(info) << "Wrong arguments. Correct usage: ./app ip_addr port_num id num_nodes_in_dist num_cnodes_in_dist num_nodes_in_city num_cnodes_in_city num_nodes_in_state num_cnodes_in_state num_nodes_in_country num_cnodes_in_country num_nodes_in_continent starting_port_num\n";
+    if (argc != 15) {
+        BOOST_LOG_TRIVIAL(info) << "Wrong arguments. Correct usage: ./app ip_addr port_num id num_nodes_in_dist num_cnodes_in_dist num_nodes_in_city num_cnodes_in_city num_nodes_in_state num_cnodes_in_state num_nodes_in_country num_cnodes_in_country num_nodes_in_continent starting_port_num start_time\n";
         return 0;
     }
 
@@ -384,6 +384,7 @@ int main(int argc, char** argv) {
     int num_cnodes_in_country = std::atoi(argv[11]); 
     int num_nodes_in_continent = std::atoi(argv[12]);
     int starting_port_number = std::atoi(argv[13]);
+    std::string start_time = argv[14];
 
     // initialize the app
     BOOST_LOG_TRIVIAL(debug) << "Creating HGFR base application on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]";
@@ -391,7 +392,7 @@ int main(int argc, char** argv) {
 
     // start the app service
     BOOST_LOG_TRIVIAL(debug) << "Starting HGFR base service on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]";
-    app.start(num_nodes_in_dist, num_cnodes_in_dist, 
+    app.start(start_time, num_nodes_in_dist, num_cnodes_in_dist, 
         num_nodes_in_city, num_cnodes_in_city, 
         num_nodes_in_state, num_cnodes_in_state,
         num_nodes_in_country, num_cnodes_in_country,
