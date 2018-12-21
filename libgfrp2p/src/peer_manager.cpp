@@ -57,6 +57,7 @@ void PeerManager::send(std::shared_ptr<Node> node, const Message &msg, const std
 	// if the receiver is itself
 	if (msg.get_receiver_id() == msg.get_sender_id()) {
 		this->on_receive(msg, data);
+		return;
 	}
 
 	// generate data to send
