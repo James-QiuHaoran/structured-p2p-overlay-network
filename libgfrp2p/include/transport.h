@@ -185,6 +185,7 @@ private:
     std::thread handler;
 
     // Server
+    unsigned short port;
     tcp::acceptor acceptor;
     // Client
     tcp::resolver resolver;
