@@ -429,7 +429,7 @@ int PeerManager::random_num_in_range(int low, int high) {
 }
 
 // write messages received and sent to the file system
-void log_messages() {
+void PeerManager::log_messages() {
 	std::ofstream myfile;
 	myfile.open("../log/"+this->node->get_id()+"-"+this->start_time+".csv");
 
