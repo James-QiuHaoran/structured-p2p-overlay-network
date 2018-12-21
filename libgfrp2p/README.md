@@ -2,14 +2,16 @@
 
 ## TODO List
 
-- Implement time recording, number of messages recording functions (data retrieval)
-	- log all message transactions in local files
-- Bootstrap nodes implementation
-	- docker configurations
+- Debug transport
+- Implement script to retrieve time of send/recv, number of messages for one broadcast
+- Bootstrap nodes implementation on docker (config)
 	- distribute IDs and construct the network (only for evaluation: use a central server)
-- Chord, Pastry, Tapestry Implementation
+- Implement Kademlia, Random Graph
 	- form structure
 	- broadcast (gossip)
+		- Push & TTL
+		- Push & UID
+		- Pull-version
 	- insert traffic control simulation
 	- insert time recording, number of messages recording functions (data retrieval)
 - Code refactoring
