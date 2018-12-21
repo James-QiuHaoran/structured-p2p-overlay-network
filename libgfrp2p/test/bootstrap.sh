@@ -118,7 +118,7 @@ do
 		$num_nodes_in_state $num_cnodes_in_state \
 		$num_nodes_in_country $num_cnodes_in_country \
 		$num_nodes_in_continent \
-		$starting_port_num &
+		$starting_port_num $1 &
 done
 
 sleep 2
