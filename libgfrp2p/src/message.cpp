@@ -97,5 +97,5 @@ std::string MessageTable::to_csv_string() const {
 
     return result;
 }
-// void Message::set_data(const std::string &data) { this->data = data; }
 
+// void Message::set_data(const std::string &data) { this->data = data; }

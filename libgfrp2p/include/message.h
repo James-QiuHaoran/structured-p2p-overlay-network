@@ -26,7 +26,6 @@ private:
     std::string receiver_id;
     // std::string data;
 
-
 public:
     static constexpr const char* csv_header = "io_timestamp,io_type,sender_id,message_id,receiver_id,type,from_level,node_order";
 
@@ -89,7 +88,6 @@ private:
     // std::size_t receive_counter;
 
     // std::size_t send_counter;
-
 
 public:
     

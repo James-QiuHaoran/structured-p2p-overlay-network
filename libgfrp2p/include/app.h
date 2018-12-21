@@ -40,7 +40,7 @@ public:
     	int num_nodes_in_continent);
 
     // start the application
-    void start(int num_nodes_in_dist, int num_cnodes_in_dist, 
+    void start(const std::string &start_time, int num_nodes_in_dist, int num_cnodes_in_dist, 
         int num_nodes_in_city, int num_cnodes_in_city, 
         int num_nodes_in_state, int num_cnodes_in_state, 
         int num_nodes_in_country, int num_cnodes_in_country, 

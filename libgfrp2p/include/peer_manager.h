@@ -8,6 +8,8 @@
 #include <math.h>
 #include <thread>
 #include <chrono>
+#include <iostream>
+#include <fstream>
 
 #include <boost/random/uniform_int_distribution.hpp>
 #include <boost/random/mersenne_twister.hpp>
@@ -61,13 +63,15 @@ private:
     // seed for random number generator
     boost::random::mt19937 gen;
 
+    // for message logging, contains all sent and received messages
     MessageTable msg_table;
+    std::string start_time;
 
 public:
     // constructors
     PeerManager();
     PeerManager(unsigned short port);
-    PeerManager(Node node, NodeTable node_table);
+    PeerManager(Node node, NodeTable node_table, const std::string &start_time);
 
     // getters
     std::shared_ptr<Node> get_node();
@@ -106,8 +110,13 @@ public:
     // stop the peer
     void stop();
 
-    // helper classes (if any)
+    /* helper classes (if any) */
+
+    // generate random number uniformly from range [low, high]
     int random_num_in_range(int low, int high);
+
+    // write messages to file system
+    void log_messages();
 };
 
 #endif
