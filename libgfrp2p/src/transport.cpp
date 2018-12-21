@@ -108,7 +108,6 @@ tcp::socket& TCPConnection::get_socket() { return *(this->socket); }
 void TCPConnection::reset_socket(boost::asio::io_service& io_service) { 
     this->socket->close();
     this->socket.reset(new tcp::socket(io_service));
-    this->socket->set_option(boost::asio::socket_base::reuse_address(true));
 }
 
 void TCPConnection::start() {
@@ -131,8 +130,8 @@ void TCPConnection::write(const std::string& data) {
 TCPConnection::TCPConnection(boost::asio::io_service& io_service,
     const std::shared_ptr<AtomicQueue<BufferItemType>>& buffer):
     socket(new tcp::socket(io_service)), resolver(io_service), buffer(buffer) {
-        socket->set_option(boost::asio::socket_base::reuse_address(true));
-
+        this->socket->open(boost::asio::ip::tcp::v4());
+        this->socket->set_option(boost::asio::socket_base::reuse_address(true));
     }
 
 void TCPConnection::read() {
