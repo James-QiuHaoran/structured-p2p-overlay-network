@@ -191,7 +191,10 @@ void TCPConnection::handle_write(boost::shared_ptr<std::string> data,
 
 AsyncTCPServer::AsyncTCPServer(const std::shared_ptr<Receiver>& receiver, unsigned short port):
     receiver(receiver), io_service(), work(new boost::asio::io_service::work(io_service)),
-    acceptor(io_service, tcp::endpoint(tcp::v4(), port)), resolver(io_service), buffer(new AtomicQueue<BufferItemType>()) { }
+    acceptor(io_service), resolver(io_service), buffer(new AtomicQueue<BufferItemType>()) {
+        this->acceptor.set_option(boost::asio::socket_base::reuse_address(true));
+        acceptor.bind(tcp::endpoint(tcp::v4(), port));
+    }
 
 
 void AsyncTCPServer::run() {
@@ -200,7 +203,7 @@ void AsyncTCPServer::run() {
     BOOST_LOG_TRIVIAL(debug) << "AsyncTCPServer::run: Starting io worker thread";
     this->io_worker = std::thread(&AsyncTCPServer::io_work, this);
     BOOST_LOG_TRIVIAL(debug) << "AsyncTCPServer::run: Threads started";
-    
+
     this->accept();
 }
 
@@ -212,13 +215,14 @@ void AsyncTCPServer::send(const std::string& ip, unsigned short port, const std:
     //     conn_iter->second->write(data);
     // } else {
         std::shared_ptr<std::string> datagram(new std::string(data));
-        BOOST_LOG_TRIVIAL(debug) << "AsyncTCPServer::send: Establishing connection with " << ip << ':' << port;
         if (!send_conn) 
             send_conn = TCPConnection::Create(this->io_service, this->buffer);
         else {
             BOOST_LOG_TRIVIAL(debug) << "AsyncTCPServer::send: Resetting socket";
             send_conn->reset_socket(this->io_service);
         }
+        send_conn->get_socket().set_option(boost::asio::socket_base::reuse_address(true));
+
         BOOST_LOG_TRIVIAL(debug) << "AsyncTCPServer::send: Creating address query on " << ip << ':' << port;
         tcp::resolver::query query(ip, std::to_string(port));
         this->resolver.async_resolve(query,
