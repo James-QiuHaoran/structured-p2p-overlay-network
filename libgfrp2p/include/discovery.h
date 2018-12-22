@@ -26,7 +26,7 @@ public:
 };
 
 
-class Discovery: public Receiver {
+class Discovery: public Receiver, public enable_shared_from_this<Discovery> {
     // Let wire protocol control the table
     friend class AsyncUDPServer;
 private:

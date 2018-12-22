@@ -11,7 +11,7 @@ public:
 
     void start(unsigned short port) {
         BOOST_LOG_TRIVIAL(debug) << "UDPTest::start: Allocating udp_server";
-        udp_server.reset(new AsyncUDPServer(static_pointer_cast<Receiver>(this->shared_from_this()), port));
+        udp_server.reset(new AsyncUDPServer(std::static_pointer_cast<Receiver>(this->shared_from_this()), port));
         this->udp_server->run();
     }
 
