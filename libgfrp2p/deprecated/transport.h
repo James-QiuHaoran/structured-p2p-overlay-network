@@ -2,20 +2,23 @@
 #define TRANSPORT_H
 
 #include <string>
+#include <array>
 #include <queue>
+#include <exception>
 #include <iostream>
 #include <thread>
 #include <condition_variable>
+#include <unordered_map>
 
-#include <string.h>
-#include <stdint.h>
-#include <errno.h>
+#include <cstring>
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <arpa/inet.h> 
-#include <fcntl.h>
-#include <unistd.h>
+#include <boost/asio.hpp>
+#include <boost/bind.hpp>
+#include <boost/log/trivial.hpp>
+#include <boost/enable_shared_from_this.hpp>
+
+using boost::asio::ip::tcp;
+using boost::asio::ip::udp;
 
 template <typename T>
 class AtomicQueue {
@@ -83,24 +86,36 @@ public:
     void send(const std::string& ip, unsigned short port, const std::string& data);
 
 private:
-    // Registered upper level receiver, calling its receive(const std::string & , unsigned short , const std::string & )
+
     std::shared_ptr<Receiver> receiver;
 
-    // One thread for sending, another for calling upper-level
-    std::thread receive_worker;
-    std::thread buffer_handler;
+    boost::asio::io_service io_service;
+    std::unique_ptr<boost::asio::io_service::work> work;
+    std::thread io_worker;
 
+    udp::socket socket;
+
+    // For incoming packets to queue up and unblock the socket
     std::unique_ptr<AtomicQueue<BufferItemType>> buffer;
+    std::thread handler;
 
-    // Routine of the threads
+    /* Only one piece of incoming data is kept
+     * If Receiver::receive() does not return promptly, packets may be ignored
+     * TODO: implement queue */
+    std::array<char, BUFFER_SIZE> recv_buffer;
+    udp::endpoint recv_endpoint;
+
     void receive();
+
+    // Boost server mechanism
+    void handle_receive(const boost::system::error_code& error, std::size_t bytes_transferred);
+    void handle_send(boost::shared_ptr<std::string> data, const boost::system::error_code& error, std::size_t bytes_transferred);
+
+    // Routine of the handling thread
     void handle();
-
-    int32_t udp_socket_id_;
-
+    void io_work();
 };
 
-#ifdef NDEBUG
 // A class that implements asynchronous TCP send and receive
 class TCPConnection: public boost::enable_shared_from_this<TCPConnection> {
 public:
@@ -195,6 +210,6 @@ private:
 
     void io_work();
 };
-#endif
+
 
 #endif

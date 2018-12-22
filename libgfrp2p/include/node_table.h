@@ -6,6 +6,7 @@
 #include <unordered_set>
 #include <memory>
 #include <mutex>
+#include <vector>
 
 #include <boost/log/trivial.hpp>
 
