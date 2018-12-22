@@ -83,7 +83,7 @@ void AsyncUDPServer::receive() {
         port = ntohs(udp_client_addr_.sin_port);
         data = std::string(recv_data, bytes_read);
 
-        this->buffer.enqueue_and_notify(BufferItemType(ip, port, data));
+        this->buffer->enqueue_and_notify(BufferItemType(ip, port, data));
 
     }
 }

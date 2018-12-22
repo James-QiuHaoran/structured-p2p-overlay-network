@@ -16,9 +16,9 @@
 
 class BaseApp {
 private:
-    Node node;
-    NodeTable node_table;
-    PeerManager peer_manager;
+    std::shared_ptr<Node> node;
+    std::shared_ptr<NodeTable> node_table;
+    std::shared_ptr<PeerManager> peer_manager;
 
 public:
 	// constructor

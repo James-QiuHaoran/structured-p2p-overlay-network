@@ -21,9 +21,10 @@ PeerManager::PeerManager() {}
 
 PeerManager::PeerManager(unsigned short port) {}
 
-PeerManager::PeerManager(Node node, NodeTable node_table, const std::string &start_time) {
-	this->node = std::make_shared<Node>(node);
-	this->node_table = std::make_shared<NodeTable>(node_table);
+PeerManager::PeerManager(const std:shared_ptr<Node>& node, const shared_ptr<NodeTable>& node_table, const std::string &start_time): 
+	node(node), node_table(node_table) {
+	// this->node = std::make_shared<Node>(node);
+	// this->node_table = std::make_shared<NodeTable>(node_table);
 	this->start_time = start_time;
 }
 

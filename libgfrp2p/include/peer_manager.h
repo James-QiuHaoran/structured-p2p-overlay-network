@@ -71,7 +71,7 @@ public:
     // constructors
     PeerManager();
     PeerManager(unsigned short port);
-    PeerManager(Node node, NodeTable node_table, const std::string &start_time);
+    PeerManager(const std:shared_ptr<Node>& node, const shared_ptr<NodeTable>& node_table, const std::string &start_time);
 
     // getters
     std::shared_ptr<Node> get_node();
