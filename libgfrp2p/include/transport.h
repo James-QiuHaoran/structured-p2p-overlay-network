@@ -197,6 +197,8 @@ private:
     void handle();
     void receive();
 };
-#endif
+#else
+
+using AsyncTCPServer = AsyncUDPServer;
 
 #endif
