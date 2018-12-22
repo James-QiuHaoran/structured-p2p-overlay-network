@@ -55,7 +55,7 @@ T AtomicQueue<T>::wait_for_dequeue() {
 
 // Classes that implement Receiver can be registered to the server
 // receive() will be called to handle received data
-class Receiver: public std::enable_shared_from_this<Receiver> {
+class Receiver {
 public:
     virtual void receive(const std::string& ip, unsigned short port, const std::string& data) = 0;
 
@@ -83,7 +83,7 @@ public:
     void send(const std::string& ip, unsigned short port, const std::string& data);
 
     ~AsyncUDPServer();
-    
+
 private:
     // Registered upper level receiver, calling its receive(const std::string & , unsigned short , const std::string & )
     std::shared_ptr<Receiver> receiver;

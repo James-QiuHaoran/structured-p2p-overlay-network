@@ -348,7 +348,7 @@ void BaseApp::start(const std::string &start_time, int num_nodes_in_dist, int nu
         }
     }
 
-    this->peer_manager = std::shared_ptr<PeerManager>(node, node_table, start_time);
+    this->peer_manager = std::make_shared<PeerManager>(node, node_table, start_time);
 
     BOOST_LOG_TRIVIAL(debug) << "Starting HGFR PeerManager on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
     this->peer_manager->start();

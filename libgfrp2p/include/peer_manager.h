@@ -46,7 +46,7 @@ public:
 /* PeerManager class
  * responsible for broadcasting messages
  */
-class PeerManager: public Receiver {
+class PeerManager: public Receiver, public std::enable_shared_from_this<PeerManager> {
 private:
     // contains node information
     std::shared_ptr<Node> node;

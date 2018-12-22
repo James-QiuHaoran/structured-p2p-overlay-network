@@ -78,13 +78,13 @@ target_link_libraries(test_udp
     ${PROJECT_NAME}
 )
 
-add_executable(test_tcp
-    test/tcp.cpp
-)
+# add_executable(test_tcp
+#     test/tcp.cpp
+# )
 
-target_link_libraries(test_tcp
-    ${PROJECT_NAME}
-)
+# target_link_libraries(test_tcp
+#     ${PROJECT_NAME}
+# )
 
 add_executable(app
     src/app.cpp

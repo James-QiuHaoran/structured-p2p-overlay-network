@@ -4,14 +4,14 @@
 
 #include "transport.h"
 
-class UDPTest: public Receiver {
+class UDPTest: public Receiver, public enable_shared_from_this<TCPTest> {
 public:
 
     std::unique_ptr<AsyncUDPServer> udp_server;
 
     void start(unsigned short port) {
         BOOST_LOG_TRIVIAL(debug) << "UDPTest::start: Allocating udp_server";
-        udp_server.reset(new AsyncUDPServer(this->shared_from_this(), port));
+        udp_server.reset(new AsyncUDPServer(static_pointer_cast<Receiver>(this->shared_from_this()), port));
         this->udp_server->run();
     }
 
