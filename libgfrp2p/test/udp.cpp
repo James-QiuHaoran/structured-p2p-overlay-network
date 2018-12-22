@@ -4,7 +4,7 @@
 
 #include "transport.h"
 
-class UDPTest: public Receiver, public enable_shared_from_this<TCPTest> {
+class UDPTest: public Receiver, public std::enable_shared_from_this<TCPTest> {
 public:
 
     std::unique_ptr<AsyncUDPServer> udp_server;
