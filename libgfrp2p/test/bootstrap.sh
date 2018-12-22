@@ -52,6 +52,7 @@ eval "num_nodes_in_a_district=\$(( ($num_nodes_total/$num_districts_total) ))"
 echo "== Boostrap Stage =="
 
 starting_port_num="2000"
+
 for (( i=0; i<$num_nodes_total; i++ ))
 do
 	printf "\nBoostrapping node #$i ... \n"
