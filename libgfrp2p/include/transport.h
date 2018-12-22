@@ -82,6 +82,8 @@ public:
     // Encapsulate low-level mechanism
     void send(const std::string& ip, unsigned short port, const std::string& data);
 
+    ~AsyncUDPServer();
+    
 private:
     // Registered upper level receiver, calling its receive(const std::string & , unsigned short , const std::string & )
     std::shared_ptr<Receiver> receiver;
@@ -96,6 +98,7 @@ private:
     void receive();
     void handle();
 
+    // Socket fd
     int32_t udp_socket_id_;
 
 };
@@ -192,8 +195,7 @@ private:
     
     // Buffer handler
     void handle();
-
-    void io_work();
+    void receive();
 };
 #endif
 

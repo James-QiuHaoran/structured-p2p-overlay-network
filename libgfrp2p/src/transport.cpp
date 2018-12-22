@@ -9,7 +9,8 @@ AsyncUDPServer::AsyncUDPServer(const std::shared_ptr<Receiver>& receiver, unsign
     std::cout << "INFO: AsyncUDPServer::(constructor): Initializing to port " << port << " on any interface" << std::endl;
 
     udp_socket_id_ = socket(AF_INET, SOCK_DGRAM, 0);
-
+    
+    struct sockaddr_in udp_addr_;
     udp_addr_.sin_family = AF_INET;
     udp_addr_.sin_port = htons(port);
     udp_addr_.sin_addr.s_addr = INADDR_ANY;
@@ -66,6 +67,10 @@ void AsyncUDPServer::receive() {
     char recv_data[BUFFER_SIZE];
     struct sockaddr_in udp_client_addr_;
     int32_t bytes_read;
+
+    std::string ip;
+    unsigned short port;
+    std::string data;
 
     for (;;) {
         bytes_read = recvfrom(this->udp_socket_id_, recv_data, BUFFER_SIZE, 0, (struct sockaddr *)&udp_client_addr_, (socklen_t*)&addr_len);

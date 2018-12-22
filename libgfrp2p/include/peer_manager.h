@@ -55,10 +55,10 @@ private:
     std::shared_ptr<NodeTable> node_table;
 
     // TCP server
-    AsyncTCPServer* tcp_server;
+    // AsyncTCPServer* tcp_server;
 
     // UDP server
-    // AsyncUDPServer* tcp_server;
+    AsyncUDPServer* tcp_server;
 
     // seed for random number generator
     boost::random::mt19937 gen;
