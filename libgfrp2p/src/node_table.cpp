@@ -181,7 +181,7 @@ std::shared_ptr<Node> NodeTable::get_peer(unsigned long level,  const std::strin
     return this->get_node_copy(level, id);
 }
 
-std::shared_ptr<Node> NodeTable::get_peer_by_order(unsigned long level,  int order) {
+std::shared_ptr<Node> NodeTable::get_peer_by_order(unsigned long level, int order) {
     // does not reside in that level's ring
     if (level > this->tables.size() - 1)
         return std::shared_ptr<Node>();
@@ -214,5 +214,5 @@ int NodeTable::get_peer_list_size(unsigned long level) {
 
     // return the end id
     auto ring = this->tables.at(level);
-    return ring.peer_list.size();
+    return (ring.peer_list.size() - 1);
 }

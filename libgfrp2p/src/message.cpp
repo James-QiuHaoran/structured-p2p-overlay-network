@@ -14,7 +14,7 @@ Message::Message(std::string messageID, int type, unsigned long from_level, std:
 	from_level(from_level),
 	sender_id(sender_id),
 	receiver_id(receiver_id) {
-		this->node_order = 0;
+		this->node_order = -1;
 	}
     
 Message::Message(unsigned short io_type, std::string messageID, int type, unsigned long from_level, std::string sender_id, std::string receiver_id):
@@ -24,7 +24,7 @@ Message::Message(unsigned short io_type, std::string messageID, int type, unsign
 	from_level(from_level),
 	sender_id(sender_id),
 	receiver_id(receiver_id) {
-		this->node_order = 0;
+		this->node_order = -1;
 	}
 
 message_key_t Message::get_key() const { return this->io_timestamp; }
