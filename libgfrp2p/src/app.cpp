@@ -340,8 +340,8 @@ void BaseApp::start(const std::string &start_time, int num_nodes_in_dist, int nu
     BOOST_LOG_TRIVIAL(debug) << "Node Tables on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
     for (auto table : this->node_table->get_tables()) {
         BOOST_LOG_TRIVIAL(debug) << "Level: " + std::to_string(table.ring_level);
-        for (auto peer : table.peer_set) {
-            BOOST_LOG_TRIVIAL(debug) << "Peer - " + peer.first + " " + peer.second->get_ip() + ":" + std::to_string(peer.second->get_port());
+        for (auto peer : table.peer_list) {
+            BOOST_LOG_TRIVIAL(debug) << "Peer - " + peer->get_id() + " " + peer->get_ip() + ":" + std::to_string(peer->get_port());
         }
         for (auto contact_node : table.contact_nodes) {
             BOOST_LOG_TRIVIAL(debug) << "Contact node - " + contact_node.first + " " + contact_node.second->get_ip() + ":" + std::to_string(contact_node.second->get_port());

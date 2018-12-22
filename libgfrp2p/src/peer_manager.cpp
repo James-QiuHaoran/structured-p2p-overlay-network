@@ -182,7 +182,12 @@ void PeerManager::broadcast_within_ring(Message msg, unsigned long current_level
 
 	sent_ids.insert(this->node->get_id().substr(level_to_id_start[current_level], level_to_id_length[current_level]));
 
-	while (current_id + pow(k, i) <= end_ID) {
+	if (this->node->get_port() == 2030)
+		BOOST_LOG_TRIVIAL(debug) << "test - level: " << current_level << "end_ID: " << end_ID;
+
+	while (node_order + pow(k, i) <= end_ID) {
+		if (this->node->get_port() == 2030)
+			BOOST_LOG_TRIVIAL(debug) << node_order << "+" << k << "^" << i;
 		current_id = node_order + pow(k, i);
 		if (pow(k, i) <= node_order) {
 			i++;
