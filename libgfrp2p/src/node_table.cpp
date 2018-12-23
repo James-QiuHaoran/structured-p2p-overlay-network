@@ -216,3 +216,7 @@ int NodeTable::get_peer_list_size(unsigned long level) {
     auto ring = this->tables.at(level);
     return (ring.peer_list.size() - 1);
 }
+
+unsigned long NodeTable::get_top_level() {
+    return this->tables.size() - 1;
+}

@@ -182,12 +182,7 @@ void PeerManager::broadcast_within_ring(Message msg, unsigned long current_level
 
 	sent_ids.insert(this->node->get_id().substr(level_to_id_start[current_level], level_to_id_length[current_level]));
 
-	if (this->node->get_port() == 2030)
-		BOOST_LOG_TRIVIAL(debug) << "test - level: " << current_level << "end_ID: " << end_ID;
-
 	while (node_order + pow(k, i) <= end_ID) {
-		if (this->node->get_port() == 2030)
-			BOOST_LOG_TRIVIAL(debug) << node_order << "+" << k << "^" << i;
 		current_id = node_order + pow(k, i);
 		if (pow(k, i) <= node_order) {
 			i++;
@@ -205,7 +200,7 @@ void PeerManager::broadcast_within_ring(Message msg, unsigned long current_level
 
 			// mark that region to be "sent"
 			std::string region_id = receiver->get_id().substr(level_to_id_start[current_level], level_to_id_length[current_level]);
-			if (sent_ids.find(region_id) != sent_ids.end()) {
+			if (sent_ids.find(region_id) != sent_ids.end() || current_level == 0) {
 				// no need to broadcast downwards in that region
 				msg.set_type(5);
 			} else {
@@ -383,7 +378,10 @@ void PeerManager::on_receive(const Message &msg, const std::string &data) {
 			break;
 		} case 2 : {
 			BOOST_LOG_TRIVIAL(trace) << this->node->get_port() << " - " << "[MSG] Broadcast Within Ring & Downwards - I: Within Ring of level " << msg.get_from_level();
-			BOOST_LOG_TRIVIAL(trace) << this->node->get_port() << " - " << data;
+			
+			if (msg.get_from_level() == this->node_table->get_top_level())
+				BOOST_LOG_TRIVIAL(trace) << this->node->get_port() << " - " << data;
+			
 			// within ring
 			Message msg_new(random_string(MSG_HASH_LENGTH), 2, msg.get_from_level(), this->node->get_id(), "");
 			msg_new.set_node_order(msg.get_node_order());
@@ -391,10 +389,7 @@ void PeerManager::on_receive(const Message &msg, const std::string &data) {
 			this->broadcast_within_ring(msg_new, msg_new.get_from_level(), k, data);
 
 			// downwards
-			if (msg.get_from_level() == 0) {
-				// has been the bottom ring, receive the message
-				BOOST_LOG_TRIVIAL(trace) << this->node->get_port() << " - " << "Message Received [touched the end-point]";
-			} else {
+			if (msg.get_from_level() >= 1) {
 				BOOST_LOG_TRIVIAL(trace) << this->node->get_port() << " - " << "[MSG] Broadcast Within Ring & Downwards - II: Downwards to level " << msg.get_from_level() - 1;
 				// keep broadcast downwards
 				Message msg_down(random_string(MSG_HASH_LENGTH), 2, msg.get_from_level()-1, this->node->get_id(), "");
@@ -405,7 +400,9 @@ void PeerManager::on_receive(const Message &msg, const std::string &data) {
 			break;
 		} case 5 : {
 			BOOST_LOG_TRIVIAL(trace) << this->node->get_port() << " - " << "[MSG] Only Broadcast Within Ring of level " << msg.get_from_level();
-			BOOST_LOG_TRIVIAL(trace) << this->node->get_port() << " - " << data;
+			
+			if (msg.get_from_level() == this->node_table->get_top_level())
+				BOOST_LOG_TRIVIAL(trace) << this->node->get_port() << " - " << data;
 			
 			// within ring
 			Message msg_new(random_string(MSG_HASH_LENGTH), 2, msg.get_from_level(), this->node->get_id(), "");
