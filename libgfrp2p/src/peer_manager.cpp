@@ -259,10 +259,6 @@ void PeerManager::broadcast_within_ring(Message msg, unsigned long current_level
 		}
 	}
 
-	if (this->node->get_port() == 2030) {
-		BOOST_LOG_TRIVIAL(debug) << "2030: Done with broadcast withing ring | level " << current_level;
-	}
-
 	return;
 }
 
