@@ -87,16 +87,16 @@ public:
     // broadcast/multicast a message
     void broadcast(const std::string &data);
     void broadcast_up(Message msg, unsigned long current_level, const std::string &data);
-    void broadcast_within_ring(Message msg, unsigned long current_level, int k, const std::string &data);
+    void broadcast_within_ring(Message msg, unsigned long current_level, int k, const std::string &data, std::unordered_set<std::string> sent_ids);
     void broadcast_down(Message msg, unsigned long current_level, const std::string &data);
     void multicast_to_contact_nodes(Message msg, unsigned long current_level, const std::string &data);
-    void send(std::shared_ptr<Node> node, const Message &msg, const std::string &data);
+    void send(std::shared_ptr<Node> node, const Message &msg, const std::string &data, std::unordered_set<std::string> sent_ids);
 
     // override the receive() func inherited from Receiver
     virtual void receive(const std::string& ip, unsigned short port, const std::string &data) override;
 
     // on receive a message
-    void on_receive(const Message &msg, const std::string &data);
+    void on_receive(const Message &msg, const std::string &data, std::unordered_set<std::string> sent_ids);
 
     // on a node join
     void on_new_connection(std::shared_ptr<Node> node);
