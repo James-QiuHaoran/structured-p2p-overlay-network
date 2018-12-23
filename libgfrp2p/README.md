@@ -2,7 +2,6 @@
 
 ## TODO List
 
-- Debug transport
 - Implement script to retrieve time of send/recv, number of messages for one broadcast
 - Bootstrap nodes implementation on docker (config)
 	- distribute IDs and construct the network (only for evaluation: use a central server)

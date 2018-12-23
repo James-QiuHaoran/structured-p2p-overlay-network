@@ -76,6 +76,9 @@ public:
     std::shared_ptr<Node> get_peer_by_order(unsigned long level, int order);     // get the particular peer by order
     int get_node_id_in_vector(unsigned long level, const std::string& id);       // get the node id in the vector
     int get_peer_list_size(unsigned long level);                                 // get the size of the peer_list in the ring
+
+    // used to tell the receiving time of the msg
+    unsigned long get_top_level();
 };
 
 #endif
