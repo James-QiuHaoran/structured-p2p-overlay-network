@@ -101,12 +101,15 @@ void NodeTable::set_node_last_pong_now(unsigned long level, const std::string& i
 bool NodeTable::is_contact_node(unsigned long level) {
     std::lock_guard<std::mutex> lock(*mlock);
     if (level > this->tables.size() - 1) {
+        // BOOST_LOG_TRIVIAL(debug) << "not in that ring";
         return false;  // does not resides in the ring of that level
-    } else if (level < this->tables.size() - 1) {
+    } else { //  (level <= this->tables.size() - 1)
+        // BOOST_LOG_TRIVIAL(debug) << "in higher ring";
         return true;   // resides in higher levels -> must be one of the contact nodes of that level's ring
-    } else {
+    }/* else {
+        BOOST_LOG_TRIVIAL(debug) << "not in one level higher";
         return false;  // does not resides in one level higher
-    }
+    }*/
 }
 
 std::unordered_set<std::shared_ptr<Node>> NodeTable::get_contact_nodes(unsigned long level) {
@@ -178,7 +181,7 @@ std::shared_ptr<Node> NodeTable::get_peer(unsigned long level,  const std::strin
     return this->get_node_copy(level, id);
 }
 
-std::shared_ptr<Node> NodeTable::get_peer_by_order(unsigned long level,  int order) {
+std::shared_ptr<Node> NodeTable::get_peer_by_order(unsigned long level, int order) {
     // does not reside in that level's ring
     if (level > this->tables.size() - 1)
         return std::shared_ptr<Node>();
@@ -211,5 +214,5 @@ int NodeTable::get_peer_list_size(unsigned long level) {
 
     // return the end id
     auto ring = this->tables.at(level);
-    return ring.peer_list.size();
+    return (ring.peer_list.size() - 1);
 }
