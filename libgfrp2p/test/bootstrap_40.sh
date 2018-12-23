@@ -13,8 +13,8 @@ node0="000000000"
 
 num_countries_in_a_continent=1
 num_states_in_a_country=1
-num_cities_in_a_state=3
-num_districts_in_a_city=6
+num_cities_in_a_state=2
+num_districts_in_a_city=2
 num_nodes_in_a_district=10
 
 num_continents=1
@@ -49,13 +49,6 @@ eval "num_nodes_in_a_state=\$(( ($num_nodes_total/$num_states_total) ))"
 eval "num_nodes_in_a_city=\$(( ($num_nodes_total/$num_cities_total) ))"
 eval "num_nodes_in_a_district=\$(( ($num_nodes_total/$num_districts_total) ))"
 
-echo "# of nodes in a continent: $num_nodes_in_a_continent"
-echo "# of nodes in a country: $num_nodes_in_a_country"
-echo "# of nodes in a state: $num_nodes_in_a_state"
-echo "# of nodes in a city: $num_nodes_in_a_city"
-echo "# of nodes in a district: $num_nodes_in_a_district"
-echo ""
-
 echo "== Boostrap Stage =="
 
 starting_port_num="2000"
@@ -68,29 +61,29 @@ do
 	eval "continent_id=\$(( $continent0 + $i/$num_nodes_in_a_continent ))"
 	continent_id=$(printf "%03d" $continent_id)
 
-	eval "country_id=\$(( $country0 + ($i/$num_nodes_in_a_country)%$num_countries_in_a_continent ))"
-	if [ "$num_countries_in_a_continent" -eq "1" ]
+	eval "country_id=\$(( $country0 + ($i/$num_nodes_in_a_country)%$num_continents ))"
+	if [ "$num_continents" -eq "1" ]
 	then
 		eval "country_id=\$(( $country0 + $i/$num_nodes_in_a_country ))"
 	fi
 	country_id=$(printf "%04d" $country_id)
 
-	eval "state_id=\$(( $state0 + ($i/$num_nodes_in_a_state)%$num_states_in_a_country ))"
-	if [ "$num_states_in_a_country" -eq "1" ]
+	eval "state_id=\$(( $state0 + ($i/$num_nodes_in_a_state)%$num_countries_total ))"
+	if [ "$num_countries_total" -eq "1" ]
 	then
 		eval "state_id=\$(( $state0 + $i/$num_nodes_in_a_state ))"
 	fi
 	state_id=$(printf "%05d" $state_id)
 
-	eval "city_id=\$(( $city0 + ($i/$num_nodes_in_a_city)%$num_cities_in_a_state ))"
-	if [ "$num_cities_in_a_state" -eq "1" ]
+	eval "city_id=\$(( $city0 + ($i/$num_nodes_in_a_city)%$num_states_total ))"
+	if [ "$num_states_total" -eq "1" ]
 	then
 		eval "city_id=\$(( $city0 + $i/$num_nodes_in_a_city ))"
 	fi
 	city_id=$(printf "%06d" $city_id)
 
-	eval "district_id=\$(( $district0 + ($i/$num_nodes_in_a_district)%$num_districts_in_a_city ))"
-	if [ "$num_districts_in_a_city" -eq "1" ]
+	eval "district_id=\$(( $district0 + ($i/$num_nodes_in_a_district)%$num_cities_total ))"
+	if [ "$num_cities_total" -eq "1" ]
 	then
 		eval "district_id=\$(( $district0 + $i/$num_nodes_in_a_district ))"
 	fi
@@ -113,9 +106,9 @@ do
 
 	num_nodes_in_dist=$num_nodes_in_a_district
 	num_cnodes_in_dist=2
-	num_nodes_in_city=12
+	num_nodes_in_city=4
 	num_cnodes_in_city=2
-	num_nodes_in_state=6
+	num_nodes_in_state=4
 	num_cnodes_in_state=2
 	num_nodes_in_country=1
 	num_cnodes_in_country=1
