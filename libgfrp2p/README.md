@@ -15,6 +15,8 @@
 	- insert time recording, number of messages recording functions (data retrieval)
 - Code refactoring
 
+`grep "Received data: Hello World" output | cut -d' ' -f7 | sort | uniq | wc -l`
+
 ## Dependencies
 - libboost-system-dev
 - libboost-log-dev
