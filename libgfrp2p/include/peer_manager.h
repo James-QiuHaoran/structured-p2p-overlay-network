@@ -116,7 +116,8 @@ public:
     int random_num_in_range(int low, int high);
 
     // write messages to file system
-    void log_messages();
+    void log_message_records();
+    void append_message_record(const Message& msg);
 };
 
 #endif

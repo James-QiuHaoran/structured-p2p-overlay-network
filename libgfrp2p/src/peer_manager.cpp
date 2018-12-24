@@ -23,8 +23,6 @@ PeerManager::PeerManager(unsigned short port) {}
 
 PeerManager::PeerManager(const std::shared_ptr<Node>& node, const std::shared_ptr<NodeTable>& node_table, const std::string &start_time): 
 	node(node), node_table(node_table) {
-	// this->node = std::make_shared<Node>(node);
-	// this->node_table = std::make_shared<NodeTable>(node_table);
 	this->start_time = start_time;
 }
 
@@ -35,7 +33,6 @@ PeerError::PeerError(std::string errorType, std::string errorMessage):
 	errorMessage(errorMessage) {}
 
 // getters
-
 std::string PeerError::get_errorType() const { return this->errorType; }
 
 std::string PeerError::get_errorMessage() const { return this->errorMessage; }
@@ -82,9 +79,10 @@ void PeerManager::send(std::shared_ptr<Node> node, const Message &msg, const std
 							   data;
 
 	// for message logging
-	this->msg_table.insert_sent(msg);
+	Message inserted_msg = this->msg_table.insert_sent(msg);
+	this->append_message_record(inserted_msg);
 
-	BOOST_LOG_TRIVIAL(trace) << this->node->get_port() << " - " << "Send msg - (" << msg.get_type() << ") | " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "] -> " << "[" << node->get_ip() << ":" << node->get_port() << "]" << " | FL: " << msg.get_from_level();
+	BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "Send msg - (" << msg.get_type() << ") | " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "] -> " << "[" << node->get_ip() << ":" << node->get_port() << "]" << " | FL: " << msg.get_from_level();
 
 	// send via TCP
 	this->tcp_server->send(node->get_ip(), node->get_port(), data_string);
@@ -101,11 +99,13 @@ void PeerManager::broadcast(const std::string &data) {
 	std::unordered_set<std::shared_ptr<Node>> contact_nodes = this->node_table->get_contact_nodes(0);
 
 	// randomly select one contact from the contact nodes
-	int random_id = rand() % contact_nodes.size();
+	// int random_id = rand() % contact_nodes.size();
+	std::string random_id = std::string(32, '0');
 	int i = 0;
 	std::shared_ptr<Node> receiver;
 	for (auto contact_node : contact_nodes) {
-		if (i == random_id) {
+		// if (i == random_id) {
+		if (contact_node->get_id() == random_id) {
 			receiver = contact_node;
 			break;
 		}
@@ -116,7 +116,7 @@ void PeerManager::broadcast(const std::string &data) {
 	// ask contact node to broadcast
 	msg.set_receiver_id(receiver->get_id());
 
-	BOOST_LOG_TRIVIAL(trace) << this->node->get_port() << " - " << "Broadcast msg - (" << msg.get_type() << ") | " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "] -> " << "[" << receiver->get_ip() << ":" << receiver->get_port() << "]" << " | FL: " << msg.get_from_level();
+	BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "Broadcast msg - (" << msg.get_type() << ") | " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "] -> " << "[" << receiver->get_ip() << ":" << receiver->get_port() << "]" << " | FL: " << msg.get_from_level();
 	
 	std::unordered_set<std::string> sent_ids;
 	this->send(receiver, msg, data, sent_ids);
@@ -151,7 +151,7 @@ void PeerManager::broadcast_up(Message msg, unsigned long current_level, const s
 	// already reach the highest level, start to broadcast downwards
 	if (contact_nodes_upper.size() == 0) {
 		int k = 2;
-		BOOST_LOG_TRIVIAL(trace) << this->node->get_port() << " - Received data: " << data;
+		BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - Received data: " << data;
 		this->broadcast_within_ring(msg, current_level, k, data, sent_ids);
 		return;
 	}
@@ -172,7 +172,7 @@ void PeerManager::broadcast_up(Message msg, unsigned long current_level, const s
 	// ask contact node in the upper ring to broadcast
 	msg.set_receiver_id(receiver->get_id());
 
-	BOOST_LOG_TRIVIAL(trace) << this->node->get_port() << " - " << "Broadcast Up msg - (" << msg.get_type() << ") | " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "] -> " << "[" << receiver->get_ip() << ":" << receiver->get_port() << "]" << " | FL: " << msg.get_from_level();
+	BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "Broadcast Up msg - (" << msg.get_type() << ") | " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "] -> " << "[" << receiver->get_ip() << ":" << receiver->get_port() << "]" << " | FL: " << msg.get_from_level();
 
 	this->send(receiver, msg, data, sent_ids);
 
@@ -240,15 +240,13 @@ void PeerManager::broadcast_within_ring(Message msg, unsigned long current_level
 				// no need to broadcast downwards
 				msg.set_type(5);
 			} else {
-				std::string id_lower = receiver->get_id().substr(level_to_id_start[current_level-1], level_to_id_length[current_level-1]);
-				if (id_lower != std::string(level_to_id_length[current_level-1], '0')) {
+				std::string id_lower = receiver->get_id().substr(level_to_id_start[0], level_to_id_length[0]);
+				if (id_lower != std::string(level_to_id_length[0], '0')) {
 				// if (sent_ids.find(region_id) != sent_ids.end()) {
 					// no need to broadcast downwards in that region
-					BOOST_LOG_TRIVIAL(debug) << ">>>> L" << current_level << " type 5 - " << this->node->get_port() << " -> " << receiver->get_port() << " | " << id_lower << " : " << std::string(level_to_id_length[current_level-1], '0');
 					msg.set_type(5);
 				} else {
 					// broadcast both downwards in that region and withing ring
-					BOOST_LOG_TRIVIAL(debug) << ">>>> L" << current_level << " type 2 - " << this->node->get_port() << " -> " << receiver->get_port() << " | " << id_lower << " : " << std::string(level_to_id_length[current_level-1], '0');
 					msg.set_type(2);
 
 					// mark that region to be "sent"
@@ -256,7 +254,11 @@ void PeerManager::broadcast_within_ring(Message msg, unsigned long current_level
 				}
 			}
 
-			BOOST_LOG_TRIVIAL(trace) << this->node->get_port() << " - " << "Broadcast W/ Ring " << node_order << "+" << k << "^" << i << " - (" << msg.get_type() << ") | " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "] -> " << "[" << receiver->get_ip() << ":" << receiver->get_port() << "]" << " | FL: " << msg.get_from_level();
+			// " << node_order << "+" << k << "^" << i << " 
+			BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "Broadcast in Ring - (" << msg.get_type() << ") | " 
+										<< "[" << this->node->get_ip() << ":" << this->node->get_port() << "] -> " 
+										<< "[" << receiver->get_ip() << ":" << receiver->get_port() << "]" 
+										<< " | FL: " << msg.get_from_level();
 
 			this->send(receiver, msg, data, sent_ids_for_receivers);
 			i++;
@@ -293,7 +295,10 @@ void PeerManager::broadcast_down(Message msg, unsigned long current_level, const
 	// ask contact node in the upper ring to broadcast
 	msg.set_receiver_id(receiver->get_id());
 
-	BOOST_LOG_TRIVIAL(trace) << this->node->get_port() << " - " << "Broadcast Down msg - (" << msg.get_type() << ") | " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "] -> " << "[" << receiver->get_ip() << ":" << receiver->get_port() << "]" << " | FL: " << msg.get_from_level();
+	BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "Broadcast Down msg - (" << msg.get_type() << ") | " 
+								<< "[" << this->node->get_ip() << ":" << this->node->get_port() << "] -> " 
+								<< "[" << receiver->get_ip() << ":" << receiver->get_port() << "]" 
+								<< " | FL: " << msg.get_from_level();
 
 	std::unordered_set<std::string> sent_ids;
 	this->send(receiver, msg, data, sent_ids);
@@ -347,10 +352,11 @@ void PeerManager::receive(const std::string& ip, unsigned short port, const std:
 
 	msg.set_node_order(data_node_id);
 
-	BOOST_LOG_TRIVIAL(trace) << this->node->get_port() << " - " << "Received msg from wire - (" << msg.get_type() << ") | " << " -> " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "] | FL: " << msg.get_from_level();
+	BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "Received msg from wire - (" << msg.get_type() << ") | " << " -> " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "] | FL: " << msg.get_from_level();
 
 	// for message logging
-	this->msg_table.insert_received(msg);
+	Message inserted_msg = this->msg_table.insert_received(msg);
+	this->append_message_record(inserted_msg);
 	
 	// enter control flow
 	this->on_receive(msg, data_in_msg, sent_ids);
@@ -360,7 +366,7 @@ void PeerManager::receive(const std::string& ip, unsigned short port, const std:
 
 // on receiving a message
 void PeerManager::on_receive(const Message &msg, const std::string &data, std::unordered_set<std::string> sent_ids) {
-	BOOST_LOG_TRIVIAL(trace) << this->node->get_port() << " - " << "On Receive msg - (" << msg.get_type() << ") | " << " -> " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "] | FL: " << msg.get_from_level();
+	BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "On Receive msg - (" << msg.get_type() << ") | " << " -> " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "] | FL: " << msg.get_from_level();
 
 	std::string sender_id = msg.get_sender_id();
 	std::string receiver_id = this->node->get_id();
@@ -387,7 +393,7 @@ void PeerManager::on_receive(const Message &msg, const std::string &data, std::u
 	// control flow
 	switch(msg.get_type()) {
 		case 0 : {
-			BOOST_LOG_TRIVIAL(trace) << this->node->get_port() << " - " << "[MSG] Broadcast Upwards - from the lower level";
+			BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "[MSG] Broadcast Upwards - from the lower level";
 			if (!this->node_table->is_contact_node(msg.get_from_level()+1)) {
 				// if not contact node
 				Message msg_new(random_string(MSG_HASH_LENGTH), 1, msg.get_from_level()+1, this->node->get_id(), "");
@@ -397,7 +403,7 @@ void PeerManager::on_receive(const Message &msg, const std::string &data, std::u
 				Message msg_new(random_string(MSG_HASH_LENGTH), 2, msg.get_from_level()+1, this->node->get_id(), "");
 				int k = 2;
 				msg_new.set_node_order(0);
-				BOOST_LOG_TRIVIAL(trace) << this->node->get_port() << " - Received data: " << data;
+				BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - Received data: " << data;
 
 				// within ring
 				this->broadcast_within_ring(msg_new, msg_new.get_from_level(), k, data, sent_ids);
@@ -419,7 +425,7 @@ void PeerManager::on_receive(const Message &msg, const std::string &data, std::u
 			}
 			break;
 		} case 1 : {
-			BOOST_LOG_TRIVIAL(trace) << this->node->get_port() << " - " << "[MSG] Broadcast Upwards - from the same level";
+			BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "[MSG] Broadcast Upwards - from the same level";
 			if (!this->node_table->is_contact_node(msg.get_from_level())) {
 				// if not contact node
 				Message msg_new(random_string(MSG_HASH_LENGTH), 1, msg.get_from_level(), this->node->get_id(), "");
@@ -429,7 +435,7 @@ void PeerManager::on_receive(const Message &msg, const std::string &data, std::u
 				Message msg_new(random_string(MSG_HASH_LENGTH), 2, msg.get_from_level(), this->node->get_id(), "");
 				msg_new.set_node_order(0);
 				int k = 2;
-				BOOST_LOG_TRIVIAL(trace) << this->node->get_port() << " - Received data: " << data;
+				BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - Received data: " << data;
 
 				// within ring
 				this->broadcast_within_ring(msg_new, msg_new.get_from_level(), k, data, sent_ids);
@@ -451,10 +457,10 @@ void PeerManager::on_receive(const Message &msg, const std::string &data, std::u
 			}
 			break;
 		} case 2 : {
-			BOOST_LOG_TRIVIAL(trace) << this->node->get_port() << " - " << "[MSG] Broadcast Within Ring & Downwards - I: Within Ring of level " << msg.get_from_level();
+			BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "[MSG] Broadcast Within Ring & Downwards - I: Within Ring of level " << msg.get_from_level();
 			
 			if (msg.get_from_level() == this->node_table->get_top_level())
-				BOOST_LOG_TRIVIAL(trace) << this->node->get_port() << " - Received data: " << data;
+				BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - Received data: " << data;
 			
 			// within ring
 			Message msg_new(random_string(MSG_HASH_LENGTH), 2, msg.get_from_level(), this->node->get_id(), "");
@@ -464,7 +470,7 @@ void PeerManager::on_receive(const Message &msg, const std::string &data, std::u
 
 			// downwards
 			if (msg.get_from_level() >= (unsigned long)1) {
-				BOOST_LOG_TRIVIAL(trace) << this->node->get_port() << " - " << "[MSG] Broadcast Within Ring & Downwards - II: Downwards to level " << msg.get_from_level() - 1;
+				BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "[MSG] Broadcast Within Ring & Downwards - II: Downwards to level " << msg.get_from_level() - 1;
 				// keep broadcast downwards
 				int i = 1;
 				while (msg.get_from_level() >= (unsigned long)i) {
@@ -478,10 +484,10 @@ void PeerManager::on_receive(const Message &msg, const std::string &data, std::u
 			}
 			break;
 		} case 5 : {
-			BOOST_LOG_TRIVIAL(trace) << this->node->get_port() << " - " << "[MSG] Only Broadcast Within Ring of level " << msg.get_from_level();
+			BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "[MSG] Only Broadcast Within Ring of level " << msg.get_from_level();
 			
 			if (msg.get_from_level() == this->node_table->get_top_level())
-				BOOST_LOG_TRIVIAL(trace) << this->node->get_port() << " - Received data: " << data;
+				BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - Received data: " << data;
 			
 			// within ring
 			Message msg_new(random_string(MSG_HASH_LENGTH), 2, msg.get_from_level(), this->node->get_id(), "");
@@ -491,7 +497,7 @@ void PeerManager::on_receive(const Message &msg, const std::string &data, std::u
 
 			break;
 		} case 3 : {
-			BOOST_LOG_TRIVIAL(trace) << this->node->get_port() << " - " << "[MSG] Election Result Broadcast Upwards & Downwards One Level";
+			BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "[MSG] Election Result Broadcast Upwards & Downwards One Level";
 			// continue to broadcast within ring
 
 			// downwards to all nodes of the lower level ring
@@ -501,10 +507,10 @@ void PeerManager::on_receive(const Message &msg, const std::string &data, std::u
 				this->broadcast_within_ring(lower_ring_msg, msg.get_from_level()-1, k, data, sent_ids);
 			break;
 		} case 4 : {
-			BOOST_LOG_TRIVIAL(trace) << this->node->get_port() << " - " << "[MSG] Election Result Received";
+			BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "[MSG] Election Result Received";
 			break;
 		} default : {
-			BOOST_LOG_TRIVIAL(trace) << this->node->get_port() << " - " << "[MSG] Unknown Message Type";
+			BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "[MSG] Unknown Message Type";
 			break;
 		}
 	}
@@ -560,10 +566,10 @@ void on_lost_connection(std::shared_ptr<Node> node) {
 
 // start the server
 void PeerManager::start() {
-	BOOST_LOG_TRIVIAL(debug) << "Starting the TCP server on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
+	BOOST_LOG_TRIVIAL(trace) << "Starting the TCP server on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
     this->tcp_server = new AsyncUDPServer(std::static_pointer_cast<Receiver>(this->shared_from_this()), this->node->get_port());
     
-	BOOST_LOG_TRIVIAL(debug) << "Running the TCP server on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
+	BOOST_LOG_TRIVIAL(trace) << "Running the TCP server on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
     this->tcp_server->run();
 
     return;
@@ -571,7 +577,7 @@ void PeerManager::start() {
 
 // stop the peer
 void PeerManager::stop() {
-	BOOST_LOG_TRIVIAL(debug) << "Stopping the TCP server on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
+	BOOST_LOG_TRIVIAL(trace) << "Stopping the TCP server on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
     this->tcp_server->stop();
 
     return;
@@ -584,14 +590,22 @@ int PeerManager::random_num_in_range(int low, int high) {
 }
 
 // write messages received and sent to the file system
-void PeerManager::log_messages() {
-	std::ofstream myfile;
-	myfile.open("../log/"+this->node->get_id()+"-"+this->start_time+".csv");
+void PeerManager::log_message_records() {
+	std::ofstream ofs;
+	ofs.open("../test/log/" + this->start_time + "/" + this->node->get_id() + ".csv", std::ofstream::out | std::ofstream::app);
 
-	myfile << Message::csv_header;
-	myfile << this->msg_table.to_csv_string();
+	ofs << this->msg_table.to_csv_string();
 
-	myfile.close();
+	ofs.close();
+}
+
+void PeerManager::append_message_record(const Message& msg) {
+	std::ofstream ofs;
+	ofs.open("../test/log/" + this->start_time + "/" + this->node->get_id() + ".csv", std::ofstream::out | std::ofstream::app);
+
+	ofs << msg.to_csv_string() + "\n";
+
+	ofs.close();
 }
 
 

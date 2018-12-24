@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <sstream>
+#include <fstream>
 #include <iomanip>
 #include <thread>         // std::this_thread::sleep_for
 #include <chrono>         // std::chrono::seconds
@@ -13,6 +14,7 @@
 #include "node.h"
 #include "node_table.h"
 #include "param_constants.h"
+#include "message.h"
 
 class BaseApp {
 private:
@@ -23,6 +25,11 @@ private:
 public:
 	// constructor
     BaseApp(std::string ip, unsigned short port, std::string id);
+
+    // getters
+    std::shared_ptr<Node> get_node();
+    std::shared_ptr<NodeTable> get_node_table();
+    std::shared_ptr<PeerManager> get_peer_manager();
 
     // form the network topology
     void form_structure(int num_nodes_in_dist, int num_cnodes_in_dist, 

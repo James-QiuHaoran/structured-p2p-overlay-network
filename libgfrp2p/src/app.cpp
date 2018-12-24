@@ -7,6 +7,19 @@ BaseApp::BaseApp(std::string ip, unsigned short port, std::string id) {
     // this->peer_manager = PeerManager(node, node_table);
 }
 
+// getters
+std::shared_ptr<Node> BaseApp::get_node() {
+    return this->node;
+}
+
+std::shared_ptr<NodeTable> BaseApp::get_node_table() {
+    return this->node_table;
+}
+
+std::shared_ptr<PeerManager> BaseApp::get_peer_manager() {
+    return this->peer_manager;
+}
+
 // public functions
 void BaseApp::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist, 
         int num_nodes_in_city, int num_cnodes_in_city, 
@@ -334,12 +347,32 @@ int main(int argc, char** argv) {
         num_nodes_in_country, num_cnodes_in_country,
         num_nodes_in_continent, starting_port_number);
 
-    if (id == "00000000000000000000000000000000") {
-        std::this_thread::sleep_for (std::chrono::seconds(3));
-        BOOST_LOG_TRIVIAL(debug) << "Slept for 3 seconds";
-        BOOST_LOG_TRIVIAL(debug) << "Broadcasting message ...";
-        app.broadcast("Hello World!");
+    // message record logging
+    std::ofstream ofs;
+    ofs.open("../test/log/" + start_time + "/" + app.get_node()->get_id() + ".csv");
+    if (ofs.is_open()) {
+        ofs << Message::csv_header << "\n";
+        ofs.close();
+    } else {
+        BOOST_LOG_TRIVIAL(trace) << "Error opening file";
     }
+    
+    // broadcast a message
+    if (id == "00000000000000000000000000000000") {
+        std::this_thread::sleep_for (std::chrono::seconds(5));
+        BOOST_LOG_TRIVIAL(debug) << "Slept for 5 seconds";
+        BOOST_LOG_TRIVIAL(debug) << "Broadcasting message ... [MSG #1: Hello world!]";
+        app.broadcast("MSG #1: Hello world!");
+        app.broadcast("MSG #2: Hello world, again!");
+    }
+
+    /*
+    if (id == "00000000000000000000000000000000") {
+        std::this_thread::sleep_for (std::chrono::seconds(5));
+        BOOST_LOG_TRIVIAL(debug) << "Slept for 5 seconds";
+        BOOST_LOG_TRIVIAL(debug) << "Broadcasting message ... [MSG #2: Hello world, again!]";
+        app.broadcast("MSG #2: Hello world, again!");
+    }*/
 
     // stop the app service
     // BOOST_LOG_TRIVIAL(debug) << "Stopping HGFR base service on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]";

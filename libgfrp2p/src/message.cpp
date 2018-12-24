@@ -3,6 +3,7 @@
 unsigned long get_milliseconds_since_epoch() {
     return static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count());
 }
+
 // Message member 
 // const char* Message::csv_header = ;
 // Constructors
@@ -72,20 +73,26 @@ bool MessageTable::exist(const message_key_t& msg_key) const {
     return this->table.find(msg_key) != this->table.end();
 }
 
-void MessageTable::insert_received(const Message& msg) {
+// insert records for receiving messages
+Message MessageTable::insert_received(const Message& msg) {
     Message to_insert = msg;
     to_insert.io_timestamp = get_milliseconds_since_epoch();
     to_insert.io_type = Message::IO_TYPE_RECEIVED;
 
     this->table[msg.get_key()] = to_insert;
+
+    return to_insert;
 }
 
-void MessageTable::insert_sent(const Message& msg) {
+// insert records for sending messages
+Message MessageTable::insert_sent(const Message& msg) {
     Message to_insert = msg;
     to_insert.io_timestamp = get_milliseconds_since_epoch();
     to_insert.io_type = Message::IO_TYPE_SENT;
 
     this->table[msg.get_key()] = to_insert;
+
+    return to_insert;
 }
 
 std::string MessageTable::to_csv_string() const {

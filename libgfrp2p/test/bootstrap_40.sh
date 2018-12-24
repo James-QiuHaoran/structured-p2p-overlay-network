@@ -51,6 +51,9 @@ eval "num_nodes_in_a_district=\$(( ($num_nodes_total/$num_districts_total) ))"
 
 echo "== Boostrap Stage =="
 
+start_time=$(date +"%Y-%m-%d-%H-%M-%S")
+mkdir -p log/$start_time
+
 starting_port_num="2000"
 
 for (( i=0; i<$num_nodes_total; i++ ))
@@ -113,7 +116,7 @@ do
 	num_nodes_in_country=1
 	num_cnodes_in_country=1
 	num_nodes_in_continent=1
-	start_time=$(date +"%Y-%m-%d-%H-%M-%S")
+
 	../bin/app $ip $port $id \
 		$num_nodes_in_dist $num_cnodes_in_dist \
 		$num_nodes_in_city $num_cnodes_in_city \
