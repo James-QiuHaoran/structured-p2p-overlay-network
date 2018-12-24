@@ -2,7 +2,7 @@
 
 ## TODO List
 
-- Implement script to retrieve time of send/recv, number of messages for one broadcast
+- Deal with multiple broadcast
 - Bootstrap nodes implementation on docker (config)
 	- distribute IDs and construct the network (only for evaluation: use a central server)
 - Implement Kademlia, Random Graph
@@ -14,8 +14,6 @@
 	- insert traffic control simulation
 	- insert time recording, number of messages recording functions (data retrieval)
 - Code refactoring
-
-`grep "Received data: Hello World" output | cut -d' ' -f7 | sort | uniq | wc -l`
 
 ## Dependencies
 - libboost-system-dev
