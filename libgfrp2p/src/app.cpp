@@ -357,12 +357,22 @@ int main(int argc, char** argv) {
         BOOST_LOG_TRIVIAL(trace) << "Error opening file";
     }
     
+    // broadcast a message
     if (id == "00000000000000000000000000000000") {
         std::this_thread::sleep_for (std::chrono::seconds(5));
         BOOST_LOG_TRIVIAL(debug) << "Slept for 5 seconds";
-        BOOST_LOG_TRIVIAL(debug) << "Broadcasting message ...";
-        app.broadcast("MSG #1: Hello World!");
+        BOOST_LOG_TRIVIAL(debug) << "Broadcasting message ... [MSG #1: Hello world!]";
+        app.broadcast("MSG #1: Hello world!");
+        app.broadcast("MSG #2: Hello world, again!");
     }
+
+    /*
+    if (id == "00000000000000000000000000000000") {
+        std::this_thread::sleep_for (std::chrono::seconds(5));
+        BOOST_LOG_TRIVIAL(debug) << "Slept for 5 seconds";
+        BOOST_LOG_TRIVIAL(debug) << "Broadcasting message ... [MSG #2: Hello world, again!]";
+        app.broadcast("MSG #2: Hello world, again!");
+    }*/
 
     // stop the app service
     // BOOST_LOG_TRIVIAL(debug) << "Stopping HGFR base service on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]";
