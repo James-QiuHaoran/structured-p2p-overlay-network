@@ -47,6 +47,9 @@ install_manifest.txt
 compile_commands.json
 CTestTestfile.cmake
 
+# Protobuf
+*.pb.cc
+*.pb.h
 
 # Project stuff
 # Build folder

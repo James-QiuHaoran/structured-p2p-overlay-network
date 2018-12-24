@@ -6,7 +6,6 @@
 using namespace bootstrap_message;
 
 int main() {
-    GOOGLE_PROTOBUF_VERIFY_VERSION;
 
     BootstrapMessage msg, msg_;
     msg.set_type(BootstrapMessage::CONFIG);

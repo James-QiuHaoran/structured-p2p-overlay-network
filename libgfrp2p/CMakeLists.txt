@@ -70,22 +70,6 @@ target_link_libraries(${PROJECT_NAME}
 
 # Make executables
 
-add_executable(test_udp
-    test/udp.cpp
-)
-
-target_link_libraries(test_udp
-    ${PROJECT_NAME}
-)
-
-# add_executable(test_tcp
-#     test/tcp.cpp
-# )
-
-# target_link_libraries(test_tcp
-#     ${PROJECT_NAME}
-# )
-
 add_executable(app
     src/app.cpp
 )
