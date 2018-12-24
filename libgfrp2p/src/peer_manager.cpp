@@ -84,7 +84,7 @@ void PeerManager::send(std::shared_ptr<Node> node, const Message &msg, const std
 	// for message logging
 	this->msg_table.insert_sent(msg);
 
-	BOOST_LOG_TRIVIAL(trace) << this->node->get_port() << " - " << "Send msg - (" << msg.get_type() << ") | " << "[" << this->node->get_ip() << ":" << this->node->get_port() << " -> " << "[" << node->get_ip() << ":" << node->get_port() << "]" << " | FL: " << msg.get_from_level();
+	BOOST_LOG_TRIVIAL(trace) << this->node->get_port() << " - " << "Send msg - (" << msg.get_type() << ") | " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "] -> " << "[" << node->get_ip() << ":" << node->get_port() << "]" << " | FL: " << msg.get_from_level();
 
 	// send via TCP
 	this->tcp_server->send(node->get_ip(), node->get_port(), data_string);
@@ -116,7 +116,7 @@ void PeerManager::broadcast(const std::string &data) {
 	// ask contact node to broadcast
 	msg.set_receiver_id(receiver->get_id());
 
-	BOOST_LOG_TRIVIAL(trace) << this->node->get_port() << " - " << "Broadcast msg - (" << msg.get_type() << ") | " << "[" << this->node->get_ip() << ":" << this->node->get_port() << " -> " << "[" << receiver->get_ip() << ":" << receiver->get_port() << "]" << " | FL: " << msg.get_from_level();
+	BOOST_LOG_TRIVIAL(trace) << this->node->get_port() << " - " << "Broadcast msg - (" << msg.get_type() << ") | " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "] -> " << "[" << receiver->get_ip() << ":" << receiver->get_port() << "]" << " | FL: " << msg.get_from_level();
 	
 	std::unordered_set<std::string> sent_ids;
 	this->send(receiver, msg, data, sent_ids);
@@ -172,7 +172,7 @@ void PeerManager::broadcast_up(Message msg, unsigned long current_level, const s
 	// ask contact node in the upper ring to broadcast
 	msg.set_receiver_id(receiver->get_id());
 
-	BOOST_LOG_TRIVIAL(trace) << this->node->get_port() << " - " << "Broadcast Up msg - (" << msg.get_type() << ") | " << "[" << this->node->get_ip() << ":" << this->node->get_port() << " -> " << "[" << receiver->get_ip() << ":" << receiver->get_port() << "]" << " | FL: " << msg.get_from_level();
+	BOOST_LOG_TRIVIAL(trace) << this->node->get_port() << " - " << "Broadcast Up msg - (" << msg.get_type() << ") | " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "] -> " << "[" << receiver->get_ip() << ":" << receiver->get_port() << "]" << " | FL: " << msg.get_from_level();
 
 	this->send(receiver, msg, data, sent_ids);
 
@@ -234,15 +234,26 @@ void PeerManager::broadcast_within_ring(Message msg, unsigned long current_level
 			msg.set_receiver_id(receiver->get_id());
 			msg.set_node_order(current_id);
 
-			// mark that region to be "sent"
+			// set type of the message
 			std::string region_id = receiver->get_id().substr(level_to_id_start[current_level], level_to_id_length[current_level]);
-			if (sent_ids.find(region_id) != sent_ids.end() || current_level == 0) {
-				// no need to broadcast downwards in that region
+			if (current_level == 0) {
+				// no need to broadcast downwards
 				msg.set_type(5);
 			} else {
-				// broadcast both downwards in that region and withing ring
-				sent_ids.insert(region_id);
-				msg.set_type(2);
+				std::string id_lower = receiver->get_id().substr(level_to_id_start[current_level-1], level_to_id_length[current_level-1]);
+				if (id_lower != std::string(level_to_id_length[current_level-1], '0')) {
+				// if (sent_ids.find(region_id) != sent_ids.end()) {
+					// no need to broadcast downwards in that region
+					BOOST_LOG_TRIVIAL(debug) << ">>>> L" << current_level << " type 5 - " << this->node->get_port() << " -> " << receiver->get_port() << " | " << id_lower << " : " << std::string(level_to_id_length[current_level-1], '0');
+					msg.set_type(5);
+				} else {
+					// broadcast both downwards in that region and withing ring
+					BOOST_LOG_TRIVIAL(debug) << ">>>> L" << current_level << " type 2 - " << this->node->get_port() << " -> " << receiver->get_port() << " | " << id_lower << " : " << std::string(level_to_id_length[current_level-1], '0');
+					msg.set_type(2);
+
+					// mark that region to be "sent"
+					sent_ids.insert(region_id);
+				}
 			}
 
 			BOOST_LOG_TRIVIAL(trace) << this->node->get_port() << " - " << "Broadcast W/ Ring " << node_order << "+" << k << "^" << i << " - (" << msg.get_type() << ") | " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "] -> " << "[" << receiver->get_ip() << ":" << receiver->get_port() << "]" << " | FL: " << msg.get_from_level();

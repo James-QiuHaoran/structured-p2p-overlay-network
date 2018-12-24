@@ -32,6 +32,8 @@
 *.out
 *.app
 
+# output files
+*.output
 
 # CMake
 CMakeLists.txt.user
