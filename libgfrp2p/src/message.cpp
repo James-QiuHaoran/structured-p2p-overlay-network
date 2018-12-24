@@ -3,6 +3,7 @@
 unsigned long get_milliseconds_since_epoch() {
     return static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count());
 }
+
 // Message member 
 // const char* Message::csv_header = ;
 // Constructors

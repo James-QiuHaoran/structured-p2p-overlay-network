@@ -83,6 +83,7 @@ void PeerManager::send(std::shared_ptr<Node> node, const Message &msg, const std
 
 	// for message logging
 	this->msg_table.insert_sent(msg);
+	this->append_message_record(msg);
 
 	BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "Send msg - (" << msg.get_type() << ") | " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "] -> " << "[" << node->get_ip() << ":" << node->get_port() << "]" << " | FL: " << msg.get_from_level();
 
@@ -351,6 +352,7 @@ void PeerManager::receive(const std::string& ip, unsigned short port, const std:
 
 	// for message logging
 	this->msg_table.insert_received(msg);
+	this->append_message_record(msg);
 	
 	// enter control flow
 	this->on_receive(msg, data_in_msg, sent_ids);
@@ -584,14 +586,22 @@ int PeerManager::random_num_in_range(int low, int high) {
 }
 
 // write messages received and sent to the file system
-void PeerManager::log_messages() {
-	std::ofstream myfile;
-	myfile.open("../log/"+this->node->get_id()+"-"+this->start_time+".csv");
+void PeerManager::log_message_records() {
+	std::ofstream ofs;
+	ofs.open("../test/log/" + this->start_time + "/" + this->node->get_id() + ".csv", std::ofstream::out | std::ofstream::app);
 
-	myfile << Message::csv_header;
-	myfile << this->msg_table.to_csv_string();
+	ofs << this->msg_table.to_csv_string();
 
-	myfile.close();
+	ofs.close();
+}
+
+void PeerManager::append_message_record(const Message& msg) {
+	std::ofstream ofs;
+	ofs.open("../test/log/" + this->start_time + "/" + this->node->get_id() + ".csv", std::ofstream::out | std::ofstream::app);
+
+	ofs << msg.to_csv_string() + "\n";
+
+	ofs.close();
 }
 
 
