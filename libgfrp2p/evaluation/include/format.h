@@ -25,7 +25,7 @@ class InitFormatter: public BaseFormatter {
 public: 
     std::uint16_t port;
     
-    InitFormatter()
+    InitFormatter();
 
     virtual std::string to_string() override; 
     virtual std::string from_string(const std::string& data) override;

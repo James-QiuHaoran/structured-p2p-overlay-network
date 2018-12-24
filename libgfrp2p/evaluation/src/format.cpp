@@ -118,10 +118,10 @@ std::string ConfigFormatter::from_string(const std::string& data) {
         std::memcpy(&ip_, specific.data() + offset, sizeof(std::uint32_t));
         offset +=  sizeof(std::uint32_t);
         char s_ip_[INET_ADDRSTRLEN];
-        inet_ntop(AF_INET, &ip_, s_ip_);
+        inet_ntop(AF_INET, &ip_, s_ip_, INET_ADDRSTRLEN);
         std::string node_ip_(s_ip_);
 
-        table_entries.insert(std::make_pair(node_id_, node_ip));
+        table_entries.insert(std::make_pair(node_id_, node_ip_));
 
     }
 
@@ -189,7 +189,7 @@ std::string PushLogFormatter::to_string() {
     return BaseFormatter::to_string() + log ;
 }
 
-std::string PullLogFormatter::from_string(const std::string& data) {
+std::string PushLogFormatter::from_string(const std::string& data) {
     log = BaseFormatter::from_string(data);
     return std::string();
 }
