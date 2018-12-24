@@ -3,8 +3,6 @@ syntax = "proto3";
 
 package bootstrap_message;
 
-option optimize_for = LITE_RUNTIME;
-
 message BootstrapMessage {
     enum Type {
         INIT = 0;

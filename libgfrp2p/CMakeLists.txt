@@ -38,10 +38,17 @@ endif()
 
 # Check Boost
 add_definitions(-D BOOST_ALL_DYN_LINK)
-find_package(Boost 1.58.0 COMPONENTS system log REQUIRED)
+find_package(Boost 1.58.0 COMPONENTS log random REQUIRED)
+
+# Check Protobuf
+find_package(Protobuf 3.0.0 REQUIRED)
+protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS 
+    ${PROJECT_SOURCE_DIR}/evaluation/proto/bootstrap_message.proto
+)
 
 include_directories(
     ${Boost_INCLUDE_DIRS}
+    ${Protobuf_INCLUDE_DIRS}
     ${PROJECT_SOURCE_DIR}/include
 )
 
@@ -64,8 +71,8 @@ add_library(${PROJECT_NAME} STATIC
 )
 
 target_link_libraries(${PROJECT_NAME}
-    Boost::system
     Boost::log
+    Boost::random
 )
 
 # Make executables
@@ -77,3 +84,17 @@ add_executable(app
 target_link_libraries(app
     ${PROJECT_NAME}
 )
+
+# add_executable(bootstrap_message
+#     test/bootstrap_message.cpp
+#     ${PROTO_HDRS}
+#     ${PROTO_SRCS}
+# )
+
+# target_include_directories(bootstrap_message
+#     PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
+# )
+
+# target_link_libraries(bootstrap_message
+#     protobuf::libprotobuf
+# )
