@@ -4,6 +4,7 @@
 #include <string>
 #include <bitset>
 #include <list>
+#include <memory>
 
 #include <cstdio>
 #include <cstdint>
@@ -24,6 +25,8 @@ class InitFormatter: public BaseFormatter {
 public: 
     std::uint16_t port;
     
+    InitFormatter()
+
     virtual std::string to_string() override; 
     virtual std::string from_string(const std::string& data) override;
 };
@@ -47,6 +50,8 @@ public:
     std::uint32_t num_table_entries;
     std::list<std::pair<std::string, std::string>> table_entries;
 
+    ConfigFormatter();
+
     virtual std::string to_string() override; 
     virtual std::string from_string(const std::string& data) override;
     
@@ -57,6 +62,8 @@ public:
 
     char status;
 
+    ConfigAckFormatter();
+
     virtual std::string to_string() override; 
     virtual std::string from_string(const std::string& data) override;
 };
@@ -64,15 +71,9 @@ public:
 
 class BroadcastFormatter: public BaseFormatter {
 public:
-    uint32_t workload_size;
+    std::uint32_t workload_size;
 
-    virtual std::string to_string() override; 
-    virtual std::string from_string(const std::string& data) override;
-};
-
-class PullLogFormatter: public BaseFormatter {
-public:
-    uint32_t workload_size;
+    BroadcastFormatter();
 
     virtual std::string to_string() override; 
     virtual std::string from_string(const std::string& data) override;
@@ -82,6 +83,8 @@ public:
 class PullLogFormatter: public BaseFormatter {
     // No commnad-specific fields
 
+    PullLogFormatter();
+
     virtual std::string to_string() override; 
     virtual std::string from_string(const std::string& data) override;
 };
@@ -89,6 +92,8 @@ class PullLogFormatter: public BaseFormatter {
 class PushLogFormatter: public BaseFormatter {
 public:
     std::string log;
+
+    PushLogFormatter();
 
     virtual std::string to_string() override; 
     virtual std::string from_string(const std::string& data) override;
