@@ -2,6 +2,7 @@
 
 ## TODO List
 
+- Benchmark/block-bench (catch workload/network flow) [end-to-end system]
 - Deal with multiple broadcast
 - Bootstrap nodes implementation on docker (config)
 	- distribute IDs and construct the network (only for evaluation: use a central server)

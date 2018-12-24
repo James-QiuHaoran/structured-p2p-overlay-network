@@ -23,8 +23,6 @@ PeerManager::PeerManager(unsigned short port) {}
 
 PeerManager::PeerManager(const std::shared_ptr<Node>& node, const std::shared_ptr<NodeTable>& node_table, const std::string &start_time): 
 	node(node), node_table(node_table) {
-	// this->node = std::make_shared<Node>(node);
-	// this->node_table = std::make_shared<NodeTable>(node_table);
 	this->start_time = start_time;
 }
 
@@ -35,7 +33,6 @@ PeerError::PeerError(std::string errorType, std::string errorMessage):
 	errorMessage(errorMessage) {}
 
 // getters
-
 std::string PeerError::get_errorType() const { return this->errorType; }
 
 std::string PeerError::get_errorMessage() const { return this->errorMessage; }
@@ -257,7 +254,11 @@ void PeerManager::broadcast_within_ring(Message msg, unsigned long current_level
 				}
 			}
 
-			BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "Broadcast W/ Ring " << node_order << "+" << k << "^" << i << " - (" << msg.get_type() << ") | " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "] -> " << "[" << receiver->get_ip() << ":" << receiver->get_port() << "]" << " | FL: " << msg.get_from_level();
+			// " << node_order << "+" << k << "^" << i << " 
+			BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "Broadcast in Ring - (" << msg.get_type() << ") | " 
+										<< "[" << this->node->get_ip() << ":" << this->node->get_port() << "] -> " 
+										<< "[" << receiver->get_ip() << ":" << receiver->get_port() << "]" 
+										<< " | FL: " << msg.get_from_level();
 
 			this->send(receiver, msg, data, sent_ids_for_receivers);
 			i++;
@@ -294,7 +295,10 @@ void PeerManager::broadcast_down(Message msg, unsigned long current_level, const
 	// ask contact node in the upper ring to broadcast
 	msg.set_receiver_id(receiver->get_id());
 
-	BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "Broadcast Down msg - (" << msg.get_type() << ") | " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "] -> " << "[" << receiver->get_ip() << ":" << receiver->get_port() << "]" << " | FL: " << msg.get_from_level();
+	BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "Broadcast Down msg - (" << msg.get_type() << ") | " 
+								<< "[" << this->node->get_ip() << ":" << this->node->get_port() << "] -> " 
+								<< "[" << receiver->get_ip() << ":" << receiver->get_port() << "]" 
+								<< " | FL: " << msg.get_from_level();
 
 	std::unordered_set<std::string> sent_ids;
 	this->send(receiver, msg, data, sent_ids);
