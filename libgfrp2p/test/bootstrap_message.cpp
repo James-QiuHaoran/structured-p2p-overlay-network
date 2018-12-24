@@ -6,7 +6,6 @@
 using namespace bootstrap_message;
 
 int main() {
-    GOOGLE_PROTOBUF_VERIFY_VERSION;
 
     BootstrapMessage msg, msg_;
     msg.set_type(BootstrapMessage::CONFIG);
@@ -20,14 +19,14 @@ int main() {
         cfg.set_table_size(2);
         cfg.add_table_ids("00001000010000100001000010000101")
         cfg.add_table_ips("192.168.100.2");
-        cfg.add_table(30303)
+        cfg.add_table_ports(30303)
         cfg.add_table_ids("00001000010000100001000010000110")
         cfg.add_table_ips("192.168.100.3");
-        cfg.add_table(30303);
+        cfg.add_table_ports(30303);
 
         cfg.set_num_nodes_in_dist(10);
         
-        msg.set_config(cfg());
+        msg.set_config(cfg);
     }
     std::string buffer;
     std::cout << "Serialization: " << msg.SerializeToString(&buffer) << std::endl;
