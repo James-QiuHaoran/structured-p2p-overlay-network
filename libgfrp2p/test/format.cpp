@@ -1,46 +1,38 @@
 #include <iostream>
+#include <string>
 
-#include "format.h"
+#include "bootstrap_message.pb.h"
 
+using namespace bootstrap_message;
 
 int main() {
-    ConfigFormatter fmt1, fmt2;
-    fmt1.run_id = 19903;
-    fmt1.node_id = "00001000010000100001000010000110";
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
 
-    fmt1.num_nodes_in_dist = 1;
-    fmt1.num_cnodes_in_dist = 2;
-    fmt1.num_nodes_in_city = 3;
-    fmt1.num_cnodes_in_city = 4;
-    fmt1.num_nodes_in_state = 5;
-    fmt1.num_cnodes_in_state = 6;
-    fmt1.num_nodes_in_country = 7;
-    fmt1.num_cnodes_in_country = 8;
-    fmt1.num_nodes_in_continent = 9;
+    BootstrapMessage msg, msg_;
+    msg.set_type(BootstrapMessage::CONFIG);
 
-    fmt1.num_table_entries = 2;
-    fmt1.table_entries["10001000010000100001000010000110"] = "192.168.100.100";
-    fmt1.table_entries["11001000010000100001000010000110"] = "192.168.100.101";
+    {    
+        Config cfg;
+        cfg.set_run_id(10086);
+        cfg.set_eval_type(Config::HGFRR);
+        cfg.set_node_id("00001000010000100001000010000100");
+        
+        cfg.set_table_size(2);
+        cfg.add_table_ids("00001000010000100001000010000101")
+        cfg.add_table_ips("192.168.100.2");
+        cfg.add_table(30303)
+        cfg.add_table_ids("00001000010000100001000010000110")
+        cfg.add_table_ips("192.168.100.3");
+        cfg.add_table(30303);
 
-    fmt2.from_string(fmt1.to_string());
-    
-    // std::cout << (fmt1.to_string() == fmt2.to_string()) << std::endl;
+        cfg.set_num_nodes_in_dist(10);
+        
+        msg.set_config(cfg());
+    }
+    std::string buffer;
+    std::cout << "Serialization: " << msg.SerializeToString(&buffer) << std::endl;
+    std::cout << "Parse: " << msg_.ParseFromString(buffer) << std::endl;
 
-    for( char c : fmt1.to_string() )
-    if (isprint(c))
-        if (c = '\\')
-            std::cout << "\\\\";
-        else
-            std::cout << c;
-    else
-        std::cout << "\0x" << std::hex
-            << static_cast<int>(static_cast<unsigned char>(c));
-
-
-    std::cout << fmt2.command_id + '0' << ' ' << fmt2.run_id << ' ' << fmt2.num_nodes_in_continent << ' ' << fmt2.num_table_entries << std::endl;
-    
-    for (const auto & kv:fmt2.table_entries){
-        std::cout << kv.first << " -> " << kv.second;
-    } 
+    std::cout << "Parsed object debug strig: " << msg.DebugString() << std::endl;
     return 0;
 }

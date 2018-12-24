@@ -1,0 +1,71 @@
+
+syntax = "proto3";
+
+package bootstrap_message;
+
+message BootstrapMessage {
+    enum Type {
+        INIT = 0;
+        CONFIG = 1;
+        // CONFIG_ACK = 2;
+        BROADCAST = 3;
+        PULL_LOG = 5;
+        PUSH_LOG = 6;
+    }
+    
+    Type type = 1;
+    
+    Init init = 2;
+    Config config = 3;
+    // ConfigAck config_ack = 4;
+    Broadcast broadcast = 4;
+    PullLog pull_log = 5;
+    PushLog push_log = 6;
+
+}
+
+message Init {
+    uint32 port = 1;
+}
+
+message Config {
+    // Experiment info
+    uint32 run_id = 1;
+    
+    enum EvalType {
+        HGFRR = 0;
+        KADEMLIA = 1;
+    }
+    EvalType eval_type = 2;
+
+    // Experiment-specific config
+    string node_id = 3;
+
+    uint32 table_size = 4;
+    repeated string table_ids = 5;
+    repeated string table_ips = 6;
+    repeated uint32 table_ports = 7;
+
+    uint32 num_nodes_in_dist = 20;
+    uint32 num_cnodes_in_dist = 21;
+    uint32 num_nodes_in_city = 22;
+    uint32 num_cnodes_in_city = 23;
+    uint32 num_nodes_in_state = 24;
+    uint32 num_cnodes_in_state = 25;
+    uint32 num_nodes_in_country = 26;
+    uint32 num_cnodes_in_country = 27;
+    uint32 num_nodes_in_continent = 28;
+}
+
+message Broadcast {
+    uint32 workload_size = 1;
+}
+
+message PullLog {
+    uint32 run_id = 1;
+}
+
+message PushLog {
+    uint32 run_id = 1;
+    string log = 2;
+}
