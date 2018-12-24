@@ -24,10 +24,22 @@ int main() {
 
     fmt2.from_string(fmt1.to_string());
     
-    std::cout << fmt1.to_string() == fmt2.to_string() << std::endl;
-    std::cout << command_id + '0' << ' ' << run_id << ' ' << num_nodes_in_continent << ' ' << num_table_entries << std::endl;
+    // std::cout << (fmt1.to_string() == fmt2.to_string()) << std::endl;
+
+    for( char c : fmt1.to_string() )
+    if (isprint(c))
+        if (c = '\\')
+            std::cout << "\\\\";
+        else
+            std::cout << c;
+    else
+        std::cout << "\0x" << std::hex
+            << static_cast<int>(static_cast<unsigned char>(c));
+
+
+    std::cout << fmt2.command_id + '0' << ' ' << fmt2.run_id << ' ' << fmt2.num_nodes_in_continent << ' ' << fmt2.num_table_entries << std::endl;
     
-    for (const auto & kv:table_entries){
+    for (const auto & kv:fmt2.table_entries){
         std::cout << kv.first << " -> " << kv.second;
     } 
     return 0;
