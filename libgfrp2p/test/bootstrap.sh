@@ -133,3 +133,5 @@ done
 sleep 2
 
 printf "\n== Successfully boostrapped for $num_nodes_total nodes! ==\n"
+
+mkdir -p log/$start_time
