@@ -82,8 +82,8 @@ void PeerManager::send(std::shared_ptr<Node> node, const Message &msg, const std
 							   data;
 
 	// for message logging
-	this->msg_table.insert_sent(msg);
-	this->append_message_record(msg);
+	Message inserted_msg = this->msg_table.insert_sent(msg);
+	this->append_message_record(inserted_msg);
 
 	BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "Send msg - (" << msg.get_type() << ") | " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "] -> " << "[" << node->get_ip() << ":" << node->get_port() << "]" << " | FL: " << msg.get_from_level();
 
@@ -351,8 +351,8 @@ void PeerManager::receive(const std::string& ip, unsigned short port, const std:
 	BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "Received msg from wire - (" << msg.get_type() << ") | " << " -> " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "] | FL: " << msg.get_from_level();
 
 	// for message logging
-	this->msg_table.insert_received(msg);
-	this->append_message_record(msg);
+	Message inserted_msg = this->msg_table.insert_received(msg);
+	this->append_message_record(inserted_msg);
 	
 	// enter control flow
 	this->on_receive(msg, data_in_msg, sent_ids);
