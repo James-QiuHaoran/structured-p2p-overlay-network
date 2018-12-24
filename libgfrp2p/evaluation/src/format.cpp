@@ -121,7 +121,7 @@ std::string ConfigFormatter::from_string(const std::string& data) {
         inet_ntop(AF_INET, &ip_, s_ip_, INET_ADDRSTRLEN);
         std::string node_ip_(s_ip_);
 
-        table_entries.insert(std::make_pair(node_id_, node_ip_));
+        table_entries[node_id_] = node_ip_;
 
     }
 

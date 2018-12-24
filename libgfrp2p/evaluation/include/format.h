@@ -3,7 +3,7 @@
 
 #include <string>
 #include <bitset>
-#include <list>
+#include <unordered_map>
 #include <memory>
 
 #include <cstdio>
@@ -48,7 +48,7 @@ public:
     std::uint32_t num_nodes_in_continent;
 
     std::uint32_t num_table_entries;
-    std::list<std::pair<std::string, std::string>> table_entries;
+    std::unordered_map<std::string, std::string> table_entries;
 
     ConfigFormatter();
 
