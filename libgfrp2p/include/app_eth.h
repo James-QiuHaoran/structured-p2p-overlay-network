@@ -36,7 +36,9 @@ public:
     	int num_nodes_in_city, int num_cnodes_in_city, 
     	int num_nodes_in_state, int num_cnodes_in_state, 
     	int num_nodes_in_country, int num_cnodes_in_country, 
-    	int num_nodes_in_continent, unsigned short starting_port_number);
+    	int num_nodes_in_continent, int num_continents,
+        int num_cnodes_in_continent,
+        unsigned short starting_port_number);
 
     // convert ID to port
     unsigned short convert_ID_to_port(unsigned short starting_port_number, const std::string& id,
@@ -51,7 +53,9 @@ public:
         int num_nodes_in_city, int num_cnodes_in_city, 
         int num_nodes_in_state, int num_cnodes_in_state, 
         int num_nodes_in_country, int num_cnodes_in_country, 
-        int num_nodes_in_continent, unsigned short starting_port_number);
+        int num_nodes_in_continent, int num_continents,
+        int num_cnodes_in_continent,
+        unsigned short starting_port_number);
 
     // stop the application
     void stop();

@@ -116,13 +116,16 @@ do
 	num_nodes_in_country=1
 	num_cnodes_in_country=1
 	num_nodes_in_continent=1
+	num_cnodes_in_continent=1
+	num_continents=1
 
 	../bin/app $ip $port $id \
 		$num_nodes_in_dist $num_cnodes_in_dist \
 		$num_nodes_in_city $num_cnodes_in_city \
 		$num_nodes_in_state $num_cnodes_in_state \
 		$num_nodes_in_country $num_cnodes_in_country \
-		$num_nodes_in_continent \
+		$num_nodes_in_continent $num_cnodes_in_continent \
+		$num_continents \
 		$starting_port_num $start_time &
 done
 

@@ -24,7 +24,9 @@ void BaseAppETH::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
         int num_nodes_in_city, int num_cnodes_in_city, 
         int num_nodes_in_state, int num_cnodes_in_state, 
         int num_nodes_in_country, int num_cnodes_in_country, 
-        int num_nodes_in_continent, unsigned short starting_port_number) {
+        int num_nodes_in_continent, int num_continents,
+        int num_cnodes_in_continent,
+        unsigned short starting_port_number) {
     
     // form network topology based ID
     std::string id_in_dist = this->node->get_id().substr(ID_SINGLE_START, ID_SINGLE_LEN);
@@ -34,8 +36,64 @@ void BaseAppETH::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
     std::string country_id = this->node->get_id().substr(ID_COUNTRY_START, ID_COUNTRY_LEN);
     std::string continent_id = this->node->get_id().substr(ID_CONTINENT_START, ID_CONTINENT_LEN);
 
+    int num_dists_in_city = num_nodes_in_city/num_cnodes_in_dist;
+    int num_cities_in_state = num_nodes_in_state/num_cnodes_in_dist;
+    int num_states_in_country = num_nodes_in_country/num_cnodes_in_state;
+    int num_countries_in_continent = num_nodes_in_continent/num_cnodes_in_country;
+
     // set node table
     std::vector<std::shared_ptr<Node>> table;
+
+    std::stringstream ss;
+
+    for (int continent_counter = 0; continent_counter < num_continents; continent_counter++) {
+        ss.str("");
+        ss.clear();
+        ss << std::setw(ID_CONTINENT_LEN) << std::setfill('0') << continent_counter;
+        continent_id = ss.str();
+        for (int country_counter = 0; country_counter < num_countries_in_continent; country_counter++) {
+            ss.str("");
+            ss.clear();
+            ss << std::setw(ID_COUNTRY_LEN) << std::setfill('0') << country_counter;
+            country_id = ss.str();
+            for (int state_counter = 0; state_counter < num_states_in_country; state_counter++) {
+                ss.str("");
+                ss.clear();
+                ss << std::setw(ID_STATE_LEN) << std::setfill('0') << state_counter;
+                state_id = ss.str();
+                for (int city_counter = 0; city_counter < num_cities_in_state; city_counter++) {
+                    ss.str("");
+                    ss.clear();
+                    ss << std::setw(ID_CITY_LEN) << std::setfill('0') << city_counter;
+                    city_id = ss.str();
+                    for (int district_counter = 0; district_counter < num_dists_in_city; district_counter++) {
+                        ss.str("");
+                        ss.clear();
+                        ss << std::setw(ID_DISTRICT_LEN) << std::setfill('0') << district_counter;
+                        dist_id = ss.str();
+                        for (int i = 0; i < num_nodes_in_dist; i++) {
+                            ss.str("");
+                            ss.clear();
+                            ss << std::setw(ID_SINGLE_LEN) << std::setfill('0') << i;
+                            id_in_dist = ss.str();
+
+                            std::string node_id = continent_id + country_id + state_id + city_id + dist_id + id_in_dist;
+                            unsigned short port = this->convert_ID_to_port(starting_port_number, node_id,
+                                    num_nodes_in_dist, num_cnodes_in_dist, 
+                                    num_nodes_in_city, num_cnodes_in_city, 
+                                    num_nodes_in_state, num_cnodes_in_state, 
+                                    num_nodes_in_country, num_cnodes_in_country, 
+                                    num_nodes_in_continent);
+                            Node node(node_id, "127.0.0.1", port);
+
+                            table.push_back(std::make_shared<Node>(node));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     this->node_table->set_table(table);
 
     return;
@@ -101,15 +159,20 @@ void BaseAppETH::start(const std::string &start_time, int num_nodes_in_dist, int
         int num_nodes_in_city, int num_cnodes_in_city, 
         int num_nodes_in_state, int num_cnodes_in_state, 
         int num_nodes_in_country, int num_cnodes_in_country, 
-        int num_nodes_in_continent, unsigned short starting_port_number) {
+        int num_nodes_in_continent, int num_continents,
+        int num_cnodes_in_continent,
+        unsigned short starting_port_number) {
     BOOST_LOG_TRIVIAL(debug) << "Setting up NodeTable for node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
     BOOST_LOG_TRIVIAL(debug) << "Establishing structure on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
     
+    // form the geographical structure
     this->form_structure(num_nodes_in_dist, num_cnodes_in_dist, 
         num_nodes_in_city, num_cnodes_in_city, 
         num_nodes_in_state, num_cnodes_in_state, 
         num_nodes_in_country, num_cnodes_in_country, 
-        num_nodes_in_continent, starting_port_number);
+        num_nodes_in_continent, num_continents, 
+        num_cnodes_in_continent,
+        starting_port_number);
     
     BOOST_LOG_TRIVIAL(debug) << "Structure established on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
     BOOST_LOG_TRIVIAL(debug) << "Node Tables on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
@@ -140,8 +203,16 @@ void BaseAppETH::broadcast(const std::string &data) {
 }
 
 int main(int argc, char** argv) {
-    if (argc != 15) {
-        BOOST_LOG_TRIVIAL(info) << "Wrong arguments. Correct usage: ./app ip_addr port_num id num_nodes_in_dist num_cnodes_in_dist num_nodes_in_city num_cnodes_in_city num_nodes_in_state num_cnodes_in_state num_nodes_in_country num_cnodes_in_country num_nodes_in_continent starting_port_num start_time\n";
+    if (argc != 17) {
+        BOOST_LOG_TRIVIAL(info) << "Wrong arguments. Correct usage: "
+                                        << "./app_eth ip_addr port_num id "
+                                            << "num_nodes_in_dist num_cnodes_in_dist " 
+                                            << "num_nodes_in_city num_cnodes_in_city " 
+                                            << "num_nodes_in_state num_cnodes_in_state "
+                                            << "num_nodes_in_country num_cnodes_in_country "
+                                            << "num_nodes_in_continent num_cnodes_in_continent "
+                                            << "num_continents"
+                                            << "starting_port_num start_time\n";
         return 0;
     }
 
@@ -159,8 +230,10 @@ int main(int argc, char** argv) {
     int num_nodes_in_country = std::atoi(argv[10]);
     int num_cnodes_in_country = std::atoi(argv[11]); 
     int num_nodes_in_continent = std::atoi(argv[12]);
-    int starting_port_number = std::atoi(argv[13]);
-    std::string start_time = argv[14];
+    int num_cnodes_in_continent = std::atoi(argv[13]);
+    int num_continents = std::atoi(argv[14]);
+    int starting_port_number = std::atoi(argv[15]);
+    std::string start_time = argv[16];
 
     // initialize the app
     BOOST_LOG_TRIVIAL(debug) << "Creating ETH base application on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]";
@@ -172,7 +245,9 @@ int main(int argc, char** argv) {
         num_nodes_in_city, num_cnodes_in_city, 
         num_nodes_in_state, num_cnodes_in_state,
         num_nodes_in_country, num_cnodes_in_country,
-        num_nodes_in_continent, starting_port_number);
+        num_nodes_in_continent, num_continents,
+        num_cnodes_in_continent,
+        starting_port_number);
 
     // message record logging
     std::ofstream ofs;
