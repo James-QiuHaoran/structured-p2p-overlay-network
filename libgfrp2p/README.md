@@ -7,10 +7,11 @@
 - Implement Kademlia + Gossip
 	- broadcast (gossip)
 		- Push & TTL
-		- Push & UID
 		- Pull-version
 - Bootstrap nodes implementation on docker (config)
 	- distribute IDs and construct the network (only for evaluation: use a central server)
+
+---
 
 ## Dependencies (in APT Names)
 - Boost
