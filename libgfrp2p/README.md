@@ -10,8 +10,6 @@
 		- Push & TTL
 		- Push & UID
 		- Pull-version
-	- insert traffic control simulation
-	- insert time recording, number of messages recording functions (data retrieval)
 - Bootstrap nodes implementation on docker (config)
 	- distribute IDs and construct the network (only for evaluation: use a central server)
 
