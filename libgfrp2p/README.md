@@ -2,11 +2,9 @@
 
 ## TODO List
 
-- Benchmark/block-bench (catch workload/network flow) [end-to-end system]
-- Deal with multiple broadcast
-- Bootstrap nodes implementation on docker (config)
-	- distribute IDs and construct the network (only for evaluation: use a central server)
-- Implement Kademlia, Random Graph
+- Insert logging for broadcasting, sending, receiving messages for ethereum;
+- Write script to handle multiple broadcast;
+- Implement Kademlia + Gossip
 	- form structure
 	- broadcast (gossip)
 		- Push & TTL
@@ -14,7 +12,8 @@
 		- Pull-version
 	- insert traffic control simulation
 	- insert time recording, number of messages recording functions (data retrieval)
-- Code refactoring
+- Bootstrap nodes implementation on docker (config)
+	- distribute IDs and construct the network (only for evaluation: use a central server)
 
 ## Dependencies (in APT Names)
 - Boost
