@@ -5,7 +5,6 @@
 - Insert logging for broadcasting, sending, receiving messages for ethereum;
 - Write script to handle multiple broadcast;
 - Implement Kademlia + Gossip
-	- form structure
 	- broadcast (gossip)
 		- Push & TTL
 		- Push & UID
