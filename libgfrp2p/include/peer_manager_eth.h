@@ -18,7 +18,7 @@
 #include "node_table_eth.h"
 #include "transport.h"
 #include "message.h"
-
+#include "param_constants.h"
 
 /* Error Class
  * define error types and error messages
@@ -45,7 +45,7 @@ public:
 /* PeerManager class
  * responsible for broadcasting messages
  */
-class PeerManager: public Receiver, public std::enable_shared_from_this<PeerManager> {
+class PeerManagerETH: public Receiver, public std::enable_shared_from_this<PeerManagerETH> {
 private:
     // contains node information
     std::shared_ptr<Node> node;
@@ -68,9 +68,9 @@ private:
 
 public:
     // constructors
-    PeerManager();
-    PeerManager(unsigned short port);
-    PeerManager(const std::shared_ptr<Node>& node, const std::shared_ptr<NodeTableETH>& node_table, const std::string &start_time);
+    PeerManagerETH();
+    PeerManagerETH(unsigned short port);
+    PeerManagerETH(const std::shared_ptr<Node>& node, const std::shared_ptr<NodeTableETH>& node_table, const std::string &start_time);
 
     // getters
     std::shared_ptr<Node> get_node();
