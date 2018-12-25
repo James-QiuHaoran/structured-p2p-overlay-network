@@ -42,8 +42,8 @@ public:
     void set_errorMessage(std::string errorMessage);
 };
 
-/* PeerManager class
- * responsible for broadcasting messages
+/* PeerManager class -- ethereum version
+ * responsible for broadcasting messages, Kademlia is used to form the routing table of each node
  */
 class PeerManagerETH: public Receiver, public std::enable_shared_from_this<PeerManagerETH> {
 private:

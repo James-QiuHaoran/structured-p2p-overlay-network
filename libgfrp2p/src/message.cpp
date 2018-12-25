@@ -87,6 +87,16 @@ bool MessageTable::exist(const message_key_t& msg_key) const {
     return this->table.find(msg_key) != this->table.end();
 }
 
+bool MessageTable::existID(const std::string &msgID) const {
+    for (auto msg : this->table) {
+        if (msg.second.get_message_id() == msgID) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 // insert records for receiving messages
 Message MessageTable::insert_received(const Message& msg) {
     Message to_insert = msg;

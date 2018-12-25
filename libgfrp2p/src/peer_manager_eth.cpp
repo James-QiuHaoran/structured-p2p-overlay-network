@@ -158,7 +158,13 @@ void PeerManagerETH::on_receive(const Message &msg, const std::string &data) {
 		std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
 	}
 
-	this->broadcast(data);
+	if (this->msg_table.existID(msg.get_message_id())) {
+		// do not need to broadcast anymore
+		return;
+	} else {
+		// continue to broadcast
+		this->broadcast(data);
+	}
 
 	return;
 }

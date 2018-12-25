@@ -89,11 +89,15 @@ private:
 
 public:
     
+    // used for checking the existence of a message
     bool exist(const message_key_t& msg_key) const;
+    bool existID(const std::string & msgID) const;
 
+    // insert message records
     Message insert_received(const Message& msg);
     Message insert_sent(const Message& msg);
 
+    // transform the message into a csv string
     std::string to_csv_string() const;
 };
 
