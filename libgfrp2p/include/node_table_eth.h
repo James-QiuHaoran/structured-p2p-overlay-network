@@ -11,7 +11,7 @@
 #include "node.h"
 
 // Node table and maintenance
-class NodeTable {
+class NodeTableETH {
 private:
     std::string self_id;
 
@@ -23,8 +23,8 @@ private:
     std::shared_ptr<Node> copy_node(const std::shared_ptr<Node>& node);
  
 public:
-    NodeTable();
-    NodeTable(const std::string& self_id);
+    NodeTableETH();
+    NodeTableETH(const std::string& self_id);
 
     // thread safty
     std::mutex *mlock;
