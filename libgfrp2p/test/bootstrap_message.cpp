@@ -32,6 +32,7 @@ int main() {
     std::string buffer;
     std::cout << "Serialization: " << msg.SerializeToString(&buffer) << std::endl;
     std::cout << "Parse: " << msg_.ParseFromString(buffer) << std::endl;
+    std::cout << "Parsed message: " << std::endl << msg_.DebugString() << std::endl;
     std::cout << "Consistency: " << MessageDifferencer::Equals(msg, msg_) << std::endl;
 
     // std::cout << "Parsed object debug strig: " << msg.DebugString() << std::endl;
