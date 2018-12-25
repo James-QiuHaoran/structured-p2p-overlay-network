@@ -16,7 +16,7 @@
 #include "message.h"
 #include "param_constants.h"
 
-class BaseApp {
+class BaseAppETH {
 private:
     std::shared_ptr<Node> node;
     std::shared_ptr<NodeTableETH> node_table;
@@ -24,7 +24,7 @@ private:
 
 public:
 	// constructor
-    BaseApp(std::string ip, unsigned short port, std::string id);
+    BaseAppETH(std::string ip, unsigned short port, std::string id);
 
     // getters
     std::shared_ptr<Node> get_node();

@@ -1,26 +1,26 @@
 #include "app_eth.h"
 
 // constructors
-BaseApp::BaseApp(std::string ip, unsigned short port, std::string id) {
+BaseAppETH::BaseAppETH(std::string ip, unsigned short port, std::string id) {
     this->node = std::make_shared<Node>(id, ip, port);
     this->node_table = std::make_shared<NodeTableETH>(id);
 }
 
 // getters
-std::shared_ptr<Node> BaseApp::get_node() {
+std::shared_ptr<Node> BaseAppETH::get_node() {
     return this->node;
 }
 
-std::shared_ptr<NodeTable> BaseApp::get_node_table() {
+std::shared_ptr<NodeTableETH> BaseAppETH::get_node_table() {
     return this->node_table;
 }
 
-std::shared_ptr<PeerManager> BaseApp::get_peer_manager() {
+std::shared_ptr<PeerManagerETH> BaseAppETH::get_peer_manager() {
     return this->peer_manager;
 }
 
 // public functions
-void BaseApp::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist, 
+void BaseAppETH::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist, 
         int num_nodes_in_city, int num_cnodes_in_city, 
         int num_nodes_in_state, int num_cnodes_in_state, 
         int num_nodes_in_country, int num_cnodes_in_country, 
@@ -34,13 +34,6 @@ void BaseApp::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
     std::string country_id = this->node->get_id().substr(ID_COUNTRY_START, ID_COUNTRY_LEN);
     std::string continent_id = this->node->get_id().substr(ID_CONTINENT_START, ID_CONTINENT_LEN);
 
-    std::stringstream ss_node(id_in_dist);
-    int node_id_in_dist = 0;
-    ss_node >> node_id_in_dist;
-
-    int num_dists_in_city = num_nodes_in_city/num_cnodes_in_dist;
-    int num_cities_in_state = num_nodes_in_state/num_cnodes_in_dist;
-
     // set node table
     std::vector<std::shared_ptr<Node>> table;
     this->node_table->set_table(table);
@@ -49,7 +42,7 @@ void BaseApp::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
 }
 
 // convert ID to port
-unsigned short BaseApp::convert_ID_to_port(unsigned short starting_port_number, const std::string& id,
+unsigned short BaseAppETH::convert_ID_to_port(unsigned short starting_port_number, const std::string& id,
     int num_nodes_in_dist, int num_cnodes_in_dist, 
     int num_nodes_in_city, int num_cnodes_in_city, 
     int num_nodes_in_state, int num_cnodes_in_state, 
@@ -104,7 +97,7 @@ unsigned short BaseApp::convert_ID_to_port(unsigned short starting_port_number, 
     return port_num;
 }
 
-void BaseApp::start(const std::string &start_time, int num_nodes_in_dist, int num_cnodes_in_dist, 
+void BaseAppETH::start(const std::string &start_time, int num_nodes_in_dist, int num_cnodes_in_dist, 
         int num_nodes_in_city, int num_cnodes_in_city, 
         int num_nodes_in_state, int num_cnodes_in_state, 
         int num_nodes_in_country, int num_cnodes_in_country, 
@@ -120,29 +113,30 @@ void BaseApp::start(const std::string &start_time, int num_nodes_in_dist, int nu
     
     BOOST_LOG_TRIVIAL(debug) << "Structure established on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
     BOOST_LOG_TRIVIAL(debug) << "Node Tables on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
-    for (auto table : this->node_table->get_tables()) {
-        BOOST_LOG_TRIVIAL(debug) << "Level: " + std::to_string(table.ring_level);
-        for (auto peer : table.peer_list) {
-            BOOST_LOG_TRIVIAL(debug) << "Peer - " + peer->get_id() + " " + peer->get_ip() + ":" + std::to_string(peer->get_port());
-        }
-        for (auto contact_node : table.contact_nodes) {
-            BOOST_LOG_TRIVIAL(debug) << "Contact node - " + contact_node.first + " " + contact_node.second->get_ip() + ":" + std::to_string(contact_node.second->get_port());
-        }
+    
+    for (auto peer : this->node_table->get_table()) {
+        BOOST_LOG_TRIVIAL(debug) << "Peer - " + peer->get_id() + " " + peer->get_ip() + ":" + std::to_string(peer->get_port());
     }
 
-    this->peer_manager = std::make_shared<PeerManager>(node, node_table, start_time);
+    this->peer_manager = std::make_shared<PeerManagerETH>(node, node_table, start_time);
 
-    BOOST_LOG_TRIVIAL(debug) << "Starting HGFR PeerManager on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
+    BOOST_LOG_TRIVIAL(debug) << "Starting ETH PeerManager on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
     this->peer_manager->start();
+
+    return;
 }
 
-void BaseApp::stop() {
-    // BOOST_LOG_TRIVIAL(debug) << "Stopping HGFR PeerManager on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
+void BaseAppETH::stop() {
+    // BOOST_LOG_TRIVIAL(debug) << "Stopping ETH PeerManager on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
     this->peer_manager->stop();
+
+    return;
 }
 
-void BaseApp::broadcast(const std::string &data) {
+void BaseAppETH::broadcast(const std::string &data) {
     this->peer_manager->broadcast(data);
+
+    return;
 }
 
 int main(int argc, char** argv) {
@@ -169,11 +163,11 @@ int main(int argc, char** argv) {
     std::string start_time = argv[14];
 
     // initialize the app
-    BOOST_LOG_TRIVIAL(debug) << "Creating HGFR base application on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]";
-    BaseApp app = BaseApp(ip, port, id);
+    BOOST_LOG_TRIVIAL(debug) << "Creating ETH base application on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]";
+    BaseAppETH app = BaseAppETH(ip, port, id);
 
     // start the app service
-    BOOST_LOG_TRIVIAL(debug) << "Starting HGFR base service on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]";
+    BOOST_LOG_TRIVIAL(debug) << "Starting ETH base service on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]";
     app.start(start_time, num_nodes_in_dist, num_cnodes_in_dist, 
         num_nodes_in_city, num_cnodes_in_city, 
         num_nodes_in_state, num_cnodes_in_state,
@@ -208,7 +202,7 @@ int main(int argc, char** argv) {
     }*/
 
     // stop the app service
-    // BOOST_LOG_TRIVIAL(debug) << "Stopping HGFR base service on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]";
+    // BOOST_LOG_TRIVIAL(debug) << "Stopping ETH base service on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]";
     app.stop();
 
     return 0;
