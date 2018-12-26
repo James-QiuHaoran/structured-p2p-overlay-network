@@ -27,7 +27,7 @@ private:
     std::string receiver_id;
 
 public:
-    static constexpr const char* csv_header = "io_timestamp,io_type,sender_id,message_id,receiver_id,type,from_level,node_order";
+    static constexpr const char* csv_header = "io_timestamp,io_type,sender_id,broadcast_id,message_id,receiver_id,type,from_level,node_order";
 
     static const unsigned short IO_TYPE_RECEIVED = 0;
     static const unsigned short IO_TYPE_SENT = 1;

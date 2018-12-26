@@ -53,6 +53,7 @@ std::string Message::to_csv_string() const {
     return std::to_string(io_timestamp) + ',' +
         std::to_string(io_type) + ',' +
         sender_id + ','+ 
+        broadcastID + ',' +
         message_id + ',' + 
         receiver_id + ',' +
         std::to_string(type) + ',' + 
