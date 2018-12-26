@@ -6,6 +6,7 @@
 #define HEARTBEAT_TIMEOUT  5
 #define NUM_CONTACT_NODES  3
 #define MSG_HASH_LENGTH   50
+#define BROADCAST_ID_LEN  20
 
 // eth
 #define TABLE_SIZE_ETH    13

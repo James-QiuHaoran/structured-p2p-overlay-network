@@ -18,6 +18,7 @@
 #include "node_table_eth.h"
 #include "message.h"
 #include "param_constants.h"
+#include "utils.h"
 
 boost::random::mt19937 gen_seed;
 
@@ -46,14 +47,6 @@ public:
         unsigned short starting_port_number);
 
     int random_num_in_range(int low, int high);
-
-    // convert ID to port
-    unsigned short convert_ID_to_port(unsigned short starting_port_number, const std::string& id,
-    	int num_nodes_in_dist, int num_cnodes_in_dist, 
-    	int num_nodes_in_city, int num_cnodes_in_city, 
-    	int num_nodes_in_state, int num_cnodes_in_state, 
-    	int num_nodes_in_country, int num_cnodes_in_country, 
-    	int num_nodes_in_continent);
 
     // start the application
     void start(const std::string &start_time, int num_nodes_in_dist, int num_cnodes_in_dist, 

@@ -19,6 +19,7 @@ private:
     unsigned long io_timestamp;
     unsigned short io_type;
     
+    std::string broadcastID;
     std::string message_id;
     int type, node_order, ttl;
     unsigned long from_level;
@@ -26,22 +27,23 @@ private:
     std::string receiver_id;
 
 public:
-    static constexpr const char* csv_header = "io_timestamp,io_type,sender_id,message_id,receiver_id,type,from_level,node_order";
+    static constexpr const char* csv_header = "io_timestamp,io_type,sender_id,broadcast_id,message_id,receiver_id,type,from_level,node_order";
 
     static const unsigned short IO_TYPE_RECEIVED = 0;
     static const unsigned short IO_TYPE_SENT = 1;
 
     // constructor
     Message();
-    Message(std::string messageID, std::string sender_id, std::string receiver_id);
-    Message(std::string messageID, int type, unsigned long from_level, std::string sender_id, std::string receiver_id);
-    Message(unsigned short io_type, std::string messageID, int type, unsigned long from_level, std::string sender_id, std::string receiver_id);
+    Message(std::string broadcastID, std::string messageID, std::string sender_id, std::string receiver_id);
+    Message(std::string broadcastID, std::string messageID, int type, unsigned long from_level, std::string sender_id, std::string receiver_id);
+    Message(unsigned short io_type, std::string broadcastID, std::string messageID, int type, unsigned long from_level, std::string sender_id, std::string receiver_id);
 
     // DB semantic
     message_key_t get_key() const;
     std::string to_csv_string() const;
 
     // getters
+    std::string get_broadcast_id() const;
     std::string get_sender_id() const;
     std::string get_receiver_id() const;
     unsigned long get_from_level() const;
@@ -51,6 +53,7 @@ public:
     int get_TTL() const;
 
     // setters
+    void set_broadcast_id(const std::string &broadcastID);
     void set_sender_id(const std::string &sender_id);
     void set_receiver_id(const std::string &receiver_id);
     void set_from_level(unsigned long level);

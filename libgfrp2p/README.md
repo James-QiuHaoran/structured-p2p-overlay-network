@@ -3,10 +3,6 @@
 ## TODO List
 
 - Insert logging for broadcasting, sending, receiving messages for ethereum;
-- Write script to handle multiple broadcast;
-- Implement Kademlia + Gossip
-	- broadcast (gossip)
-		- Pull-version
 - Bootstrap nodes implementation on docker (config)
 	- distribute IDs and construct the network (only for evaluation: use a central server)
 

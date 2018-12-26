@@ -95,12 +95,12 @@ void BaseAppETH::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
                                 id_in_dist = ss.str();
 
                                 std::string node_id = continent_id + country_id + state_id + city_id + dist_id + id_in_dist;
-                                unsigned short port = this->convert_ID_to_port(starting_port_number, node_id,
-                                        num_nodes_in_dist, num_cnodes_in_dist, 
-                                        num_nodes_in_city, num_cnodes_in_city, 
-                                        num_nodes_in_state, num_cnodes_in_state, 
-                                        num_nodes_in_country, num_cnodes_in_country, 
-                                        num_nodes_in_continent);
+                                unsigned short port = starting_port_number + convert_ID_string_to_int(node_id,
+                                                                                num_nodes_in_dist, num_cnodes_in_dist, 
+                                                                                num_nodes_in_city, num_cnodes_in_city, 
+                                                                                num_nodes_in_state, num_cnodes_in_state, 
+                                                                                num_nodes_in_country, num_cnodes_in_country, 
+                                                                                num_nodes_in_continent);
                                 Node node(node_id, "127.0.0.1", port);
 
                                 table.push_back(std::make_shared<Node>(node));
@@ -117,61 +117,6 @@ void BaseAppETH::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
     this->node_table->set_table(table);
 
     return;
-}
-
-// convert ID to port
-unsigned short BaseAppETH::convert_ID_to_port(unsigned short starting_port_number, const std::string& id,
-    int num_nodes_in_dist, int num_cnodes_in_dist, 
-    int num_nodes_in_city, int num_cnodes_in_city, 
-    int num_nodes_in_state, int num_cnodes_in_state, 
-    int num_nodes_in_country, int num_cnodes_in_country, 
-    int num_nodes_in_continent) {
-    
-    std::string id_in_dist = id.substr(ID_SINGLE_START);
-    std::string dist_id = id.substr(ID_DISTRICT_START, ID_DISTRICT_LEN);
-    std::string city_id = id.substr(ID_CITY_START, ID_CITY_LEN);
-    std::string state_id = id.substr(ID_STATE_START, ID_STATE_LEN);
-    std::string country_id = id.substr(ID_COUNTRY_START, ID_COUNTRY_LEN);
-    std::string continent_id = id.substr(ID_CONTINENT_START, ID_CONTINENT_LEN);
-
-    int node_id_in_dist = 0, dist_id_int = 0, city_id_int = 0, state_id_int = 0, country_id_int = 0, continent_id_int = 0;
-    
-    std::stringstream ss_node(id_in_dist);
-    ss_node >> node_id_in_dist;
-
-    std::stringstream ss_dist(dist_id);
-    ss_dist >> dist_id_int;
-    int num_nodes_in_one_dist = num_nodes_in_dist;
-
-    int num_dists_in_city = num_nodes_in_city/num_cnodes_in_dist;
-    std::stringstream ss_city(city_id);
-    ss_city >> city_id_int;
-    int num_nodes_in_one_city = num_nodes_in_one_dist * num_dists_in_city;
-
-    int num_cities_in_state = num_nodes_in_state/num_cnodes_in_dist;
-    std::stringstream ss_state(state_id);
-    ss_state >> state_id_int;
-    int num_nodes_in_one_state = num_nodes_in_one_city * num_cities_in_state;
-
-    int num_states_in_country = num_nodes_in_country/num_cnodes_in_state;
-    std::stringstream ss_country(country_id);
-    ss_country >> country_id_int;
-    int num_nodes_in_one_country = num_nodes_in_one_state * num_states_in_country;
-
-    int num_countries_in_continent = num_nodes_in_continent/num_cnodes_in_country;
-    std::stringstream ss_continent(continent_id);
-    ss_continent >> continent_id_int;
-    int num_nodes_in_one_continent = num_nodes_in_one_country * num_countries_in_continent;
-
-    int port_num = starting_port_number + 
-                   num_nodes_in_one_continent * continent_id_int +
-                   num_nodes_in_one_country * country_id_int +
-                   num_nodes_in_one_state * state_id_int +
-                   num_nodes_in_one_city * city_id_int +
-                   num_nodes_in_one_dist * dist_id_int +
-                   node_id_in_dist;
-
-    return port_num;
 }
 
 void BaseAppETH::start(const std::string &start_time, int num_nodes_in_dist, int num_cnodes_in_dist, 
@@ -216,7 +161,7 @@ void BaseAppETH::stop() {
 }
 
 void BaseAppETH::broadcast(const std::string &data) {
-    this->peer_manager->broadcast(data, TTL_ETH);
+    this->peer_manager->broadcast(data, TTL_ETH, "");
 
     return;
 }

@@ -9,7 +9,9 @@ unsigned long get_milliseconds_since_epoch() {
 // Constructors
 Message::Message() {}
 
-Message::Message(std::string messageID, std::string sender_id, std::string receiver_id):
+// used in eth
+Message::Message(std::string broadcastID, std::string messageID, std::string sender_id, std::string receiver_id):
+    broadcastID(broadcastID),
     message_id(messageID),
     sender_id(sender_id),
     receiver_id(receiver_id) {
@@ -20,8 +22,10 @@ Message::Message(std::string messageID, std::string sender_id, std::string recei
         this->io_timestamp = 0;
 }
 
-Message::Message(std::string messageID, int type, unsigned long from_level, std::string sender_id, std::string receiver_id):
-	message_id(messageID),
+// used in hgfrr
+Message::Message(std::string broadcastID, std::string messageID, int type, unsigned long from_level, std::string sender_id, std::string receiver_id):
+	broadcastID(broadcastID),
+    message_id(messageID),
 	type(type),
 	from_level(from_level),
 	sender_id(sender_id),
@@ -31,8 +35,9 @@ Message::Message(std::string messageID, int type, unsigned long from_level, std:
         this->io_timestamp = 0;
 	}
     
-Message::Message(unsigned short io_type, std::string messageID, int type, unsigned long from_level, std::string sender_id, std::string receiver_id):
-	io_type(io_type),
+Message::Message(unsigned short io_type, std::string broadcastID, std::string messageID, int type, unsigned long from_level, std::string sender_id, std::string receiver_id):
+    io_type(io_type),
+    broadcastID(broadcastID),
     message_id(messageID),
 	type(type),
 	from_level(from_level),
@@ -48,6 +53,7 @@ std::string Message::to_csv_string() const {
     return std::to_string(io_timestamp) + ',' +
         std::to_string(io_type) + ',' +
         sender_id + ','+ 
+        broadcastID + ',' +
         message_id + ',' + 
         receiver_id + ',' +
         std::to_string(type) + ',' + 
@@ -56,6 +62,8 @@ std::string Message::to_csv_string() const {
 }
 
 // Getters and setters
+std::string Message::get_broadcast_id() const { return this->broadcastID; }
+
 std::string Message::get_sender_id() const { return this->sender_id; }
 
 std::string Message::get_receiver_id() const { return this->receiver_id; }
@@ -69,6 +77,8 @@ int Message::get_node_order() const { return this->node_order; }
 int Message::get_type() const { return this->type; }
 
 int Message::get_TTL() const { return this->ttl; }
+
+void Message::set_broadcast_id(const std::string &broadcastID) { this->broadcastID = broadcastID; }
 
 void Message::set_sender_id(const std::string &sender_id) { this->sender_id = sender_id; }
 

@@ -70,6 +70,7 @@ add_library(${PROJECT_NAME} STATIC
     src/message.cpp
     src/node_table_eth.cpp
     src/peer_manager_eth.cpp
+    src/utils.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}
