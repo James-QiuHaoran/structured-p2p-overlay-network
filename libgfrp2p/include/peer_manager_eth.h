@@ -66,7 +66,14 @@ private:
     MessageTable msg_table;
     std::string start_time;
 
+    // broadcast mode
+    unsigned short mode;
+
 public:
+    // two modes of gossip broadcast
+    static const unsigned short PUSH = 0;
+    static const unsigned short PULL = 1;
+
     // constructors
     PeerManagerETH();
     PeerManagerETH(unsigned short port);
@@ -79,6 +86,7 @@ public:
     // setters
     void set_node(std::shared_ptr<Node> node);
     void set_node_table(std::shared_ptr<NodeTableETH> node_table);
+    void set_mode(unsigned short mode);
     
     // start the server
     void start();
@@ -86,6 +94,8 @@ public:
     // broadcast a message
     void broadcast(const std::string &data, int ttl);
     void send(std::shared_ptr<Node> node, const Message &msg, const std::string &data);
+    void send_inv(std::shared_ptr<Node> node, const std::string &data_hash);
+    void send_data(std::shared_ptr<Node> node, const std::string &data);
 
     // override the receive() func inherited from Receiver
     virtual void receive(const std::string& ip, unsigned short port, const std::string &data) override;

@@ -24,6 +24,8 @@ PeerManagerETH::PeerManagerETH(unsigned short port) {}
 PeerManagerETH::PeerManagerETH(const std::shared_ptr<Node>& node, const std::shared_ptr<NodeTableETH>& node_table, const std::string &start_time): 
 	node(node), node_table(node_table) {
 	this->start_time = start_time;
+
+	this->mode = PeerManagerETH::PUSH;
 }
 
 PeerError::PeerError() {}
@@ -49,6 +51,8 @@ void PeerError::set_errorMessage(std::string message) { this->errorMessage = mes
 void PeerManagerETH::set_node(std::shared_ptr<Node> node) { this->node = node; }
 
 void PeerManagerETH::set_node_table(std::shared_ptr<NodeTableETH> node_table) { this->node_table = node_table; }
+
+void PeerManagerETH::set_mode(unsigned short mode) { this->mode = mode; }
 
 // send message using transport layer 
 // using wire protcol - TCP Transportation
@@ -113,6 +117,20 @@ void PeerManagerETH::broadcast(const std::string &data, int ttl) {
 	}
 
 	return;
+}
+
+// send data hash as invitation
+void PeerManagerETH::send_inv(std::shared_ptr<Node> node, const std::string &data_hash) {
+	Message msg(random_string(MSG_HASH_LENGTH), this->node->get_id(), node->get_id());
+	msg.set_type(1);
+	send(node, msg, data_hash);
+}
+
+// send real data
+void PeerManagerETH::send_data(std::shared_ptr<Node> node, const std::string &data) {
+	Message msg(random_string(MSG_HASH_LENGTH), this->node->get_id(), node->get_id());
+	msg.set_type(2);
+	send(node, msg, data);
 }
 
 // on receiving a packet
