@@ -42,7 +42,7 @@ message Config {
     uint32 node_id = 3;
 
     uint32 table_size = 4;
-    repeated string table_ids = 5;
+    repeated uint32 table_ids = 5;
     repeated string table_ips = 6;
     repeated uint32 table_ports = 7;
 

@@ -555,12 +555,12 @@ void PeerManager::contact_node_election(unsigned long level) {
 }
 
 // on a node join
-void on_new_connection(std::shared_ptr<Node> node) {
+void PeerManager::on_new_connection(std::shared_ptr<Node> node) {
 	return;
 }
 
 // on a node leave
-void on_lost_connection(std::shared_ptr<Node> node) {
+void PeerManager::on_lost_connection(std::shared_ptr<Node> node) {
 	return;
 }
 

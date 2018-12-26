@@ -24,7 +24,6 @@ private:
     unsigned long from_level;
     std::string sender_id;
     std::string receiver_id;
-    // std::string data;
 
 public:
     static constexpr const char* csv_header = "io_timestamp,io_type,sender_id,message_id,receiver_id,type,from_level,node_order";
@@ -34,6 +33,7 @@ public:
 
     // constructor
     Message();
+    Message(std::string messageID, std::string sender_id, std::string receiver_id);
     Message(std::string messageID, int type, unsigned long from_level, std::string sender_id, std::string receiver_id);
     Message(unsigned short io_type, std::string messageID, int type, unsigned long from_level, std::string sender_id, std::string receiver_id);
 
@@ -48,7 +48,6 @@ public:
     std::string get_message_id() const;
     int get_type() const;
     int get_node_order() const;
-    // std::string get_data() const;
 
     // setters
     void set_sender_id(const std::string &sender_id);
@@ -57,7 +56,6 @@ public:
     void set_message_id(std::string message_id);
     void set_type(int type);
     void set_node_order(int order);
-    // void set_data(const std::string &data);
 };
 
 // Define hash for message key
@@ -91,11 +89,15 @@ private:
 
 public:
     
+    // used for checking the existence of a message
     bool exist(const message_key_t& msg_key) const;
+    bool existID(const std::string & msgID) const;
 
+    // insert message records
     Message insert_received(const Message& msg);
     Message insert_sent(const Message& msg);
 
+    // transform the message into a csv string
     std::string to_csv_string() const;
 };
 

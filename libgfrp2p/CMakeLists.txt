@@ -68,6 +68,8 @@ add_library(${PROJECT_NAME} STATIC
     src/transport.cpp
     src/peer_manager.cpp
     src/message.cpp
+    src/node_table_eth.cpp
+    src/peer_manager_eth.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -81,7 +83,15 @@ add_executable(app
     src/app.cpp
 )
 
+add_executable(app_eth
+    src/app_eth.cpp
+)
+
 target_link_libraries(app
+    ${PROJECT_NAME}
+)
+
+target_link_libraries(app_eth
     ${PROJECT_NAME}
 )
 
