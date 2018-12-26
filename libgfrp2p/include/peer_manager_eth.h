@@ -10,6 +10,7 @@
 #include <chrono>
 #include <iostream>
 #include <fstream>
+#include <functional>
 
 #include <boost/random/uniform_int_distribution.hpp>
 #include <boost/random/mersenne_twister.hpp>
@@ -95,11 +96,11 @@ public:
     void start();
 
     // broadcast a message
-    void broadcast(const std::string &data, int ttl);
+    void broadcast(const std::string &data, int ttl, std::string broadcast_id);
     void send(std::shared_ptr<Node> node, const Message &msg, const std::string &data);
-    void send_inv(std::shared_ptr<Node> node, const std::string &data_hash);
-    void send_data(std::shared_ptr<Node> node, const std::string &data);
-    void send_request(std::shared_ptr<Node> node, const std::string &data_hash);
+    void send_inv(std::shared_ptr<Node> node, const std::string &data_hash, const std::string &broadcast_id);
+    void send_data(std::shared_ptr<Node> node, const std::string &data, const std::string &broadcast_id);
+    void send_request(std::shared_ptr<Node> node, const std::string &data_hash, const std::string &broadcast_id);
 
     // override the receive() func inherited from Receiver
     virtual void receive(const std::string& ip, unsigned short port, const std::string &data) override;

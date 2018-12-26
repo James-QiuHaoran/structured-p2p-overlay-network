@@ -216,7 +216,7 @@ void BaseAppETH::stop() {
 }
 
 void BaseAppETH::broadcast(const std::string &data) {
-    this->peer_manager->broadcast(data, TTL_ETH);
+    this->peer_manager->broadcast(data, TTL_ETH, "");
 
     return;
 }
