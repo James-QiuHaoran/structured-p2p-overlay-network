@@ -69,6 +69,9 @@ private:
     // broadcast mode
     unsigned short mode;
 
+    // messaged received
+    std::unordered_map<std::string, std::string> data_map;
+
 public:
     // two modes of gossip broadcast
     static const unsigned short PUSH = 0;
@@ -96,6 +99,7 @@ public:
     void send(std::shared_ptr<Node> node, const Message &msg, const std::string &data);
     void send_inv(std::shared_ptr<Node> node, const std::string &data_hash);
     void send_data(std::shared_ptr<Node> node, const std::string &data);
+    void send_request(std::shared_ptr<Node> node, const std::string &data_hash);
 
     // override the receive() func inherited from Receiver
     virtual void receive(const std::string& ip, unsigned short port, const std::string &data) override;

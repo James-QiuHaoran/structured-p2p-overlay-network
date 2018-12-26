@@ -113,7 +113,14 @@ void PeerManagerETH::broadcast(const std::string &data, int ttl) {
 
 		BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "Broadcast msg | " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "] -> " << "[" << receiver->get_ip() << ":" << receiver->get_port() << "]";
 		
-		this->send(receiver, msg, data);
+		if (this->mode == PeerManagerETH::PUSH)
+			// push version
+			this->send(receiver, msg, data);
+		else {
+			// pull version
+    		std::size_t data_hash = std::hash<std::string>{}(data);
+			this->send_inv(receiver, std::to_string(data_hash));
+		}
 	}
 
 	return;
@@ -131,6 +138,13 @@ void PeerManagerETH::send_data(std::shared_ptr<Node> node, const std::string &da
 	Message msg(random_string(MSG_HASH_LENGTH), this->node->get_id(), node->get_id());
 	msg.set_type(2);
 	send(node, msg, data);
+}
+
+// send request for data
+void PeerManagerETH::send_request(std::shared_ptr<Node> node, const std::string &data_hash) {
+	Message msg(random_string(MSG_HASH_LENGTH), this->node->get_id(), node->get_id());
+	msg.set_type(3);
+	send(node, msg, data_hash);
 }
 
 // on receiving a packet
@@ -155,7 +169,7 @@ void PeerManagerETH::receive(const std::string& ip, unsigned short port, const s
 	pos_start = pos_end + 1;
 	std::string data_in_msg = data.substr(pos_start);
 
-	if (ttl == "0") {
+	if (ttl == "0" && this->mode == PeerManagerETH::PUSH) {
 		// no need to broadcast
 		return;
 	}
@@ -201,12 +215,49 @@ void PeerManagerETH::on_receive(const Message &msg, const std::string &data) {
 		std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
 	}
 
-	if (this->msg_table.existID(msg.get_message_id())) {
-		// do not need to broadcast anymore
-		return;
+	if (this->mode == PeerManagerETH::PULL) {
+		// pull version
+		if (msg.get_type() == 1) {
+			// it is an invitation
+			if (this->data_map.find(data) != this->data_map.end()) {
+				// already received, do nothing
+				return;
+			} else {
+				// send request
+				std::string ip = data.substr(data.find("|")+1, data.find(":") - data.find("|") - 1);
+				unsigned short port = std::stoi(data.substr(data.find(":")+1));
+				Node receiver(msg.get_sender_id(), ip, port);
+
+				this->send_request(std::make_shared<Node>(receiver), data);
+			}
+		} else if (msg.get_type() == 2) {
+			// it is the data, receive it
+			this->data_map.insert({data.substr(0, data.find("|")), data.substr(data.find("|")+1)});
+
+			// then broadcast
+			this->broadcast(data.substr(data.find("|")+1), 0);
+		} else if (msg.get_type() == 3) {
+			// it is the request, send the data
+			std::string real_data = this->data_map.find(data.substr(0, data.find("|")))->second;
+
+			std::string ip = data.substr(data.find("|")+1, data.find(":") - data.find("|") - 1);
+			unsigned short port = std::stoi(data.substr(data.find(":")+1));
+			Node receiver(msg.get_sender_id(), ip, port);
+
+			this->send_data(std::make_shared<Node>(receiver), data + "|" + real_data);
+		} else {
+			// message not recognized, drop the message
+			return;
+		}
 	} else {
-		// continue to broadcast
-		this->broadcast(data, msg.get_TTL()-1);
+		// push version
+		if (this->msg_table.existID(msg.get_message_id())) {
+			// do not need to broadcast anymore
+			return;
+		} else {
+			// continue to broadcast
+			this->broadcast(data, msg.get_TTL()-1);
+		}
 	}
 
 	return;
