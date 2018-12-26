@@ -6,6 +6,8 @@
 #define HEARTBEAT_TIMEOUT  5
 #define NUM_CONTACT_NODES  3
 #define MSG_HASH_LENGTH   50
+#define TABLE_SIZE_ETH    13
+#define NUM_RECEIVERS_ETH  7
 
 // ID definition rules
 #define ID_CONTINENT_LEN   3

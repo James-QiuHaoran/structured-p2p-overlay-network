@@ -87,11 +87,21 @@ void PeerManagerETH::broadcast(const std::string &data) {
 	std::vector<std::shared_ptr<Node>> routing_table = this->node_table->get_peer_set();
 
 	// receiver list
-	std::vector<std::shared_ptr<Node>> receiver_list;
+	std::unordered_set<std::shared_ptr<Node>> receiver_list;
+	std::unordered_set<int> random_ids;
 
 	// randomly select nodes to broadcast
-	// [TODO]
+    for (int i = 0; i < NUM_RECEIVERS_ETH; i++) {
+        int id = this->random_num_in_range(0, TABLE_SIZE_ETH-1);
+        if (random_ids.find(id) != random_ids.end()) {
+            random_ids.insert(id);
+            receiver_list.insert(routing_table[id]);
+        } else {
+            i--;
+        }
+    }
 
+    // send out messages
 	for (auto receiver : receiver_list) {
 		msg.set_receiver_id(receiver->get_id());
 

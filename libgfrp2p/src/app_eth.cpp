@@ -41,11 +41,27 @@ void BaseAppETH::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
     int num_states_in_country = num_nodes_in_country/num_cnodes_in_state;
     int num_countries_in_continent = num_nodes_in_continent/num_cnodes_in_country;
 
+    int num_nodes_total = num_continents * num_countries_in_continent * num_states_in_country * num_cities_in_state * num_dists_in_city * num_nodes_in_dist;
+
     // set node table
     std::vector<std::shared_ptr<Node>> table;
 
+    // generate random neighbors to connect
+    std::unordered_set<int> neighbor_ids;
+    
+    for (int i = 0; i < TABLE_SIZE_ETH; i++) {
+        int id = this->random_num_in_range(0, num_nodes_total-1);
+        if (neighbor_ids.find(id) != neighbor_ids.end()) {
+            neighbor_ids.insert(id);
+        } else {
+            i--;
+        }
+    }
+
+    // int to string
     std::stringstream ss;
 
+    int counter = 0;
     for (int continent_counter = 0; continent_counter < num_continents; continent_counter++) {
         ss.str("");
         ss.clear();
@@ -72,21 +88,25 @@ void BaseAppETH::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
                         ss << std::setw(ID_DISTRICT_LEN) << std::setfill('0') << district_counter;
                         dist_id = ss.str();
                         for (int i = 0; i < num_nodes_in_dist; i++) {
-                            ss.str("");
-                            ss.clear();
-                            ss << std::setw(ID_SINGLE_LEN) << std::setfill('0') << i;
-                            id_in_dist = ss.str();
+                            if (neighbor_ids.find(i) != neighbor_ids.end()) {
+                                ss.str("");
+                                ss.clear();
+                                ss << std::setw(ID_SINGLE_LEN) << std::setfill('0') << i;
+                                id_in_dist = ss.str();
 
-                            std::string node_id = continent_id + country_id + state_id + city_id + dist_id + id_in_dist;
-                            unsigned short port = this->convert_ID_to_port(starting_port_number, node_id,
-                                    num_nodes_in_dist, num_cnodes_in_dist, 
-                                    num_nodes_in_city, num_cnodes_in_city, 
-                                    num_nodes_in_state, num_cnodes_in_state, 
-                                    num_nodes_in_country, num_cnodes_in_country, 
-                                    num_nodes_in_continent);
-                            Node node(node_id, "127.0.0.1", port);
+                                std::string node_id = continent_id + country_id + state_id + city_id + dist_id + id_in_dist;
+                                unsigned short port = this->convert_ID_to_port(starting_port_number, node_id,
+                                        num_nodes_in_dist, num_cnodes_in_dist, 
+                                        num_nodes_in_city, num_cnodes_in_city, 
+                                        num_nodes_in_state, num_cnodes_in_state, 
+                                        num_nodes_in_country, num_cnodes_in_country, 
+                                        num_nodes_in_continent);
+                                Node node(node_id, "127.0.0.1", port);
 
-                            table.push_back(std::make_shared<Node>(node));
+                                table.push_back(std::make_shared<Node>(node));
+                            }
+
+                            counter++;
                         }
                     }
                 }
@@ -199,6 +219,12 @@ void BaseAppETH::broadcast(const std::string &data) {
     this->peer_manager->broadcast(data);
 
     return;
+}
+
+// random number generated uniformly from [low, high]
+int BaseAppETH::random_num_in_range(int low, int high) {
+    boost::random::uniform_int_distribution<> dist(low, high);
+    return dist(gen_seed);
 }
 
 int main(int argc, char** argv) {
