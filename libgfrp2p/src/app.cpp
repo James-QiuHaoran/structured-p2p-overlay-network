@@ -222,7 +222,6 @@ unsigned short BaseApp::convert_ID_to_port(unsigned short starting_port_number, 
     int num_nodes_in_state, int num_cnodes_in_state, 
     int num_nodes_in_country, int num_cnodes_in_country, 
     int num_nodes_in_continent) {
-    // BOOST_LOG_TRIVIAL(debug) << id;
     
     std::string id_in_dist = id.substr(ID_SINGLE_START);
     std::string dist_id = id.substr(ID_DISTRICT_START, ID_DISTRICT_LEN);

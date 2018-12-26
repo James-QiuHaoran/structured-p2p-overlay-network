@@ -9,6 +9,17 @@ unsigned long get_milliseconds_since_epoch() {
 // Constructors
 Message::Message() {}
 
+Message::Message(std::string messageID, std::string sender_id, std::string receiver_id):
+    message_id(messageID),
+    sender_id(sender_id),
+    receiver_id(receiver_id) {
+        this->node_order = -1;
+        this->type = 0;
+        this->from_level = 0;
+        this->io_type = 0;
+        this->io_timestamp = 0;
+}
+
 Message::Message(std::string messageID, int type, unsigned long from_level, std::string sender_id, std::string receiver_id):
 	message_id(messageID),
 	type(type),
@@ -16,6 +27,8 @@ Message::Message(std::string messageID, int type, unsigned long from_level, std:
 	sender_id(sender_id),
 	receiver_id(receiver_id) {
 		this->node_order = -1;
+        this->io_type = 0;
+        this->io_timestamp = 0;
 	}
     
 Message::Message(unsigned short io_type, std::string messageID, int type, unsigned long from_level, std::string sender_id, std::string receiver_id):
@@ -26,6 +39,7 @@ Message::Message(unsigned short io_type, std::string messageID, int type, unsign
 	sender_id(sender_id),
 	receiver_id(receiver_id) {
 		this->node_order = -1;
+        this->io_timestamp = 0;
 	}
 
 message_key_t Message::get_key() const { return this->io_timestamp; }
@@ -71,6 +85,16 @@ void Message::set_type(int type) { this->type = type; }
 /* MessageTable member functions */
 bool MessageTable::exist(const message_key_t& msg_key) const {
     return this->table.find(msg_key) != this->table.end();
+}
+
+bool MessageTable::existID(const std::string &msgID) const {
+    for (auto msg : this->table) {
+        if (msg.second.get_message_id() == msgID) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 // insert records for receiving messages
