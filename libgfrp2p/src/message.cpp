@@ -68,7 +68,7 @@ int Message::get_node_order() const { return this->node_order; }
 
 int Message::get_type() const { return this->type; }
 
-// std::string Message::get_data() const { return this->data; }
+int Message::get_TTL() const { return this->ttl; }
 
 void Message::set_sender_id(const std::string &sender_id) { this->sender_id = sender_id; }
 
@@ -81,6 +81,8 @@ void Message::set_message_id(std::string msgID) { this->message_id = msgID; }
 void Message::set_node_order(int order) { this->node_order = order; }
 
 void Message::set_type(int type) { this->type = type; }
+
+void Message::set_TTL(int ttl) { this->ttl = ttl; }
 
 /* MessageTable member functions */
 bool MessageTable::exist(const message_key_t& msg_key) const {

@@ -20,7 +20,7 @@ private:
     unsigned short io_type;
     
     std::string message_id;
-    int type, node_order;
+    int type, node_order, ttl;
     unsigned long from_level;
     std::string sender_id;
     std::string receiver_id;
@@ -48,6 +48,7 @@ public:
     std::string get_message_id() const;
     int get_type() const;
     int get_node_order() const;
+    int get_TTL() const;
 
     // setters
     void set_sender_id(const std::string &sender_id);
@@ -56,6 +57,7 @@ public:
     void set_message_id(std::string message_id);
     void set_type(int type);
     void set_node_order(int order);
+    void set_TTL(int ttl);
 };
 
 // Define hash for message key
