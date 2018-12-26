@@ -39,7 +39,7 @@ message Config {
     EvalType eval_type = 2;
 
     // Experiment-specific config
-    string node_id = 3;
+    uint32 node_id = 3;
 
     uint32 table_size = 4;
     repeated string table_ids = 5;
