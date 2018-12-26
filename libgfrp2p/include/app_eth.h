@@ -1,5 +1,5 @@
-#ifndef APP_H
-#define APP_H
+#ifndef APP_ETH_H
+#define APP_ETH_H
 
 #include <string>
 #include <cstdlib>

@@ -60,10 +60,11 @@ void PeerManagerETH::send(std::shared_ptr<Node> node, const Message &msg, const 
 	}
 
 	// generate data to send
-	// data format: sender_id,receiver_id,msg_id,data
+	// data format: sender_id,receiver_id,msg_id,ttl,data
 	std::string data_string = this->node->get_id() + "," + 
 							   node->get_id() + "," +
 							   msg.get_message_id() + "," + 
+							   std::to_string(msg.get_TTL()) + "," +
 							   data;
 
 	// for message logging
@@ -79,9 +80,10 @@ void PeerManagerETH::send(std::shared_ptr<Node> node, const Message &msg, const 
 }
 
 // a node wants to broadcast a message
-void PeerManagerETH::broadcast(const std::string &data) {
+void PeerManagerETH::broadcast(const std::string &data, int ttl) {
 	// wrap the data into a Message
 	Message msg(random_string(MSG_HASH_LENGTH), this->node->get_id(), "");
+	msg.set_TTL(ttl);
 
 	// get all nodes in the routing table
 	std::vector<std::shared_ptr<Node>> routing_table = this->node_table->get_peer_set();
@@ -119,16 +121,29 @@ void PeerManagerETH::receive(const std::string& ip, unsigned short port, const s
 	std::size_t pos_start = 0;
 	std::size_t pos_end = data.find(",", 0);
 	std::string sender_id = data.substr(pos_start, pos_end-pos_start);
+	
 	pos_start = pos_end + 1;
 	pos_end = data.find(",", pos_end+1);
 	std::string receiver_id = data.substr(pos_start, pos_end-pos_start);
+	
 	pos_start = pos_end + 1;
 	pos_end = data.find(",", pos_end+1);
 	std::string messageID = data.substr(pos_start, pos_end-pos_start);
+
+	pos_start = pos_end + 1;
+	pos_end = data.find(",", pos_end+1);
+	std::string ttl = data.substr(pos_start, pos_end-pos_start);
+
 	pos_start = pos_end + 1;
 	std::string data_in_msg = data.substr(pos_start);
 
+	if (ttl == "0") {
+		// no need to broadcast
+		return;
+	}
+
 	Message msg = Message(messageID, sender_id, receiver_id);
+	msg.set_TTL(std::stoi(ttl));
 
 	BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "Received msg from wire | [] " << " -> " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "]";
 
@@ -173,7 +188,7 @@ void PeerManagerETH::on_receive(const Message &msg, const std::string &data) {
 		return;
 	} else {
 		// continue to broadcast
-		this->broadcast(data);
+		this->broadcast(data, msg.get_TTL()-1);
 	}
 
 	return;

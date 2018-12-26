@@ -1,5 +1,5 @@
-#ifndef PEER_MANAGER_H
-#define PEER_MANAGER_H
+#ifndef PEER_MANAGER_ETH_H
+#define PEER_MANAGER_ETH_H
 
 #include <string>
 #include <unordered_set>
@@ -83,8 +83,8 @@ public:
     // start the server
     void start();
 
-    // broadcast/multicast a message
-    void broadcast(const std::string &data);
+    // broadcast a message
+    void broadcast(const std::string &data, int ttl);
     void send(std::shared_ptr<Node> node, const Message &msg, const std::string &data);
 
     // override the receive() func inherited from Receiver
