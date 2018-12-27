@@ -111,3 +111,19 @@ target_link_libraries(eval_client
     protobuf::libprotobuf
     ${PROJECT_NAME}
 )
+
+add_executable(eval_server
+    test/tcp_test.cpp
+    ${PROTO_HDRS}
+    ${PROTO_SRCS}
+)
+
+target_include_directories(eval_server
+    PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+target_link_libraries(eval_server
+    protobuf::libprotobuf
+    ${PROJECT_NAME}
+    sqlite3
+)
