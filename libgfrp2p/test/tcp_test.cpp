@@ -61,7 +61,7 @@ public:
 				std::cout << "Number of nodes: " << num_node << std::endl;
 			}			
 		}
-    }
+    	}
 
 	virtual void receive(const std::string& ip, unsigned short port, const std::string& data) override {
         BOOST_LOG_TRIVIAL(info) << "UDPTest::receive: Packet received from " + ip + ':' + std::to_string(port) + '\n' + data;
@@ -72,7 +72,7 @@ public:
 		if (nodeinfo.type() == bootstrap_message::BootstrapMessage::INIT){
 			init(ip, port, nodeinfo);
 		}
-    }
+    	}
 
 	static int printNode(void *NotUsed, int argc, char **argv, char **azColName)
 		for(int i=0; i<argc; i++){
@@ -90,11 +90,11 @@ public:
 
 		rc = sqlite3_exec(db, sql, printNode, 0, &errMsg);
    		if(rc != SQLITE_OK){
-      		fprintf(stderr, "SQL error: %s\n", errMsg);
+      			fprintf(stderr, "SQL error: %s\n", errMsg);
 			num_node++;
    		}
 		else{
-      		fprintf(stdout, "Operation done successfully\n");
+      			fprintf(stdout, "Operation done successfully\n");
    		}
 	}
 
@@ -136,10 +136,10 @@ public:
 
 		rc = sqlite3_exec(db, sql, sendConfig, (void*)data, &errMsg);
    		if(rc != SQLITE_OK){
-      		fprintf(stderr, "SQL error: %s\n", errMsg);
+      			fprintf(stderr, "SQL error: %s\n", errMsg);
    		}
 		else{
-      		fprintf(stdout, "Operation done successfully\n");
+      			fprintf(stdout, "Operation done successfully\n");
    		}
 	}
 };
