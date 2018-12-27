@@ -7,7 +7,7 @@
 class TCPTest: public Receiver, public std::enable_shared_from_this<TCPTest> {
 public:
 
-	static std::unique_ptr<AsyncTCPServer> tcp_server;
+    static std::unique_ptr<AsyncTCPServer> tcp_server;
 	sqlite3 *db;
 	int num_node;
 
@@ -17,22 +17,26 @@ public:
 		num_node = 0;
 
 		if (sqlite3_open("test.db", &db)){
-			fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
+			std::cout << "Cannot open database: " << sqlite3_errmsg(db) << std::endl;
+			//fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db));
 			exit(0);
 		}
 		else{
-			fprintf(stderr, "Open database successfully\n");
+			std::cout << "Open database successfully" << std::endl;
+			//fprintf(stderr, "Open database successfully\n");
 		}
 
 		char* errMsg;
    		int rc;
-		char* sql = "CREATE TABLE Node(ip CHAR(50), port INT, id INT);";
-		rc = sqlite3_exec(db, sql, printNode, 0, &errMsg);
+		char* create_sql = "CREATE TABLE Node(ip CHAR(50), port INT, id INT)";
+		rc = sqlite3_exec(db, create_sql, printNode, 0, &errMsg);
 	   	if(rc != SQLITE_OK){
-	   		fprintf(stderr, "SQL error: %s\n", errMsg);
+			std::cout << "SQL error: " << errMsg << std::endl;
+	   		//fprintf(stderr, "SQL error: %s\n", errMsg);
 	   	}
 		else{
-			fprintf(stdout, "Table created successfully\n");
+			std::cout << "Table created successfully" << std::endl;
+			//fprintf(stdout, "Table created successfully\n");
 	   	}	
 
         this->tcp_server->run();
@@ -47,13 +51,15 @@ public:
 			}
 
 			else if (command == "list"){
-				sql = "SELECT * FROM Node";
+				char* sql = "SELECT * FROM Node";
 				rc = sqlite3_exec(db, sql, printNode, 0, &errMsg);
 		   		if(rc != SQLITE_OK){
-			  		fprintf(stderr, "SQL error: %s\n", errMsg);
+					std::cout << "SQL error: " << errMsg << std::endl;
+			  		//fprintf(stderr, "SQL error: %s\n", errMsg);
 		   		}
 				else{
-			  		fprintf(stdout, "Operation done successfully\n");
+					std::cout << "Operation done successfully" << std::endl;
+			  		//fprintf(stdout, "Operation done successfully\n");
 		   		}
 			}
 
@@ -66,7 +72,7 @@ public:
 	virtual void receive(const std::string& ip, unsigned short port, const std::string& data) override {
         BOOST_LOG_TRIVIAL(info) << "UDPTest::receive: Packet received from " + ip + ':' + std::to_string(port) + '\n' + data;
 
-		bootstrap_message::BootstrapMessage nodeinfo;
+		bootstrap_message::BootstrapMessage nodeinfo;	
 		nodeinfo.ParseFromString(data);
 
 		if (nodeinfo.type() == bootstrap_message::BootstrapMessage::INIT){
@@ -74,48 +80,49 @@ public:
 		}
     }
 
-	static int printNode(void *NotUsed, int argc, char **argv, char **azColName){
+	static int printNode(void *NotUsed, int argc, char **argv, char **azColName)
+	{
 		for(int i=0; i<argc; i++){
-			printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
+			std::cout << azColName[i] << " = " << argv[i] << std::endl;
+			//printf("%s = %s\n", azColName[i], argv[i]);
 		}
-		printf("\n");
 		return 0;
 	}
 
 	void init(const std::string& ip, unsigned short port, const bootstrap_message::BootstrapMessage nodeinfo){
 		char* errMsg;
    		int rc;
-   		char sql[100];
-		sprintf(sql, "INSERT INTO Node (ip, port, id) VALUES (%s, %d, %d);", ip, port, num_node+1);
+   		char* sql;
+		sprintf(sql, "INSERT INTO Node (ip, port, id) VALUES (%s, %d, %d)", ip, port, num_node+1);
 
 		rc = sqlite3_exec(db, sql, printNode, 0, &errMsg);
    		if(rc != SQLITE_OK){
-      		fprintf(stderr, "SQL error: %s\n", errMsg);
+			std::cout << "SQL error: " << errMsg << std::endl;
+      		//fprintf(stderr, "SQL error: %s\n", errMsg);
 			num_node++;
    		}
 		else{
-      		fprintf(stdout, "Operation done successfully\n");
+			std::cout << "Operation done successfully" << std::endl;
+      		//fprintf(stdout, "Operation done successfully\n");
    		}
 	}
 
 	static int sendConfig(void *data, int argc, char **argv, char **azColName){
-		fprintf(stderr, "%s: ", (const char*)data);
-		const std::string& ip = "";
-		ip += argv[0];
+		//fprintf(stderr, "%s: ", (const char*)data);
 		unsigned short port = std::stoi(argv[1]);
 
 		bootstrap_message::BootstrapMessage msg;
 		msg.set_type(bootstrap_message::BootstrapMessage::CONFIG);
 
-		msg.mutable_config()->set_run_id(10086);
+		msg.mutable_config()->set_run_id("12345");
 		msg.mutable_config()->set_eval_type(bootstrap_message::Config::HGFRR);
 		msg.mutable_config()->set_node_id(std::stoi(argv[2]));
 		
 		msg.mutable_config()->set_table_size(2);
-		msg.mutable_config()->add_table_ids("00001000010000100001000010000101");
+		msg.mutable_config()->add_table_ids(0);
 		msg.mutable_config()->add_table_ips("192.168.100.2");
 		msg.mutable_config()->add_table_ports(30303);
-		msg.mutable_config()->add_table_ids("00001000010000100001000010000110");
+		msg.mutable_config()->add_table_ids(1);
 		msg.mutable_config()->add_table_ips("192.168.100.3");
 		msg.mutable_config()->add_table_ports(30303);
 
@@ -124,7 +131,7 @@ public:
 		std::string buffer;
 		msg.SerializeToString(&buffer);
 	
-		tcp_server->send(ip, port, buffer);
+		tcp_server->send(argv[0], port, buffer);
 		return 0;
 	}
 
@@ -136,10 +143,12 @@ public:
 
 		rc = sqlite3_exec(db, sql, sendConfig, (void*)data, &errMsg);
    		if(rc != SQLITE_OK){
-      		fprintf(stderr, "SQL error: %s\n", errMsg);
+			std::cout << "SQL error: " << errMsg << std::endl;
+      		//fprintf(stderr, "SQL error: %s\n", errMsg);
    		}
 		else{
-      		fprintf(stdout, "Operation done successfully\n");
+			std::cout << "Operation done successfully" << std::endl;
+      		//fprintf(stdout, "Operation done successfully\n");
    		}
 	}
 };
