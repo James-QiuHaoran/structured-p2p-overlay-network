@@ -1,7 +1,11 @@
 #include <sstream>
 #include <iomanip>
+#include <algorithm>
+#include <time.h>
 
 #include "param_constants.h"
+
+std::string random_string(size_t length);
 
 std::string convert_ID_int_to_string(int id,
     int num_nodes_in_dist, int num_cnodes_in_dist, 

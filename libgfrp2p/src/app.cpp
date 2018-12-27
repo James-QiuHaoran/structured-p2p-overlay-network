@@ -319,18 +319,18 @@ int main(int argc, char** argv) {
     }
     
     // broadcast a message
-    if (id == "00000000000000000000000000000000") {
+    //if (id == "00000000000000000100001000000003") {
         std::this_thread::sleep_for (std::chrono::seconds(5));
         BOOST_LOG_TRIVIAL(debug) << "Slept for 5 seconds";
-        BOOST_LOG_TRIVIAL(debug) << "Broadcasting message ... [MSG #1: Hello world!]";
+        BOOST_LOG_TRIVIAL(debug) << "Broadcasting message ...";
         // app.broadcast("MSG #1: Hello world (1)!");
         // app.broadcast("MSG #2: Hello world (2)!");
         // app.broadcast("MSG #3: Hello world (3)!");
         // app.broadcast(one_kb_data);
         app.broadcast(data_of_block_size);
-        app.broadcast(data_of_block_size);
-        app.broadcast(data_of_block_size);
-    }
+        //app.broadcast(data_of_block_size);
+        //app.broadcast(data_of_block_size);
+    //}
 
     // stop the app service
     // BOOST_LOG_TRIVIAL(debug) << "Stopping HGFR base service on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]";

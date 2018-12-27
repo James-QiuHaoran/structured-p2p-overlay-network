@@ -10,6 +10,7 @@
 #include <chrono>
 #include <iostream>
 #include <fstream>
+#include <time.h>
 
 #include <boost/random/uniform_int_distribution.hpp>
 #include <boost/random/mersenne_twister.hpp>
@@ -19,6 +20,7 @@
 #include "transport.h"
 #include "param_constants.h"
 #include "message.h"
+#include "utils.h"
 
 
 /* Error Class
@@ -65,6 +67,7 @@ private:
 
     // for message logging, contains all sent and received messages
     MessageTable msg_table;
+    std::vector<std::string> broadcasted_msgs;
     std::string run_id;
 
 public:
@@ -114,6 +117,9 @@ public:
 
     // generate random number uniformly from range [low, high]
     int random_num_in_range(int low, int high);
+
+    // generate random string of length
+    std::string random_string_of_length(size_t length);
 
     // write messages to file system
     void log_message_records();

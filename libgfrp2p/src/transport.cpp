@@ -56,7 +56,7 @@ void AsyncUDPServer::send(const std::string& ip, unsigned short port, const std:
     int32_t res_sendto = sendto(this->udp_socket_id_, data.data(), data.size(), 0, (struct sockaddr *)&udp_client_addr_, sizeof(struct sockaddr));
     if(res_sendto == -1) {
         std::cerr << "ERROR: AsyncUDPServer::send: Failed to send: " << strerror(errno) << std::endl;
-    } else if (res_sendto < data.size()) {
+    } else if (res_sendto < (int)data.size()) {
         std::cerr << "WARNING: AsyncUDPServer::send: Only " << res_sendto << " out of "  << data.size() << " is sent" << std::endl;
     }
 }
