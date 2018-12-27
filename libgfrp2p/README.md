@@ -2,9 +2,9 @@
 
 ## TODO List
 
-- Insert logging for broadcasting, sending, receiving messages for ethereum;
-- Bootstrap nodes implementation on docker (config)
-	- distribute IDs and construct the network (only for evaluation: use a central server)
+- Bootstrap nodes implementation on docker (config);
+- Test Kad+Gossip with Eth;
+- Evaluation
 
 ---
 

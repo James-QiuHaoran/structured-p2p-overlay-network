@@ -7,9 +7,9 @@
 class TCPTest: public Receiver, public std::enable_shared_from_this<TCPTest> {
 public:
 
-    std::unique_ptr<AsyncTCPServer> tcp_server;
-	std::sqlite3 *db;
-	uint32 num_node;
+	static std::unique_ptr<AsyncTCPServer> tcp_server;
+	sqlite3 *db;
+	int num_node;
 
     void start(unsigned short port) {
         BOOST_LOG_TRIVIAL(debug) << "TCPTest::start: Allocating tcp_server";
@@ -26,7 +26,7 @@ public:
 
 		char* errMsg;
    		int rc;
-		std::string sql = "CREATE TABLE Node(ip CHAR(50), port INT, id INT);";
+		char* sql = "CREATE TABLE Node(ip CHAR(50), port INT, id INT);";
 		rc = sqlite3_exec(db, sql, printNode, 0, &errMsg);
 	   	if(rc != SQLITE_OK){
 	   		fprintf(stderr, "SQL error: %s\n", errMsg);
@@ -74,7 +74,7 @@ public:
 		}
     }
 
-	static int printNode(void *NotUsed, int argc, char **argv, char **azColName)
+	static int printNode(void *NotUsed, int argc, char **argv, char **azColName){
 		for(int i=0; i<argc; i++){
 			printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
 		}
@@ -104,11 +104,11 @@ public:
 		ip += argv[0];
 		unsigned short port = std::stoi(argv[1]);
 
-		BootstrapMessage msg;
-		msg.set_type(BootstrapMessage::CONFIG);
+		bootstrap_message::BootstrapMessage msg;
+		msg.set_type(bootstrap_message::BootstrapMessage::CONFIG);
 
 		msg.mutable_config()->set_run_id(10086);
-		msg.mutable_config()->set_eval_type(Config::HGFRR);
+		msg.mutable_config()->set_eval_type(bootstrap_message::Config::HGFRR);
 		msg.mutable_config()->set_node_id(std::stoi(argv[2]));
 		
 		msg.mutable_config()->set_table_size(2);
@@ -124,14 +124,14 @@ public:
 		std::string buffer;
 		msg.SerializeToString(&buffer);
 	
-		this->tcp_server->send(ip, port, buffer);
+		tcp_server->send(ip, port, buffer);
 		return 0;
 	}
 
 	void config() {
 		char* errMsg;
    		int rc;
-   		std::string sql = "SELECT * FROM Node";
+   		char* sql = "SELECT * FROM Node";
    		char* data = "Send config function called";
 
 		rc = sqlite3_exec(db, sql, sendConfig, (void*)data, &errMsg);

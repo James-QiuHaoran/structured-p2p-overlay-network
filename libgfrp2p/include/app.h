@@ -17,6 +17,10 @@
 #include "message.h"
 #include "utils.h"
 
+// string of data of length 1024 bytes
+static const std::string one_kb_data(1024, 'S');
+static const std::string data_of_block_size(1024*17, 'S');
+
 class BaseApp {
 private:
     std::shared_ptr<Node> node;
@@ -24,7 +28,7 @@ private:
     std::shared_ptr<PeerManager> peer_manager;
 
 public:
-	// constructor
+    // constructor
     BaseApp(std::string ip, unsigned short port, std::string id);
 
     // getters

@@ -150,7 +150,8 @@ void PeerManager::broadcast_up(Message msg, unsigned long current_level, const s
 	// already reach the highest level, start to broadcast downwards
 	if (contact_nodes_upper.size() == 0) {
 		int k = 2;
-		BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - Received data: " << data;
+		if (data.length() < 12)
+			BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - Received data: " << data;
 		this->broadcast_within_ring(msg, current_level, k, data, sent_ids);
 		return;
 	}
@@ -412,7 +413,8 @@ void PeerManager::on_receive(const Message &msg, const std::string &data, std::u
 				Message msg_new(msg.get_broadcast_id(), random_string(MSG_HASH_LENGTH), 2, msg.get_from_level()+1, this->node->get_id(), "");
 				int k = 2;
 				msg_new.set_node_order(0);
-				BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - Received data: " << data;
+				if (data.length() < 12)
+					BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - Received data: " << data;
 
 				// within ring
 				this->broadcast_within_ring(msg_new, msg_new.get_from_level(), k, data, sent_ids);
@@ -444,7 +446,8 @@ void PeerManager::on_receive(const Message &msg, const std::string &data, std::u
 				Message msg_new(msg.get_broadcast_id(), random_string(MSG_HASH_LENGTH), 2, msg.get_from_level(), this->node->get_id(), "");
 				msg_new.set_node_order(0);
 				int k = 2;
-				BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - Received data: " << data;
+				if (data.length() < 12)
+					BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - Received data: " << data;
 
 				// within ring
 				this->broadcast_within_ring(msg_new, msg_new.get_from_level(), k, data, sent_ids);
@@ -468,8 +471,10 @@ void PeerManager::on_receive(const Message &msg, const std::string &data, std::u
 		} case 2 : {
 			BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "[MSG] Broadcast Within Ring & Downwards - I: Within Ring of level " << msg.get_from_level();
 			
-			if (msg.get_from_level() == this->node_table->get_top_level())
-				BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - Received data: " << data;
+			if (msg.get_from_level() == this->node_table->get_top_level()) {
+				if (data.length() < 12)
+					BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - Received data: " << data;
+			}
 			
 			// within ring
 			Message msg_new(msg.get_broadcast_id(), random_string(MSG_HASH_LENGTH), 2, msg.get_from_level(), this->node->get_id(), "");
@@ -495,8 +500,10 @@ void PeerManager::on_receive(const Message &msg, const std::string &data, std::u
 		} case 5 : {
 			BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "[MSG] Only Broadcast Within Ring of level " << msg.get_from_level();
 			
-			if (msg.get_from_level() == this->node_table->get_top_level())
-				BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - Received data: " << data;
+			if (msg.get_from_level() == this->node_table->get_top_level()) {
+				if (data.length() < 12)
+					BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - Received data: " << data;
+			}
 			
 			// within ring
 			Message msg_new(msg.get_broadcast_id(), random_string(MSG_HASH_LENGTH), 2, msg.get_from_level(), this->node->get_id(), "");
