@@ -65,13 +65,13 @@ private:
 
     // for message logging, contains all sent and received messages
     MessageTable msg_table;
-    std::string start_time;
+    std::string run_id;
 
 public:
     // constructors
     PeerManager();
     PeerManager(unsigned short port);
-    PeerManager(const std::shared_ptr<Node>& node, const std::shared_ptr<NodeTable>& node_table, const std::string &start_time);
+    PeerManager(const std::shared_ptr<Node>& node, const std::shared_ptr<NodeTable>& node_table, const std::string& run_id);
 
     // getters
     std::shared_ptr<Node> get_node();
@@ -118,6 +118,8 @@ public:
     // write messages to file system
     void log_message_records();
     void append_message_record(const Message& msg);
+    std::string get_all_records_csv();
+    std::string get_run_id();
 };
 
 #endif

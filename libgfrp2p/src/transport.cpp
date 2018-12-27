@@ -30,15 +30,15 @@ AsyncUDPServer::AsyncUDPServer(const std::shared_ptr<Receiver>& receiver, unsign
 
 void AsyncUDPServer::run() {
     #ifndef NDEBUG
-    std::cout << "DEBUG: AsyncUDPServer::run: Starting buffer handler thread";
+    std::cout << "DEBUG: AsyncUDPServer::run: Starting buffer handler thread" << std::endl;
     #endif
     this->buffer_handler = std::thread(&AsyncUDPServer::handle, this);
     #ifndef NDEBUG
-    std::cout << "DEBUG: AsyncUDPServer::run: Starting receive worker thread";
+    std::cout << "DEBUG: AsyncUDPServer::run: Starting receive worker thread" << std::endl;
     #endif
     this->receive_worker = std::thread(&AsyncUDPServer::receive, this);
     #ifndef NDEBUG
-    std::cout << "DEBUG: AsyncUDPServer::run: Threads started";
+    std::cout << "DEBUG: AsyncUDPServer::run: Threads started" << std::endl;
     #endif
 }
 

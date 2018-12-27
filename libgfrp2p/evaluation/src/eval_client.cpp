@@ -1,8 +1,11 @@
 #include "eval_client.h"
 
 
-EvalClient::EvalClient(unsigned short local_bootstrap_port, unsigned short local_broadcast_port, const std::string& bootstrap_ip, unsigned short bootstrap_port):
-    local_bootstrap_port(local_bootstrap_port), local_broadcast_port(local_broadcast_port), bootstrap_ip(bootstrap_ip), bootstrap_port(bootstrap_port)  { }
+using bootstrap_message::BootstrapMessage;
+using bootstrap_message::Config;
+
+EvalClient::EvalClient(unsigned short local_bootstrap_port, unsigned short local_broadcast_port, const std::string& bootstrap_server_ip, unsigned short bootstrap_server_port):
+    local_bootstrap_port(local_bootstrap_port), local_broadcast_port(local_broadcast_port), bootstrap_server_ip(bootstrap_server_ip), bootstrap_server_port(bootstrap_server_port)  { }
 
 void EvalClient::receive(const std::string & ip, unsigned short port, const std::string & data) {
     BootstrapMessage msg;
@@ -16,27 +19,39 @@ void EvalClient::receive(const std::string & ip, unsigned short port, const std:
             if (this->self_) return; // TODO: Resetting mechanism
 
             // TODO: Convert id to string function
+            std::string str_self_id = convert_ID_int_to_string(msg.config().node_id(),
+                msg.config().num_nodes_in_dist(), msg.config().num_cnodes_in_dist(), 
+                msg.config().num_nodes_in_city(), msg.config().num_cnodes_in_city(), 
+                msg.config().num_nodes_in_state(), msg.config().num_cnodes_in_state(), 
+                msg.config().num_nodes_in_country(), msg.config().num_cnodes_in_country(), 
+                msg.config().num_nodes_in_continent());
 
-            this->self_ = std::make_shared<Node>(/*str_id*/, "127.0.0.1", local_broadcast_port);
-            this->node_table_ = std::make_shared<NodeTable>(/*str_id*/);
+            this->self_ = std::make_shared<Node>(str_self_id, "127.0.0.1", local_broadcast_port);
+            this->node_table_ = std::make_shared<NodeTable>(str_self_id);
 
             // Extract the node list from msg
             std::unordered_map<std::string, std::pair<std::string, unsigned short>> node_list;
             for (int i = 0; i < msg.config().table_size(); i++) {
-                std::unordered_map[/*convert id to str*/] = std::make_pair(msg.config().table_ips(i), msg.config().table_ports(i));
+                std::string str_id = convert_ID_int_to_string(msg.config().table_ids(i),
+                    msg.config().num_nodes_in_dist(), msg.config().num_cnodes_in_dist(), 
+                    msg.config().num_nodes_in_city(), msg.config().num_cnodes_in_city(), 
+                    msg.config().num_nodes_in_state(), msg.config().num_cnodes_in_state(), 
+                    msg.config().num_nodes_in_country(), msg.config().num_cnodes_in_country(), 
+                    msg.config().num_nodes_in_continent());
+                node_list[str_id] = std::make_pair(msg.config().table_ips(i), msg.config().table_ports(i));
             }
 
-            create_hgfr_table(msg.config().num_nodes_in_dist, msg.config().num_cnodes_in_dist(), 
+            create_hgfr_table(msg.config().num_nodes_in_dist(), msg.config().num_cnodes_in_dist(), 
                 msg.config().num_nodes_in_city(), msg.config().num_cnodes_in_city(), 
                 msg.config().num_nodes_in_state(), msg.config().num_cnodes_in_state(), 
                 msg.config().num_nodes_in_country(), msg.config().num_cnodes_in_country(), 
                 msg.config().num_nodes_in_continent(), node_list);
             
-            this->peer_manager_ = std::make_shared<PeerManager>(self_, node_table_, msg.config().run_id());
+            this->peer_manager_ = std::make_shared<PeerManager>(self_, node_table_, str_self_id);
 
             std::cout << "DEBUG: EvalClient::receive: HGFR evaluation configured, info:" << std::endl;
-            for (const auto& table : this->self__table->get_tables()) {
-                std::cout << "DEBUG: EvalClient::receive: \tLevel " << table.ring_level << " has "  << table.peer_listl.size() " peers and " << table.contact_nodes.size() << "contact nodes" << std::endl;
+            for (const auto& table : this->node_table_->get_tables()) {
+                std::cout << "DEBUG: EvalClient::receive: \tLevel " << table.ring_level << " has "  << table.peer_list.size() << " peers and " << table.contact_nodes.size() << "contact nodes" << std::endl;
             }
         } else if (false) {
             /* TODO: handle other messages*/
@@ -46,9 +61,13 @@ void EvalClient::receive(const std::string & ip, unsigned short port, const std:
             std::cerr << "ERROR: EvalClient::receive: Broadcast received before configuration" << std::endl;
             return;
         }
+
+        std::cout << "DEBUG: EvalClient::receive: Handling requested broadcast" << std::endl;
         peer_manager_->broadcast(generate_random_workload(msg.broadcast().workload_size()));
     } else if (msg.type() == BootstrapMessage::PULL_LOG) {
-        peer_manager_->get_log
+
+        std::cout << "DEBUG: EvalClient::receive: Pushing required push" << std::endl;
+        send_push_log();
     } else {
         std::cerr << "ERROR: EvalClient::receive: Unknown message type received from bootstrap" << std::endl;
         return;
@@ -66,7 +85,7 @@ void EvalClient::create_hgfr_table(
     int num_nodes_in_state, int num_cnodes_in_state, 
     int num_nodes_in_country, int num_cnodes_in_country, 
     int num_nodes_in_continent, 
-    std::unordered_map<std::pair<std::string, unsigned short>>& node_list) {
+    const std::unordered_map<std::string, std::pair<std::string, unsigned short>>& node_list) {
     
     std::string id_in_dist = this->self_->get_id().substr(ID_SINGLE_START, ID_SINGLE_LEN);
     std::string dist_id = this->self_->get_id().substr(ID_DISTRICT_START, ID_DISTRICT_LEN);
@@ -109,7 +128,12 @@ void EvalClient::create_hgfr_table(
         std::string peer_id_in_dist = ss.str();
         std::string node_id = this->self_->get_id().substr(0, ID_SINGLE_START) + peer_id_in_dist;
         
-        auto node = std::make_shared<Node>(node_id, node_list[node_id].first, port[node_id].second);
+        auto iter = node_list.find(node_id);
+        if (iter == node_list.end()) {
+            std::cerr << "ERROR: EvalClient::create_hgfr_table: Cannot find broadcast ip and port of " << node_id << std::endl;
+            continue;
+        }
+        auto node = std::make_shared<Node>(node_id, iter->second.first, iter->second.second);
 
         // insert into contact node list
         if (i < num_cnodes_in_dist) {
@@ -161,8 +185,14 @@ void EvalClient::create_hgfr_table(
             for (auto contact_node : contact_nodes_list) {
                 std::string node_id = node_id_until_dist + contact_node->get_id().substr(ID_SINGLE_START, ID_SINGLE_LEN);
 
-                auto node = std::make_shared<Node>(node_id, node_list[node_id].first, port[node_id].second);
-
+                auto iter = node_list.find(node_id);
+                if (iter == node_list.end()) {
+                    std::cerr << "ERROR: EvalClient::create_hgfr_table: Cannot find broadcast ip and port of " << node_id << std::endl;
+                    continue;
+                }
+        
+                auto node = std::make_shared<Node>(node_id, iter->second.first, iter->second.second);
+        
                 peer_list.push_back(node);
                 peer_set.insert({node_id, node});
 
@@ -212,7 +242,13 @@ void EvalClient::create_hgfr_table(
             for (auto contact_node : contact_nodes_list) {
                 std::string node_id = node_id_until_city + contact_node->get_id().substr(ID_DISTRICT_START);
 
-                auto node = std::make_shared<Node>(node_id, node_list[node_id].first, port[node_id].second);
+                auto iter = node_list.find(node_id);
+                if (iter == node_list.end()) {
+                    std::cerr << "ERROR: EvalClient::create_hgfr_table: Cannot find broadcast ip and port of " << node_id << std::endl;
+                    continue;
+                }
+        
+                auto node = std::make_shared<Node>(node_id, iter->second.first, iter->second.second);     
 
                 peer_list.push_back(node);
                 peer_set.insert({node_id, node});
@@ -233,33 +269,69 @@ void EvalClient::create_hgfr_table(
         tables.push_back(table_city);
     }
 
-    this->self__table->set_tables(tables);
+    this->node_table_->set_tables(tables);
 }
 
-void send_init() {
+void EvalClient::send_init() {
     
     // Send init message
-    BroadcastMessage msg;
-    msg.set_type(BroadcastMessage::INIT);
+    BootstrapMessage msg;
+    msg.set_type(BootstrapMessage::INIT);
     msg.mutable_init()->set_port(local_broadcast_port);
     
     std::string serialized;
-    if (!msg.SerializeToString(serialized) {
-        std::cerr << "ERROR: EvalClient::run: Failed to serialize init message" << std::endl;
+    if (!msg.SerializeToString(&serialized)) {
+        std::cerr << "ERROR: EvalClient::send_init: Failed to serialize init message" << std::endl;
         return;
     }
 
     if (!tcp_server_) {
-        std::cerr << "ERROR: EvalClient::run: TCP Server not configured" << std::endl;
+        std::cerr << "ERROR: EvalClient::send_init: TCP Server not configured" << std::endl;
         return;
     }
 
-    tcp_server_->send(bootstrap_ip, bootstrap_port);
+    std::cout << "INFO: EvalClient::send_init: Sending INIT message to bootstrap" << std::endl;
+    tcp_server_->send(bootstrap_server_ip, bootstrap_server_port, serialized);
+}
+
+void EvalClient::send_push_log() {
+    BootstrapMessage msg;
+    msg.set_type(BootstrapMessage::PUSH_LOG);
+    msg.mutable_push_log()->set_run_id(peer_manager_->get_run_id());
+    msg.mutable_push_log()->set_log(peer_manager_->get_all_records_csv());
+
+    std::string serialized;
+    if (!msg.SerializeToString(&serialized)) {
+        std::cerr << "ERROR: EvalClient::send_push_log: Failed to serialize init message" << std::endl;
+        return;
+    }
+
+    if (!tcp_server_) {
+        std::cerr << "ERROR: EvalClient::send_push_log: TCP Server not configured" << std::endl;
+        return;
+    }
+
+    tcp_server_->send(bootstrap_server_ip, bootstrap_server_port, serialized);
+        
 }
 
 void EvalClient::run() {
-    tcp_server_ = std::make_shared<AsyncTCPServer>(local_bootstrap_port);
+    tcp_server_ = std::make_shared<AsyncTCPServer>(std::static_pointer_cast<Receiver>(shared_from_this()), local_bootstrap_port);
     tcp_server_->run();
 
     send_init();    
+}
+
+int main(int argc, char* argv[]) {
+    if (argc != 5) {
+        std::cerr << "Illegal number" << std::endl;
+        std::cout << "Usage e.g.: ./eval_client local_bootstrap_port local_broadcast_port bootstrap_server_ip bootstrap_server_port" << std::endl;
+    }
+    std::shared_ptr<EvalClient> eval_client = std::make_shared<EvalClient>(std::stoi(argv[1]), std::stoi(argv[2]), argv[3], std::stoi(argv[4]));
+
+    eval_client->run();
+    
+    std::this_thread::sleep_for(std::chrono::hours(24));
+    return 0;
+
 }

@@ -50,6 +50,7 @@ include_directories(
     ${Boost_INCLUDE_DIRS}
     ${Protobuf_INCLUDE_DIRS}
     ${PROJECT_SOURCE_DIR}/include
+    ${PROJECT_SOURCE_DIR}/evaluation/include
 )
 
 # For DLL platforms the DLL part of a shared library is treated as a runtime target 
@@ -96,16 +97,17 @@ target_link_libraries(app_eth
     ${PROJECT_NAME}
 )
 
-# add_executable(bootstrap_message
-#     test/bootstrap_message.cpp
-#     ${PROTO_HDRS}
-#     ${PROTO_SRCS}
-# )
+add_executable(eval_client
+    evaluation/src/eval_client.cpp
+    ${PROTO_HDRS}
+    ${PROTO_SRCS}
+)
 
-# target_include_directories(bootstrap_message
-#     PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
-# )
+target_include_directories(eval_client
+    PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
+)
 
-# target_link_libraries(bootstrap_message
-#     protobuf::libprotobuf
-# )
+target_link_libraries(eval_client
+    protobuf::libprotobuf
+    ${PROJECT_NAME}
+)

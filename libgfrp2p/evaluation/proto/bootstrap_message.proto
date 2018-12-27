@@ -30,7 +30,7 @@ message Init {
 
 message Config {
     // Experiment info
-    uint32 run_id = 1;
+    string run_id = 1;
     
     enum EvalType {
         HGFRR = 0;
@@ -62,10 +62,10 @@ message Broadcast {
 }
 
 message PullLog {
-    uint32 run_id = 1;
+    string run_id = 1;
 }
 
 message PushLog {
-    uint32 run_id = 1;
+    string run_id = 1;
     string log = 2;
 }

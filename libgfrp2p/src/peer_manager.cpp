@@ -21,10 +21,8 @@ PeerManager::PeerManager() {}
 
 PeerManager::PeerManager(unsigned short port) {}
 
-PeerManager::PeerManager(const std::shared_ptr<Node>& node, const std::shared_ptr<NodeTable>& node_table, const std::string &start_time): 
-	node(node), node_table(node_table) {
-	this->start_time = start_time;
-}
+PeerManager::PeerManager(const std::shared_ptr<Node>& node, const std::shared_ptr<NodeTable>& node_table, const std::string& run_id): 
+	node(node), node_table(node_table), run_id(run_id) { }
 
 PeerError::PeerError() {}
 
@@ -603,7 +601,7 @@ int PeerManager::random_num_in_range(int low, int high) {
 // write messages received and sent to the file system
 void PeerManager::log_message_records() {
 	std::ofstream ofs;
-	ofs.open("../test/log/" + this->start_time + "/" + this->node->get_id() + ".csv", std::ofstream::out | std::ofstream::app);
+	ofs.open("../test/log/" + this->run_id + "/" + this->node->get_id() + ".csv", std::ofstream::out | std::ofstream::app);
 
 	ofs << this->msg_table.to_csv_string();
 
@@ -612,13 +610,21 @@ void PeerManager::log_message_records() {
 
 void PeerManager::append_message_record(const Message& msg) {
 	std::ofstream ofs;
-	ofs.open("../test/log/" + this->start_time + "/" + this->node->get_id() + ".csv", std::ofstream::out | std::ofstream::app);
+	ofs.open("../test/log/" + this->run_id + "/" + this->node->get_id() + ".csv", std::ofstream::out | std::ofstream::app);
 
 	ofs << msg.to_csv_string() + "\n";
 
 	ofs.close();
 }
 
+std::string PeerManager::get_all_records_csv() {
+	std::ifstream ifs("../test/log/" + this->run_id + "/" + this->node->get_id() + ".csv", std::ofstream::out | std::ofstream::app);
+    return std::string(std::istreambuf_iterator<char>(ifs), std::istreambuf_iterator<char>());
+}
+
+std::string PeerManager::get_run_id() {
+	return run_id;
+}
 
 /*
 // to be put in node_table.cpp
