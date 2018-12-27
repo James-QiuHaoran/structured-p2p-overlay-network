@@ -7,7 +7,7 @@
 class TCPTest: public Receiver, public std::enable_shared_from_this<TCPTest> {
 public:
 
-    std::unique_ptr<AsyncTCPServer> tcp_server;
+	static std::unique_ptr<AsyncTCPServer> tcp_server;
 	sqlite3 *db;
 	int num_node;
 
