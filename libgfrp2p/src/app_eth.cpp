@@ -36,13 +36,23 @@ void BaseAppETH::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
     std::string country_id = this->node->get_id().substr(ID_COUNTRY_START, ID_COUNTRY_LEN);
     std::string continent_id = this->node->get_id().substr(ID_CONTINENT_START, ID_CONTINENT_LEN);
 
-    int num_dists_in_city = num_nodes_in_city/num_cnodes_in_dist;
-    int num_cities_in_state = num_nodes_in_state/num_cnodes_in_dist;
-    int num_states_in_country = num_nodes_in_country/num_cnodes_in_state;
-    int num_countries_in_continent = num_nodes_in_continent/num_cnodes_in_country;
+    int num_dists_in_city, num_cities_in_state, num_states_in_country, num_countries_in_continent;
+    
+    num_dists_in_city = num_nodes_in_city/num_cnodes_in_dist;
+    if (num_dists_in_city == 0)
+        num_dists_in_city = 1;
+    num_cities_in_state = num_nodes_in_state/num_cnodes_in_city;
+    if (num_cities_in_state == 0)
+        num_cities_in_state = 1;
+    num_states_in_country = num_nodes_in_country/num_cnodes_in_state;
+    if (num_states_in_country == 0)
+        num_states_in_country = 1;
+    num_countries_in_continent = num_nodes_in_continent/num_cnodes_in_country;
+    if (num_countries_in_continent == 0)
+        num_countries_in_continent = 1;
 
     int num_nodes_total = num_continents * num_countries_in_continent * num_states_in_country * num_cities_in_state * num_dists_in_city * num_nodes_in_dist;
-
+    
     // set node table
     std::vector<std::shared_ptr<Node>> table;
 
@@ -51,7 +61,7 @@ void BaseAppETH::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
     
     for (int i = 0; i < TABLE_SIZE_ETH; i++) {
         int id = this->random_num_in_range(0, num_nodes_total-1);
-        if (neighbor_ids.find(id) != neighbor_ids.end()) {
+        if (neighbor_ids.find(id) == neighbor_ids.end()) {
             neighbor_ids.insert(id);
         } else {
             i--;
