@@ -79,8 +79,9 @@ int EvalServer::printNode(void *NotUsed, int argc, char **argv, char **azColName
 void EvalServer::init(const std::string& ip, unsigned short port, const bootstrap_message::BootstrapMessage nodeinfo){
 	char* errMsg;
    	int rc;
-   	char* sql;
-	sprintf(sql, "INSERT INTO Node (ip, port, id) VALUES (%s, %d, %d)", ip, port, num_node+1);
+   	char sql[100];
+	uint32 node_id = num_node + 1;
+	sprintf(sql, "INSERT INTO Node (ip, port, id) VALUES (%s, %d, %d)", ip, port, node_id);
 
 	rc = sqlite3_exec(db, sql, printNode, 0, &errMsg);
    	if(rc != SQLITE_OK){
@@ -137,6 +138,37 @@ void EvalServer::stop() {
 	tcp_server->stop();
 }
 
+int EvalServer::sendBroadcast(void *data, int argc, char **argv, char **azColName){
+	uint32 workload_size = *((uint32*) data);
+	unsigned short port = std::stoi(argv[1]);
+
+	bootstrap_message::BootstrapMessage msg;
+	msg.set_type(bootstrap_message::BootstrapMessage::BROADCAST);
+
+	msg.mutable_broadcast()->set_wordload_size(wordload_size);
+
+	std::string buffer;
+	msg.SerializeToString(&buffer);
+
+	tcp_server->send(argv[0], port, buffer);
+	return 0;
+}
+
+void EvalServer::broadcast(uint32 node_id, uint32 workload_size) {
+	char* errMsg;
+	int rc;
+   	char sql[100];
+	sprintf(sql, "SELECT * FROM Node WHERE id = %d", node_id);
+
+	rc = sqlite3_exec(db, sql, sendBroadcast, (void*) &workload_size, &errMsg);
+   	if(rc != SQLITE_OK){
+		std::cerr << "SQL error: " << errMsg << std::endl;
+		num_node++;
+   	}
+	else{
+		std::cout << "Operation done successfully" << std::endl;
+   	}
+}
 
 int main(int argc, char* argv[]) {
     BOOST_LOG_TRIVIAL(debug) << "main: Starting with " << argc << " arguments";

@@ -18,6 +18,8 @@ public:
 	void init(const std::string& ip, unsigned short port, const bootstrap_message::BootstrapMessage nodeinfo);
 	static int sendConfig(void *data, int argc, char **argv, char **azColName);
 	void config();
+	static int sendBroadcast(void *data, int argc, char **argv, char **azColName);
+	void broadcast(uint32 node_id, uint32 workload_size);
 	void stop();
 };
 
