@@ -20,6 +20,7 @@
 #include "transport.h"
 #include "message.h"
 #include "param_constants.h"
+#include "utils.h"
 
 /* Error Class
  * define error types and error messages
@@ -65,6 +66,8 @@ private:
 
     // for message logging, contains all sent and received messages
     MessageTable msg_table;
+    std::vector<std::string> broadcasted_msgs;
+    std::vector<std::string> broadcasted_msgs_all_nodes;
     std::string start_time;
 
     // broadcast mode
@@ -121,6 +124,9 @@ public:
 
     // generate random number uniformly from range [low, high]
     int random_num_in_range(int low, int high);
+
+    // generate random string of length
+    std::string random_string_of_length(size_t length);
 
     // write messages to file system
     void log_message_records();

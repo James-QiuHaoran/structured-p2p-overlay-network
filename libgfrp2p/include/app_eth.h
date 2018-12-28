@@ -9,6 +9,7 @@
 #include <iomanip>
 #include <thread>         // std::this_thread::sleep_for
 #include <chrono>         // std::chrono::seconds
+#include <ctime>
 
 #include <boost/random/uniform_int_distribution.hpp>
 #include <boost/random/mersenne_twister.hpp>
@@ -50,6 +51,7 @@ public:
         int num_cnodes_in_continent,
         unsigned short starting_port_number);
 
+    // generate random number in range [low, high]
     int random_num_in_range(int low, int high);
 
     // start the application
