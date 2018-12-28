@@ -164,6 +164,10 @@ void BaseAppETH::start(const std::string &start_time, int num_nodes_in_dist, int
 
     this->peer_manager = std::make_shared<PeerManagerETH>(node, node_table, start_time);
 
+    // set gossip mode
+    // this->peer_manager->set_mode(PeerManagerETH::PUSH);  // PUSH version
+    this->peer_manager->set_mode(PeerManagerETH::PULL);  // PULL version
+
     BOOST_LOG_TRIVIAL(debug) << "Starting ETH PeerManager on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
     this->peer_manager->start();
 
@@ -192,6 +196,7 @@ int BaseAppETH::random_num_in_range(int low, int high) {
 int main(int argc, char** argv) {
     // srand ( time(NULL) );
     srand(std::atoi(argv[2]));
+
     if (argc != 17) {
         BOOST_LOG_TRIVIAL(info) << "Wrong arguments. Correct usage: "
                                         << "./app_eth ip_addr port_num id "

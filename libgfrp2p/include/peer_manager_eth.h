@@ -73,7 +73,7 @@ private:
     // broadcast mode
     unsigned short mode;
 
-    // messaged received
+    // messaged received <data_hash, data_content>
     std::unordered_map<std::string, std::string> data_map;
 
 public:
