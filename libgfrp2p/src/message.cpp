@@ -20,6 +20,7 @@ Message::Message(std::string broadcastID, std::string messageID, std::string sen
         this->from_level = 0;
         this->io_type = 0;
         this->io_timestamp = 0;
+        this->ttl = 0;
 }
 
 // used in hgfrr
@@ -33,6 +34,7 @@ Message::Message(std::string broadcastID, std::string messageID, int type, unsig
 		this->node_order = -1;
         this->io_type = 0;
         this->io_timestamp = 0;
+        this->ttl = 0;
 	}
     
 Message::Message(unsigned short io_type, std::string broadcastID, std::string messageID, int type, unsigned long from_level, std::string sender_id, std::string receiver_id):
@@ -107,6 +109,10 @@ bool MessageTable::existID(const std::string &msgID) const {
     }
 
     return false;
+}
+
+int MessageTable::num_msgs_in_total() {
+    return this->table.size();
 }
 
 // insert records for receiving messages

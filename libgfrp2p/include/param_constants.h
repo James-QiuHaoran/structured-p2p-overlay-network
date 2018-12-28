@@ -11,8 +11,8 @@
 
 // eth
 #define TABLE_SIZE_ETH    13
-#define NUM_RECEIVERS_ETH  5
-#define TTL_ETH            7
+#define NUM_RECEIVERS_ETH  3
+#define TTL_ETH            5
 
 // ID definition rules
 #define ID_CONTINENT_LEN   3

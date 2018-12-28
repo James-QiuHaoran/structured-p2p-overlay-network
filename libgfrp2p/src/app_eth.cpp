@@ -165,8 +165,8 @@ void BaseAppETH::start(const std::string &start_time, int num_nodes_in_dist, int
     this->peer_manager = std::make_shared<PeerManagerETH>(node, node_table, start_time);
 
     // set gossip mode
-    // this->peer_manager->set_mode(PeerManagerETH::PUSH);  // PUSH version
-    this->peer_manager->set_mode(PeerManagerETH::PULL);  // PULL version
+    this->peer_manager->set_mode(PeerManagerETH::PUSH);  // PUSH version
+    // this->peer_manager->set_mode(PeerManagerETH::PULL);  // PULL version
 
     BOOST_LOG_TRIVIAL(debug) << "Starting ETH PeerManager on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
     this->peer_manager->start();
@@ -254,13 +254,13 @@ int main(int argc, char** argv) {
     }
     
     // broadcast a message
-    if (id == "00000000000000000000000000000000") {
-        std::this_thread::sleep_for (std::chrono::seconds(5));
-        BOOST_LOG_TRIVIAL(trace) << "Slept for 5 seconds";
+    //if (id == "00000000000000000000000000000000") {
+        std::this_thread::sleep_for (std::chrono::seconds(3));
+        BOOST_LOG_TRIVIAL(trace) << "Slept for 3 seconds";
         BOOST_LOG_TRIVIAL(trace) << "Broadcasting message ...";
-        app.broadcast("MSG #1: Hello world!");
-        //app.broadcast("MSG #2: Hello world, again!");
-    }
+        // app.broadcast("MSG #1: Hello world!");
+        app.broadcast(data_of_block_size);
+    //}
 
     // stop the app service
     // BOOST_LOG_TRIVIAL(debug) << "Stopping ETH base service on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]";
