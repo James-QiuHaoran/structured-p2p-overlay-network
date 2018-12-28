@@ -7,6 +7,7 @@
 
 class EvalServer: public Receiver, public std::enable_shared_from_this<EvalServer> {
 private:
+	static std::unique_ptr<AsyncTCPServer> tcp_server;
 	sqlite3 *db;
 	int num_node;    
 
@@ -17,7 +18,7 @@ public:
 	void init(const std::string& ip, unsigned short port, const bootstrap_message::BootstrapMessage nodeinfo);
 	static int sendConfig(void *data, int argc, char **argv, char **azColName);
 	void config();
-
+	void stop();
 };
 
 #endif
