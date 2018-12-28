@@ -10,11 +10,10 @@ content=""
 
 for file in `ls *.csv`
 do
-	msg_timestamps=`cat $file | tail -n +2 | cut -d',' -f1`
-	for i in $msg_timestamps
-	do
-		content="$content $i"
-	done
+	msg_timestamp=`cat $file | head -n 2 | tail -n 1 | cut -d',' -f1`
+	content="$content $msg_timestamp"
+	msg_timestamp=`cat $file | tail -n 1 | cut -d',' -f1`
+	content="$content $msg_timestamp"
 done
 
 for i in $content

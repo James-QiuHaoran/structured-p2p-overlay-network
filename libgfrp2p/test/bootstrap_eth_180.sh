@@ -61,7 +61,7 @@ echo "== Boostrap Stage =="
 start_time=$(date +"%Y-%m-%d-%H-%M-%S")
 mkdir -p log/$start_time
 
-starting_port_num="2000"
+starting_port_num="2180"
 
 for (( i=0; i<$num_nodes_total; i++ ))
 do
