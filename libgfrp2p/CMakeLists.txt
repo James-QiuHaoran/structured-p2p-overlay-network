@@ -46,9 +46,16 @@ protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS
     ${PROJECT_SOURCE_DIR}/evaluation/proto/bootstrap_message.proto
 )
 
+# Check packages without native CMake support
+LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules)
+
+# Check SQLite3
+find_package(SQLite3 REQUIRED)
+
 include_directories(
     ${Boost_INCLUDE_DIRS}
     ${Protobuf_INCLUDE_DIRS}
+    ${SQLITE3_INCLUDE_DIRS}
     ${PROJECT_SOURCE_DIR}/include
     ${PROJECT_SOURCE_DIR}/evaluation/include
 )
@@ -109,5 +116,21 @@ target_include_directories(eval_client
 
 target_link_libraries(eval_client
     protobuf::libprotobuf
+    ${PROJECT_NAME}
+)
+
+add_executable(eval_server
+    evaluation/src/eval_server.cpp
+    ${PROTO_HDRS}
+    ${PROTO_SRCS}
+)
+
+target_include_directories(eval_server
+    PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+target_link_libraries(eval_server
+    protobuf::libprotobuf
+    ${SQLITE3_LIBRARIES}
     ${PROJECT_NAME}
 )

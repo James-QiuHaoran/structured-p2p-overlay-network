@@ -17,7 +17,7 @@
 	- libboost-random-dev
 - Protobuf
 	- libprotobuf-dev
-	- libprotobuf
+	- libprotobuf10
 	- protobuf-compiler
 
 ## Design of Wire Protocol

@@ -326,6 +326,7 @@ int main(int argc, char* argv[]) {
     if (argc != 5) {
         std::cerr << "Illegal number" << std::endl;
         std::cout << "Usage e.g.: ./eval_client local_bootstrap_port local_broadcast_port bootstrap_server_ip bootstrap_server_port" << std::endl;
+        return 1;
     }
     std::shared_ptr<EvalClient> eval_client = std::make_shared<EvalClient>(std::stoi(argv[1]), std::stoi(argv[2]), argv[3], std::stoi(argv[4]));
 

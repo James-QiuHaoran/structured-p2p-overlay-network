@@ -1,7 +1,8 @@
 #include <iostream>
 #include <boost/log/trivial.hpp>
+#include "eval_server.h"
 
-std::unique_ptr<AsyncTCPServer> EvalServer::tcp_server_;
+std::unique_ptr<AsyncTCPServer> EvalServer::tcp_server;
 
 
 void EvalServer::start(unsigned short port) {
@@ -56,7 +57,7 @@ void EvalServer::start(unsigned short port) {
 	}
 }
 
-virtual void EvalServer::receive(const std::string& ip, unsigned short port, const std::string& data) override {
+void EvalServer::receive(const std::string& ip, unsigned short port, const std::string& data) {
 	BOOST_LOG_TRIVIAL(info) << "UDPTest::receive: Packet received from " + ip + ':' + std::to_string(port) + '\n' + data;
 
 	bootstrap_message::BootstrapMessage nodeinfo;	
@@ -67,7 +68,7 @@ virtual void EvalServer::receive(const std::string& ip, unsigned short port, con
 	}
 }
 
-static int EvalServer::printNode(void *NotUsed, int argc, char **argv, char **azColName)
+int EvalServer::printNode(void *NotUsed, int argc, char **argv, char **azColName)
 {
 	for(int i=0; i<argc; i++){
 		std::cout << azColName[i] << " = " << argv[i] << std::endl;
@@ -91,7 +92,7 @@ void EvalServer::init(const std::string& ip, unsigned short port, const bootstra
    	}
 }
 
-static int EvalServer::sendConfig(void *data, int argc, char **argv, char **azColName){
+int EvalServer::sendConfig(void *data, int argc, char **argv, char **azColName){
 	unsigned short port = std::stoi(argv[1]);
 
 	bootstrap_message::BootstrapMessage msg;
@@ -132,13 +133,17 @@ void EvalServer::config() {
    	}
 }
 
+void EvalServer::stop() {
+	tcp_server->stop();
+}
+
 
 int main(int argc, char* argv[]) {
     BOOST_LOG_TRIVIAL(debug) << "main: Starting with " << argc << " arguments";
     unsigned short port = std::stoi(argv[1]);
     BOOST_LOG_TRIVIAL(debug) << "main: Port number " << port;
-    std::shared_ptr<TCPTest> tcp_test(new TCPTest());
+    std::shared_ptr<EvalServer> tcp_test(new EvalServer());
     tcp_test->start(port);
-    tcp_test->tcp_server->stop();
+    tcp_test->stop();
     return 0;
 }
