@@ -3,8 +3,11 @@
 ## TODO List
 
 - Bootstrap nodes implementation on docker (config);
-- Test Kad+Gossip with Eth;
-- Evaluation
+- Refactor Kad+Gossip;
+	- `push` version [Done]
+	- `pull` version [TODO]
+- Test Kad+Gossip against Eth;
+- Evaluation;
 
 ---
 
