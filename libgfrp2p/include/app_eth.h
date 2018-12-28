@@ -9,6 +9,7 @@
 #include <iomanip>
 #include <thread>         // std::this_thread::sleep_for
 #include <chrono>         // std::chrono::seconds
+#include <ctime>
 
 #include <boost/random/uniform_int_distribution.hpp>
 #include <boost/random/mersenne_twister.hpp>

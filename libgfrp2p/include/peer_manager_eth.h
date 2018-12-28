@@ -67,6 +67,7 @@ private:
     // for message logging, contains all sent and received messages
     MessageTable msg_table;
     std::vector<std::string> broadcasted_msgs;
+    std::vector<std::string> broadcasted_msgs_all_nodes;
     std::string start_time;
 
     // broadcast mode

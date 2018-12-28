@@ -1,9 +1,13 @@
 #include "peer_manager_eth.h"
 
 // constructors
-PeerManagerETH::PeerManagerETH() {}
+PeerManagerETH::PeerManagerETH() {
+	this->mode = PeerManagerETH::PUSH;
+}
 
-PeerManagerETH::PeerManagerETH(unsigned short port) {}
+PeerManagerETH::PeerManagerETH(unsigned short port) {
+	this->mode = PeerManagerETH::PUSH;
+}
 
 PeerManagerETH::PeerManagerETH(const std::shared_ptr<Node>& node, const std::shared_ptr<NodeTableETH>& node_table, const std::string &start_time): 
 	node(node), node_table(node_table) {
@@ -79,6 +83,7 @@ void PeerManagerETH::broadcast(const std::string &data, int ttl, std::string bro
 		broadcastID = this->node->get_id()+ss.str();
 		new_broadcast = true;
 	}
+
 	// wrap the data into a Message
 	Message msg(broadcastID, this->random_string_of_length(MSG_HASH_LENGTH), this->node->get_id(), "");
 	msg.set_TTL(ttl);
@@ -95,7 +100,7 @@ void PeerManagerETH::broadcast(const std::string &data, int ttl, std::string bro
 	// randomly select nodes to broadcast
     for (int i = 0; i < NUM_RECEIVERS_ETH; i++) {
         int id = this->random_num_in_range(0, TABLE_SIZE_ETH-1);
-        if (random_ids.find(id) != random_ids.end()) {
+        if (random_ids.find(id) == random_ids.end()) {
             random_ids.insert(id);
             receiver_list.insert(routing_table[id]);
         } else {
@@ -251,11 +256,14 @@ void PeerManagerETH::on_receive(const Message &msg, const std::string &data) {
 		}
 	} else {
 		// push version
-		if (this->msg_table.existID(msg.get_message_id())) {
+		if (std::find(this->broadcasted_msgs_all_nodes.begin(), this->broadcasted_msgs_all_nodes.end(), msg.get_broadcast_id()) != this->broadcasted_msgs_all_nodes.end()) {
 			// do not need to broadcast anymore
+			BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "No need to broadcast | " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "]";
 			return;
 		} else {
-			// continue to broadcast
+			// continue to broadcast with ttl decreasing by 1
+			broadcasted_msgs_all_nodes.push_back(msg.get_broadcast_id());
+			BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "Continue to broadcast | " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "]";
 			this->broadcast(data, msg.get_TTL()-1, msg.get_broadcast_id());
 		}
 	}

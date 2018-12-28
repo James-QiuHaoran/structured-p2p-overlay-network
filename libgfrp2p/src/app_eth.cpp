@@ -58,10 +58,18 @@ void BaseAppETH::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
 
     // generate random neighbors to connect
     std::unordered_set<int> neighbor_ids;
-    
+
+    int self_order = convert_ID_string_to_int(this->node->get_id(),
+                                                num_nodes_in_dist, num_cnodes_in_dist, 
+                                                num_nodes_in_city, num_cnodes_in_city, 
+                                                num_nodes_in_state, num_cnodes_in_state, 
+                                                num_nodes_in_country, num_cnodes_in_country, 
+                                                num_nodes_in_continent);
+
     for (int i = 0; i < TABLE_SIZE_ETH; i++) {
-        int id = this->random_num_in_range(0, num_nodes_total-1);
-        if (neighbor_ids.find(id) == neighbor_ids.end()) {
+        // int id = this->random_num_in_range(0, num_nodes_total-1);
+        int id = rand() % num_nodes_total;
+        if (neighbor_ids.find(id) == neighbor_ids.end() && id != self_order) {
             neighbor_ids.insert(id);
         } else {
             i--;
@@ -98,24 +106,23 @@ void BaseAppETH::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
                         ss << std::setw(ID_DISTRICT_LEN) << std::setfill('0') << district_counter;
                         dist_id = ss.str();
                         for (int i = 0; i < num_nodes_in_dist; i++) {
-                            if (neighbor_ids.find(i) != neighbor_ids.end()) {
-                                ss.str("");
-                                ss.clear();
-                                ss << std::setw(ID_SINGLE_LEN) << std::setfill('0') << i;
-                                id_in_dist = ss.str();
+                            ss.str("");
+                            ss.clear();
+                            ss << std::setw(ID_SINGLE_LEN) << std::setfill('0') << i;
+                            id_in_dist = ss.str();
+                            std::string node_id = continent_id + country_id + state_id + city_id + dist_id + id_in_dist;
+                            int order = convert_ID_string_to_int(node_id,
+                                                                    num_nodes_in_dist, num_cnodes_in_dist, 
+                                                                    num_nodes_in_city, num_cnodes_in_city, 
+                                                                    num_nodes_in_state, num_cnodes_in_state, 
+                                                                    num_nodes_in_country, num_cnodes_in_country, 
+                                                                    num_nodes_in_continent);
 
-                                std::string node_id = continent_id + country_id + state_id + city_id + dist_id + id_in_dist;
-                                unsigned short port = starting_port_number + convert_ID_string_to_int(node_id,
-                                                                                num_nodes_in_dist, num_cnodes_in_dist, 
-                                                                                num_nodes_in_city, num_cnodes_in_city, 
-                                                                                num_nodes_in_state, num_cnodes_in_state, 
-                                                                                num_nodes_in_country, num_cnodes_in_country, 
-                                                                                num_nodes_in_continent);
+                            if (neighbor_ids.find(order) != neighbor_ids.end() && node_id != this->node->get_id()) {
+                                unsigned short port = starting_port_number + order;
                                 Node node(node_id, "127.0.0.1", port);
-
                                 table.push_back(std::make_shared<Node>(node));
                             }
-
                             counter++;
                         }
                     }
@@ -183,6 +190,8 @@ int BaseAppETH::random_num_in_range(int low, int high) {
 }
 
 int main(int argc, char** argv) {
+    // srand ( time(NULL) );
+    srand(std::atoi(argv[2]));
     if (argc != 17) {
         BOOST_LOG_TRIVIAL(info) << "Wrong arguments. Correct usage: "
                                         << "./app_eth ip_addr port_num id "
@@ -242,10 +251,10 @@ int main(int argc, char** argv) {
     // broadcast a message
     if (id == "00000000000000000000000000000000") {
         std::this_thread::sleep_for (std::chrono::seconds(5));
-        BOOST_LOG_TRIVIAL(debug) << "Slept for 5 seconds";
-        BOOST_LOG_TRIVIAL(debug) << "Broadcasting message ... [MSG #1: Hello world!]";
+        BOOST_LOG_TRIVIAL(trace) << "Slept for 5 seconds";
+        BOOST_LOG_TRIVIAL(trace) << "Broadcasting message ...";
         app.broadcast("MSG #1: Hello world!");
-        app.broadcast("MSG #2: Hello world, again!");
+        //app.broadcast("MSG #2: Hello world, again!");
     }
 
     // stop the app service
