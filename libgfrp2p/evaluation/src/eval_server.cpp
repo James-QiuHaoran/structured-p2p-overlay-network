@@ -75,6 +75,7 @@ NodeRecord EvalServer::handle_check(std::size_t node_id) {
 void EvalServer::handle_config(const EvalConfig& config) {
 	
 	eval_config_.reset(new BootstrapMessage());
+	eval_config_->set_type(BootstrapMessage::CONFIG);
 
 	eval_config_->mutable_config()->set_run_id(config.run_id);
 
@@ -89,6 +90,8 @@ void EvalServer::handle_config(const EvalConfig& config) {
     eval_config_->mutable_config()->set_num_nodes_in_country(config.num_nodes_in_country);
     eval_config_->mutable_config()->set_num_cnodes_in_country(config.num_cnodes_in_country);
 	eval_config_->mutable_config()->set_num_nodes_in_continent(config.num_nodes_in_continent);
+	eval_config_->mutable_config()->set_num_cnodes_in_continent(config.num_cnodes_in_continent);
+	eval_config_->mutable_config()->set_num_continents(config.num_continents);
 
 	std::lock_guard<std::mutex> lock(mlock_);
 
@@ -198,39 +201,6 @@ void EvalServer::send_pull_log(const std::string& run_id, const std::string& ip,
 	tcp_server_->send(ip, port, buffer);
 }
 
-int EvalServer::sendBroadcast(void *data, int argc, char **argv, char **azColName){
-	uint32 workload_size = *((uint32*) data);
-	unsigned short port = std::stoi(argv[1]);
-
-	bootstrap_message::BootstrapMessage msg;
-	msg.set_type(bootstrap_message::BootstrapMessage::BROADCAST);
-
-	msg.mutable_broadcast()->set_wordload_size(wordload_size);
-
-	std::string buffer;
-	msg.SerializeToString(&buffer);
-
-	tcp_server->send(argv[0], port, buffer);
-	return 0;
-}
-
-void EvalServer::broadcast(uint32 node_id, uint32 workload_size) {
-	char* errMsg;
-	int rc;
-   	char sql[100];
-	sprintf(sql, "SELECT * FROM Node WHERE id = %d", node_id);
-
-	rc = sqlite3_exec(db, sql, sendBroadcast, (void*) &workload_size, &errMsg);
-   	if(rc != SQLITE_OK){
-		std::cerr << "SQL error: " << errMsg << std::endl;
-		num_node++;
-   	}
-	else{
-		std::cout << "Operation done successfully" << std::endl;
-   	}
-}
-
-
 int main(int argc, char* argv[]) {
 	if (argc != 3) {
 		std::cerr << "ERROR: main: Illegal number of arguments" << std::endl;
@@ -259,13 +229,14 @@ int main(int argc, char* argv[]) {
 		} else if (command == "config") {
 			EvalConfig eval_config;
 			
-			std::cout << "Enter the config (run_id eval_type(0/1) n_dist cn_dist n_city cn_city n_state cn_state n_country cn_country n_continent) >>> ";
+			std::cout << "Enter the config (run_id eval_type(0/1) n_dist cn_dist n_city cn_city n_state cn_state n_country cn_country n_continent cn_continent num_continent) >>> ";
 			std::cin >> eval_config.run_id >> eval_config.eval_type 
 				>> eval_config.num_nodes_in_dist >> eval_config.num_cnodes_in_dist 
 				>> eval_config.num_nodes_in_city >> eval_config.num_cnodes_in_city
 				>> eval_config.num_nodes_in_state >> eval_config.num_cnodes_in_state
 				>> eval_config.num_nodes_in_country >> eval_config.num_cnodes_in_country
-				>> eval_config.num_nodes_in_continent;
+				>> eval_config.num_nodes_in_continent >> eval_config.num_cnodes_in_continent
+				>> eval_config.num_continents;
 
 			eval_server->handle_config(eval_config);
 		} else if (command == "broadast") {

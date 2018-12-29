@@ -55,6 +55,8 @@ message Config {
     uint32 num_nodes_in_country = 26;
     uint32 num_cnodes_in_country = 27;
     uint32 num_nodes_in_continent = 28;
+    uint32 num_cnodes_in_continent = 29;
+    uint32 num_continents = 30;
 }
 
 message Broadcast {

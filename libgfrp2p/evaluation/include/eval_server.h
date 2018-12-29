@@ -36,7 +36,8 @@ struct EvalConfig {
     std::uint32_t num_nodes_in_country;
     std::uint32_t num_cnodes_in_country;
 	std::uint32_t num_nodes_in_continent;
-
+	std::uint32_t num_cnodes_in_continent;
+	std::uint32_t num_continents;
 };
 
 class EvalServer: public Receiver, public std::enable_shared_from_this<EvalServer> {
