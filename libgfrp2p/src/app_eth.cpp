@@ -258,24 +258,28 @@ int main(int argc, char** argv) {
     }
     
     // broadcast a message
-    int order = convert_ID_string_to_int(id, num_nodes_in_dist, num_cnodes_in_dist, 
+    /*int order = convert_ID_string_to_int(id, num_nodes_in_dist, num_cnodes_in_dist, 
                                             num_nodes_in_city, num_cnodes_in_city, 
                                             num_nodes_in_state, num_cnodes_in_state, 
                                             num_nodes_in_country, num_cnodes_in_country, 
-                                            num_nodes_in_continent);
-    if (order < 3) {
-        std::this_thread::sleep_for (std::chrono::seconds(3));
-        BOOST_LOG_TRIVIAL(trace) << "Slept for 3 seconds";
+                                            num_nodes_in_continent);*/
+    // if (order < 180) {
+        int num_messages_to_broadcast = 2;
+        int mean_interval = 10;
+        int variance = 2;
+        int random_sleep_time = rand() % 180;
+        std::this_thread::sleep_for (std::chrono::seconds(random_sleep_time));
+        BOOST_LOG_TRIVIAL(trace) << "Slept for " << random_sleep_time << " seconds";
         BOOST_LOG_TRIVIAL(trace) << "Broadcasting message ...";
 
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < num_messages_to_broadcast-1; i++) {
             BOOST_LOG_TRIVIAL(trace) << "Broadcast a message of size " << data_of_block_size.length() / 1000 << "kb";
             app.broadcast(data_of_block_size);
-            std::this_thread::sleep_for (std::chrono::seconds(8 + rand() % 2));
+            std::this_thread::sleep_for (std::chrono::seconds(mean_interval-variance + rand() % variance));
             BOOST_LOG_TRIVIAL(trace) << "Slept for several seconds";
         }
         app.broadcast(data_of_block_size);
-    }
+    //}
 
     // stop the app service
     app.stop();
