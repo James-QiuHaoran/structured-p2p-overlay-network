@@ -47,15 +47,15 @@ protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS
 )
 
 # Check packages without native CMake support
-LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules)
+# LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules)
 
 # Check SQLite3
-find_package(SQLite3 REQUIRED)
+# find_package(SQLite3 REQUIRED)
 
 include_directories(
     ${Boost_INCLUDE_DIRS}
     ${Protobuf_INCLUDE_DIRS}
-    ${SQLITE3_INCLUDE_DIRS}
+    # ${SQLITE3_INCLUDE_DIRS}
     ${PROJECT_SOURCE_DIR}/include
     ${PROJECT_SOURCE_DIR}/evaluation/include
 )
@@ -131,6 +131,5 @@ target_include_directories(eval_server
 
 target_link_libraries(eval_server
     protobuf::libprotobuf
-    ${SQLITE3_LIBRARIES}
     ${PROJECT_NAME}
 )

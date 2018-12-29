@@ -277,7 +277,7 @@ void EvalClient::send_init() {
     // Send init message
     BootstrapMessage msg;
     msg.set_type(BootstrapMessage::INIT);
-    msg.mutable_init()->set_port(local_broadcast_port);
+    msg.mutable_init()->set_port(local_bootstrap_port);
     
     std::string serialized;
     if (!msg.SerializeToString(&serialized)) {
