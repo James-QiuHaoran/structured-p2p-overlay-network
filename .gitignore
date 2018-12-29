@@ -2,3 +2,14 @@ libgfrp2p/build/*
 libgfrp2p/test/log
 libgfrp2p/test/log/*
 libgfrp2p/test/output
+
+paper-atc/paper-src/main.aux
+paper-atc/paper-src/main.ent
+paper-atc/paper-src/main.log
+paper-atc/paper-src/abstract.log
+paper-atc/paper-src/main.synctex.gz
+paper-atc/paper-src/texput.log
+paper-atc/paper-src/*.log
+paper-atc/paper-src/*.aux
+paper-atc/paper-src/*.ent
+paper-atc/paper-src/*.gz

@@ -31,20 +31,24 @@
 \date{}
 
 %make title bold and 14 pt font (Latex default is non-bold, 16 pt)
-\title{\Large \bf Wonderful : A Terrific Application and Fascinating Paper}
+\title{\Large \bf HGFRR: Hidden Geographical Fractal Random Ring}
 
 %for single author (just remove % characters)
-\author{
-{\rm Your N.\ Here}\\
-Your Institution
-\and
-{\rm Second Name}\\
-Second Institution
+%\author{
+%{\rm Your N.\ Here}\\
+%Your Institution
+%\and
+%{\rm Second Name}\\
+%Second Institution
 % copy the following lines to add more authors
 % \and
 % {\rm Name}\\
 %Name Institution
-} % end author
+%} % end author
+
+\author{
+{\rm Anonymous Authors}\\
+}
 
 \maketitle
 
@@ -54,20 +58,40 @@ Second Institution
 
 
 \subsection*{Abstract}
-Your Abstract Text Goes Here.  Just a few facts.
-Whet our appetites.
+\input{abstract.tex}
 
 \section{Introduction}
+\input{intro.tex}
 
-A paragraph of text goes here.  Lots of text.  Plenty of interesting
-text. \\
+\section{Background and Motivation}
+\input{background.tex}
 
-More fascinating text. Features\endnote{Remember to use endnotes, not footnotes!} galore, plethora of promises.\\
+\section{HGFRR Design}
+\input{design.tex}
 
-\section{This is Another Section}
+\section{Proof and Analysis}
+\input{analysis.tex}
 
-Some embedded literal typset code might 
-look like the following :
+\section{Implementation Details}
+\input{implementation.tex}
+
+\section{Evaluation}
+\input{eval.tex}
+
+\section{Related Work}
+\input{related.tex}
+
+\section{Conclusion}
+\input{conclusion.tex}
+
+\section{Acknowledgments}
+
+A polite author always includes acknowledgments.  Thank everyone,
+especially those who funded the work. 
+
+%%%%%%%%%%%%%%%%%%%%%% End %%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Template}
 
 {\tt \small
 \begin{verbatim}
@@ -179,36 +203,8 @@ latex usenixTemplate
 Well, it's getting boring isn't it.  This is the last subsection
 before we wrap it up.
 
-\section{Acknowledgments}
-
-A polite author always includes acknowledgments.  Thank everyone,
-especially those who funded the work. 
-
-\section{Availability}
-
-It's great when this section says that MyWonderfulApp is free software, 
-available via anonymous FTP from
-
-\begin{center}
-{\tt ftp.site.dom/pub/myname/Wonderful}\\
-\end{center}
-
-Also, it's even greater when you can write that information is also 
-available on the Wonderful homepage at 
-
-\begin{center}
-{\tt http://www.site.dom/\~{}myname/SWIG}
-\end{center}
-
-Now we get serious and fill in those references.  Remember you will
-have to run latex twice on the document in order to resolve those
-cite tags you met earlier.  This is where they get resolved.
-We've preserved some real ones in addition to the template-speak.
-After the bibliography you are DONE.
-
 {\normalsize \bibliographystyle{acm}
 \bibliography{./main}}
-
 
 \theendnotes
 
