@@ -199,7 +199,7 @@ int BaseAppETH::random_num_in_range(int low, int high) {
 
 int main(int argc, char** argv) {
     // srand ( time(NULL) );
-    srand(std::atoi(argv[2]));
+    srand(std::atoi(argv[2]) + time(NULL));
 
     if (argc != 17) {
         BOOST_LOG_TRIVIAL(info) << "Wrong arguments. Correct usage: "
@@ -263,16 +263,21 @@ int main(int argc, char** argv) {
                                             num_nodes_in_state, num_cnodes_in_state, 
                                             num_nodes_in_country, num_cnodes_in_country, 
                                             num_nodes_in_continent);
-    if (order < 1) {
+    if (order < 3) {
         std::this_thread::sleep_for (std::chrono::seconds(3));
         BOOST_LOG_TRIVIAL(trace) << "Slept for 3 seconds";
         BOOST_LOG_TRIVIAL(trace) << "Broadcasting message ...";
-        // app.broadcast("MSG #1: Hello world!");
+
+        for (int i = 0; i < 2; i++) {
+            BOOST_LOG_TRIVIAL(trace) << "Broadcast a message of size " << data_of_block_size.length() / 1000 << "kb";
+            app.broadcast(data_of_block_size);
+            std::this_thread::sleep_for (std::chrono::seconds(8 + rand() % 2));
+            BOOST_LOG_TRIVIAL(trace) << "Slept for several seconds";
+        }
         app.broadcast(data_of_block_size);
     }
 
     // stop the app service
-    // BOOST_LOG_TRIVIAL(debug) << "Stopping ETH base service on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]";
     app.stop();
 
     return 0;
