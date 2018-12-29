@@ -370,21 +370,19 @@ void PeerManager::on_receive(const Message &msg, const std::string &data, std::u
 	// simulate traffic control - delay according to ID difference
 	int sleep_time = 0;
 	if (sender_id.substr(ID_CONTINENT_START, ID_CONTINENT_START+ID_CONTINENT_LEN) != receiver_id.substr(ID_CONTINENT_START, ID_CONTINENT_START+ID_CONTINENT_LEN)) {
-		sleep_time = random_num_in_range(160, 200);
-        std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
+		sleep_time = this->random_num_in_range(160, 200);
 	} else if (sender_id.substr(ID_COUNTRY_START, ID_COUNTRY_START+ID_COUNTRY_LEN) != receiver_id.substr(ID_COUNTRY_START, ID_COUNTRY_START+ID_COUNTRY_LEN)) {
-		sleep_time = random_num_in_range(120, 160);
-        std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
+		sleep_time = this->random_num_in_range(120, 160);
 	} else if (sender_id.substr(ID_STATE_START, ID_STATE_START+ID_STATE_LEN) != receiver_id.substr(ID_STATE_START, ID_STATE_START+ID_STATE_LEN)) {
-		sleep_time = random_num_in_range(80, 120);
-        std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
+		sleep_time = this->random_num_in_range(80, 120);
 	} else if (sender_id.substr(ID_CITY_START, ID_CITY_START+ID_CITY_LEN) != receiver_id.substr(ID_CITY_START, ID_CITY_START+ID_CITY_LEN)) {
-		sleep_time = random_num_in_range(40, 80);
-        std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
+		sleep_time = this->random_num_in_range(40, 80);
 	} else if (sender_id.substr(ID_DISTRICT_START, ID_DISTRICT_START+ID_DISTRICT_LEN) != receiver_id.substr(ID_DISTRICT_START, ID_DISTRICT_START+ID_DISTRICT_LEN)) {
-		sleep_time = random_num_in_range(0, 40);
-		std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
+		sleep_time = this->random_num_in_range(0, 40);
 	}
+
+	// BOOST_LOG_TRIVIAL(debug) << "slept for " << sleep_time << " ms";
+	std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
 
 	// control flow
 	switch(msg.get_type()) {

@@ -11,6 +11,7 @@
 #include <iostream>
 #include <fstream>
 #include <functional>
+#include <ctime>
 
 #include <boost/random/uniform_int_distribution.hpp>
 #include <boost/random/mersenne_twister.hpp>
@@ -67,13 +68,13 @@ private:
     // for message logging, contains all sent and received messages
     MessageTable msg_table;
     std::vector<std::string> broadcasted_msgs;
-    std::vector<std::string> broadcasted_msgs_all_nodes;
+    std::vector<std::string> broadcasted_msgs_all_nodes; // store broadcast_id
     std::string start_time;
 
     // broadcast mode
     unsigned short mode;
 
-    // messaged received
+    // messaged received <data_hash, data_content>
     std::unordered_map<std::string, std::string> data_map;
 
 public:
@@ -109,7 +110,7 @@ public:
     virtual void receive(const std::string& ip, unsigned short port, const std::string &data) override;
 
     // on receive a message
-    void on_receive(const Message &msg, const std::string &data);
+    void on_receive(const Message &msg, const std::string &data, const std::string& ip, unsigned short port);
 
     // on a node join
     void on_new_connection(std::shared_ptr<Node> node);

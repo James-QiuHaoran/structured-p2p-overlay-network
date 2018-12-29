@@ -102,6 +102,8 @@ public:
     Message insert_received(const Message& msg);
     Message insert_sent(const Message& msg);
 
+    int num_msgs_in_total();
+
     // transform the message into a csv string
     std::string to_csv_string() const;
 };

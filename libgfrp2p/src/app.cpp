@@ -319,7 +319,12 @@ int main(int argc, char** argv) {
     }
     
     // broadcast a message
-    //if (id == "00000000000000000100001000000003") {
+    int order = convert_ID_string_to_int(id, num_nodes_in_dist, num_cnodes_in_dist, 
+                                            num_nodes_in_city, num_cnodes_in_city, 
+                                            num_nodes_in_state, num_cnodes_in_state, 
+                                            num_nodes_in_country, num_cnodes_in_country, 
+                                            num_nodes_in_continent);
+    if (order < 180) {
         std::this_thread::sleep_for (std::chrono::seconds(5));
         BOOST_LOG_TRIVIAL(debug) << "Slept for 5 seconds";
         BOOST_LOG_TRIVIAL(debug) << "Broadcasting message ...";
@@ -330,7 +335,7 @@ int main(int argc, char** argv) {
         app.broadcast(data_of_block_size);
         //app.broadcast(data_of_block_size);
         //app.broadcast(data_of_block_size);
-    //}
+    }
 
     // stop the app service
     // BOOST_LOG_TRIVIAL(debug) << "Stopping HGFR base service on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]";

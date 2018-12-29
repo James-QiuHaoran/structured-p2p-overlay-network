@@ -65,6 +65,7 @@ void BaseAppETH::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
                                                 num_nodes_in_state, num_cnodes_in_state, 
                                                 num_nodes_in_country, num_cnodes_in_country, 
                                                 num_nodes_in_continent);
+    neighbor_ids.insert((self_order+1) % num_nodes_total);
 
     for (int i = 0; i < TABLE_SIZE_ETH; i++) {
         // int id = this->random_num_in_range(0, num_nodes_total-1);
@@ -121,7 +122,10 @@ void BaseAppETH::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
                             if (neighbor_ids.find(order) != neighbor_ids.end() && node_id != this->node->get_id()) {
                                 unsigned short port = starting_port_number + order;
                                 Node node(node_id, "127.0.0.1", port);
-                                table.push_back(std::make_shared<Node>(node));
+                                if (order == self_order+1)
+                                    table.insert(table.begin(), std::make_shared<Node>(node));
+                                else
+                                    table.push_back(std::make_shared<Node>(node));
                             }
                             counter++;
                         }
@@ -164,6 +168,10 @@ void BaseAppETH::start(const std::string &start_time, int num_nodes_in_dist, int
 
     this->peer_manager = std::make_shared<PeerManagerETH>(node, node_table, start_time);
 
+    // set gossip mode
+    this->peer_manager->set_mode(PeerManagerETH::PUSH);  // PUSH version
+    // this->peer_manager->set_mode(PeerManagerETH::PULL);  // PULL version
+
     BOOST_LOG_TRIVIAL(debug) << "Starting ETH PeerManager on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
     this->peer_manager->start();
 
@@ -191,7 +199,8 @@ int BaseAppETH::random_num_in_range(int low, int high) {
 
 int main(int argc, char** argv) {
     // srand ( time(NULL) );
-    srand(std::atoi(argv[2]));
+    srand(std::atoi(argv[2]) + time(NULL));
+
     if (argc != 17) {
         BOOST_LOG_TRIVIAL(info) << "Wrong arguments. Correct usage: "
                                         << "./app_eth ip_addr port_num id "
@@ -249,16 +258,30 @@ int main(int argc, char** argv) {
     }
     
     // broadcast a message
-    if (id == "00000000000000000000000000000000") {
-        std::this_thread::sleep_for (std::chrono::seconds(5));
-        BOOST_LOG_TRIVIAL(trace) << "Slept for 5 seconds";
+    /*int order = convert_ID_string_to_int(id, num_nodes_in_dist, num_cnodes_in_dist, 
+                                            num_nodes_in_city, num_cnodes_in_city, 
+                                            num_nodes_in_state, num_cnodes_in_state, 
+                                            num_nodes_in_country, num_cnodes_in_country, 
+                                            num_nodes_in_continent);*/
+    // if (order < 180) {
+        int num_messages_to_broadcast = 2;
+        int mean_interval = 10;
+        int variance = 2;
+        int random_sleep_time = rand() % 180;
+        std::this_thread::sleep_for (std::chrono::seconds(random_sleep_time));
+        BOOST_LOG_TRIVIAL(trace) << "Slept for " << random_sleep_time << " seconds";
         BOOST_LOG_TRIVIAL(trace) << "Broadcasting message ...";
-        app.broadcast("MSG #1: Hello world!");
-        //app.broadcast("MSG #2: Hello world, again!");
-    }
+
+        for (int i = 0; i < num_messages_to_broadcast-1; i++) {
+            BOOST_LOG_TRIVIAL(trace) << "Broadcast a message of size " << data_of_block_size.length() / 1000 << "kb";
+            app.broadcast(data_of_block_size);
+            std::this_thread::sleep_for (std::chrono::seconds(mean_interval-variance + rand() % variance));
+            BOOST_LOG_TRIVIAL(trace) << "Slept for several seconds";
+        }
+        app.broadcast(data_of_block_size);
+    //}
 
     // stop the app service
-    // BOOST_LOG_TRIVIAL(debug) << "Stopping ETH base service on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]";
     app.stop();
 
     return 0;

@@ -45,26 +45,33 @@ void PeerManagerETH::set_mode(unsigned short mode) { this->mode = mode; }
 // send message using transport layer 
 // using wire protcol - TCP Transportation
 void PeerManagerETH::send(std::shared_ptr<Node> node, const Message &msg, const std::string &data) {
-	// if the receiver is itself
-	if (msg.get_receiver_id() == msg.get_sender_id()) {
-		this->on_receive(msg, data);
-		return;
-	}
-
 	// generate data to send
-	// data format: sender_id,receiver_id,msg_id,ttl,data
+	// data format: sender_id,receiver_id,broadcast_id,msg_id,type,ttl,data
 	std::string data_string = this->node->get_id() + "," + 
 							   node->get_id() + "," +
 							   msg.get_broadcast_id() + "," +
-							   msg.get_message_id() + "," + 
-							   std::to_string(msg.get_TTL()) + "," +
+							   msg.get_message_id() + "," +
+							   std::to_string(msg.get_type()) + "," + 
+							   std::to_string(msg.get_TTL()) + "," + 
 							   data;
 
 	// for message logging
 	Message inserted_msg = this->msg_table.insert_sent(msg);
 	this->append_message_record(inserted_msg);
 
-	BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "Send msg | " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "] -> " << "[" << node->get_ip() << ":" << node->get_port() << "]";
+	if (this->mode == PeerManagerETH::PUSH)
+		BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "Send msg | " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "] -> " << "[" << node->get_ip() << ":" << node->get_port() << "]";
+	else if (this->mode == PeerManagerETH::PULL) {
+		if (msg.get_type() == 1)
+			BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "Send invitation | " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "] -> " << "[" << node->get_ip() << ":" << node->get_port() << "]";
+		else if (msg.get_type() == 2)
+			BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "Send data | " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "] -> " << "[" << node->get_ip() << ":" << node->get_port() << "]";
+		else if (msg.get_type() == 3) {
+			BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "Send request | " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "] -> " << "[" << node->get_ip() << ":" << node->get_port() << "]";
+		}
+	}
+
+	// BOOST_LOG_TRIVIAL(debug) << data;
 
 	// send via TCP
 	this->tcp_server->send(node->get_ip(), node->get_port(), data_string);
@@ -74,9 +81,12 @@ void PeerManagerETH::send(std::shared_ptr<Node> node, const Message &msg, const 
 
 // a node wants to broadcast a message
 void PeerManagerETH::broadcast(const std::string &data, int ttl, std::string broadcastID) {
+	// generate data hash
+    std::size_t data_hash = std::hash<std::string>{}(data);
+
 	bool new_broadcast = false;
+	std::stringstream ss;
 	if (broadcastID == "") {
-		std::stringstream ss;
 		ss.str("");
 	    ss.clear();
 	    ss << std::setw(NUM_MSG_LIMIT) << std::setfill('0') << this->broadcasted_msgs.size();
@@ -85,10 +95,18 @@ void PeerManagerETH::broadcast(const std::string &data, int ttl, std::string bro
 	}
 
 	// wrap the data into a Message
-	Message msg(broadcastID, this->random_string_of_length(MSG_HASH_LENGTH), this->node->get_id(), "");
+	ss.str("");
+	ss.clear();
+	ss << std::setw(MSG_HASH_LENGTH) << std::setfill('0') << this->msg_table.num_msgs_in_total();
+	// std::string message_id = this->random_string_of_length(MSG_HASH_LENGTH);
+	std::string message_id = this->node->get_id() + ss.str();
+	Message msg(broadcastID, message_id, this->node->get_id(), "");
 	msg.set_TTL(ttl);
-	if (new_broadcast)
-		this->broadcasted_msgs.push_back(msg.get_message_id());
+
+	if (new_broadcast) {
+		this->broadcasted_msgs.push_back(msg.get_broadcast_id());
+		this->data_map.insert({std::to_string(data_hash), data});
+	}
 
 	// get all nodes in the routing table
 	std::vector<std::shared_ptr<Node>> routing_table = this->node_table->get_peer_set();
@@ -96,9 +114,15 @@ void PeerManagerETH::broadcast(const std::string &data, int ttl, std::string bro
 	// receiver list
 	std::unordered_set<std::shared_ptr<Node>> receiver_list;
 	std::unordered_set<int> random_ids;
+	random_ids.insert(0);
+	srand(this->node->get_port() + time(NULL));
+	int trial = rand() % 1000;
+	if (trial < 990) {
+		receiver_list.insert(routing_table[0]);
+	}
 
 	// randomly select nodes to broadcast
-    for (int i = 0; i < NUM_RECEIVERS_ETH; i++) {
+    for (int i = 0; i < NUM_RECEIVERS_ETH-1; i++) {
         int id = this->random_num_in_range(0, TABLE_SIZE_ETH-1);
         if (random_ids.find(id) == random_ids.end()) {
             random_ids.insert(id);
@@ -119,7 +143,6 @@ void PeerManagerETH::broadcast(const std::string &data, int ttl, std::string bro
 			this->send(receiver, msg, data);
 		else {
 			// pull version
-    		std::size_t data_hash = std::hash<std::string>{}(data);
 			this->send_inv(receiver, std::to_string(data_hash), broadcastID);
 		}
 	}
@@ -129,21 +152,42 @@ void PeerManagerETH::broadcast(const std::string &data, int ttl, std::string bro
 
 // send data hash as invitation
 void PeerManagerETH::send_inv(std::shared_ptr<Node> node, const std::string &data_hash, const std::string &broadcast_id) {
-	Message msg(broadcast_id, this->random_string_of_length(MSG_HASH_LENGTH), this->node->get_id(), node->get_id());
+	// BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "Send invitation | " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "] -> " << "[" << node->get_ip() << ":" << node->get_port() << "]";
+	std::stringstream ss;
+	ss.str("");
+	ss.clear();
+	ss << std::setw(MSG_HASH_LENGTH) << std::setfill('0') << this->msg_table.num_msgs_in_total();
+	// std::string message_id = this->random_string_of_length(MSG_HASH_LENGTH);
+	std::string message_id = this->node->get_id() + ss.str();
+	Message msg(broadcast_id, message_id, this->node->get_id(), node->get_id());
 	msg.set_type(1);
 	send(node, msg, data_hash);
 }
 
 // send real data
 void PeerManagerETH::send_data(std::shared_ptr<Node> node, const std::string &data, const std::string &broadcast_id) {
-	Message msg(broadcast_id, this->random_string_of_length(MSG_HASH_LENGTH), this->node->get_id(), node->get_id());
+	// BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "Send data | " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "] -> " << "[" << node->get_ip() << ":" << node->get_port() << "]";
+	std::stringstream ss;
+	ss.str("");
+	ss.clear();
+	ss << std::setw(MSG_HASH_LENGTH) << std::setfill('0') << this->msg_table.num_msgs_in_total();
+	// std::string message_id = this->random_string_of_length(MSG_HASH_LENGTH);
+	std::string message_id = this->node->get_id() + ss.str();
+	Message msg(broadcast_id, message_id, this->node->get_id(), node->get_id());
 	msg.set_type(2);
 	send(node, msg, data);
 }
 
 // send request for data
 void PeerManagerETH::send_request(std::shared_ptr<Node> node, const std::string &data_hash, const std::string &broadcast_id) {
-	Message msg(broadcast_id, this->random_string_of_length(MSG_HASH_LENGTH), this->node->get_id(), node->get_id());
+	// BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "Send request | " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "] -> " << "[" << node->get_ip() << ":" << node->get_port() << "]";
+	std::stringstream ss;
+	ss.str("");
+	ss.clear();
+	ss << std::setw(MSG_HASH_LENGTH) << std::setfill('0') << this->msg_table.num_msgs_in_total();
+	// std::string message_id = this->random_string_of_length(MSG_HASH_LENGTH);
+	std::string message_id = this->node->get_id() + ss.str();
+	Message msg(broadcast_id, message_id, this->node->get_id(), node->get_id());
 	msg.set_type(3);
 	send(node, msg, data_hash);
 }
@@ -151,6 +195,7 @@ void PeerManagerETH::send_request(std::shared_ptr<Node> node, const std::string 
 // on receiving a packet
 void PeerManagerETH::receive(const std::string& ip, unsigned short port, const std::string &data) {
 	// parsing data
+	// data format: sender_id,receiver_id,broadcast_id,msg_id,type,ttl,data
 	std::size_t pos_start = 0;
 	std::size_t pos_end = data.find(",", 0);
 	std::string sender_id = data.substr(pos_start, pos_end-pos_start);
@@ -169,6 +214,10 @@ void PeerManagerETH::receive(const std::string& ip, unsigned short port, const s
 
 	pos_start = pos_end + 1;
 	pos_end = data.find(",", pos_end+1);
+	int type = std::stoi(data.substr(pos_start, pos_end-pos_start));
+
+	pos_start = pos_end + 1;
+	pos_end = data.find(",", pos_end+1);
 	std::string ttl = data.substr(pos_start, pos_end-pos_start);
 
 	pos_start = pos_end + 1;
@@ -181,22 +230,23 @@ void PeerManagerETH::receive(const std::string& ip, unsigned short port, const s
 
 	Message msg = Message(broadcastID, messageID, sender_id, receiver_id);
 	msg.set_TTL(std::stoi(ttl));
+	msg.set_type(type);
 
-	BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "Received msg from wire | [] " << " -> " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "]";
-
+	BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "Received from wire | [" << ip << ":" << port << "] " << " -> " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "]";
+	// BOOST_LOG_TRIVIAL(debug) << data_in_msg;
 	// for message logging
 	Message inserted_msg = this->msg_table.insert_received(msg);
 	this->append_message_record(inserted_msg);
 	
 	// enter control flow
-	this->on_receive(msg, data_in_msg);
+	this->on_receive(msg, data_in_msg, ip, port);
 
 	return;
 }
 
 // on receiving a message
-void PeerManagerETH::on_receive(const Message &msg, const std::string &data) {
-	BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "On Receive msg | [] -> " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "]";
+void PeerManagerETH::on_receive(const Message &msg, const std::string &data, const std::string& sender_ip, unsigned short sender_port) {
+	BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "On Receive msg | [" << sender_ip << ":" << sender_port << "] -> " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "]";
 
 	std::string sender_id = msg.get_sender_id();
 	std::string receiver_id = this->node->get_id();
@@ -204,39 +254,39 @@ void PeerManagerETH::on_receive(const Message &msg, const std::string &data) {
 	// simulate traffic control - delay according to ID difference
 	int sleep_time = 0;
 	if (sender_id.substr(ID_CONTINENT_START, ID_CONTINENT_START+ID_CONTINENT_LEN) != receiver_id.substr(ID_CONTINENT_START, ID_CONTINENT_START+ID_CONTINENT_LEN)) {
-		sleep_time = random_num_in_range(160, 200);
-        std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
+		sleep_time = this->random_num_in_range(160, 200);
 	} else if (sender_id.substr(ID_COUNTRY_START, ID_COUNTRY_START+ID_COUNTRY_LEN) != receiver_id.substr(ID_COUNTRY_START, ID_COUNTRY_START+ID_COUNTRY_LEN)) {
-		sleep_time = random_num_in_range(120, 160);
-        std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
+		sleep_time = this->random_num_in_range(120, 160);
 	} else if (sender_id.substr(ID_STATE_START, ID_STATE_START+ID_STATE_LEN) != receiver_id.substr(ID_STATE_START, ID_STATE_START+ID_STATE_LEN)) {
-		sleep_time = random_num_in_range(80, 120);
-        std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
+		sleep_time = this->random_num_in_range(80, 120);
 	} else if (sender_id.substr(ID_CITY_START, ID_CITY_START+ID_CITY_LEN) != receiver_id.substr(ID_CITY_START, ID_CITY_START+ID_CITY_LEN)) {
-		sleep_time = random_num_in_range(40, 80);
-        std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
+		sleep_time = this->random_num_in_range(40, 80);
 	} else if (sender_id.substr(ID_DISTRICT_START, ID_DISTRICT_START+ID_DISTRICT_LEN) != receiver_id.substr(ID_DISTRICT_START, ID_DISTRICT_START+ID_DISTRICT_LEN)) {
-		sleep_time = random_num_in_range(0, 40);
-		std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
+		sleep_time = this->random_num_in_range(0, 40);
 	}
+
+	// BOOST_LOG_TRIVIAL(debug) << "slept for " << sleep_time << " ms";
+	std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
 
 	if (this->mode == PeerManagerETH::PULL) {
 		// pull version
 		if (msg.get_type() == 1) {
 			// it is an invitation
 			if (this->data_map.find(data) != this->data_map.end()) {
+				BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "[MSG] Received useless inv | [" << this->node->get_ip() << ":" << this->node->get_port() << "] from [" << sender_ip << ":" << sender_port << "]";
 				// already received, do nothing
 				return;
 			} else {
 				// send request
-				std::string ip = data.substr(data.find("|")+1, data.find(":") - data.find("|") - 1);
-				unsigned short port = std::stoi(data.substr(data.find(":")+1));
-				Node receiver(msg.get_sender_id(), ip, port);
+				Node receiver(msg.get_sender_id(), sender_ip, sender_port);
+
+				BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "[MSG] Received invitation | [" << this->node->get_ip() << ":" << this->node->get_port() << "] from [" << sender_ip << ":" << sender_port << "]";
 
 				this->send_request(std::make_shared<Node>(receiver), data, msg.get_broadcast_id());
 			}
 		} else if (msg.get_type() == 2) {
-			// it is the data, receive it
+			// it is the data, receive it (data format: data_hash|data_content)
+			BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "[MSG] Received data | [" << this->node->get_ip() << ":" << this->node->get_port() << "] from [" << sender_ip << ":" << sender_port << "]";
 			this->data_map.insert({data.substr(0, data.find("|")), data.substr(data.find("|")+1)});
 
 			// then broadcast
@@ -245,25 +295,26 @@ void PeerManagerETH::on_receive(const Message &msg, const std::string &data) {
 			// it is the request, send the data
 			std::string real_data = this->data_map.find(data.substr(0, data.find("|")))->second;
 
-			std::string ip = data.substr(data.find("|")+1, data.find(":") - data.find("|") - 1);
-			unsigned short port = std::stoi(data.substr(data.find(":")+1));
-			Node receiver(msg.get_sender_id(), ip, port);
+			Node receiver(msg.get_sender_id(), sender_ip, sender_port);
+
+			BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "[MSG] Received request | [" << this->node->get_ip() << ":" << this->node->get_port() << "] from [" << sender_ip << ":" << sender_port << "]";
 
 			this->send_data(std::make_shared<Node>(receiver), data + "|" + real_data, msg.get_broadcast_id());
 		} else {
 			// message not recognized, drop the message
+			BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "[MSG] Message not recognized | [" << this->node->get_ip() << ":" << this->node->get_port() << "] from [" << sender_ip << ":" << sender_port << "]";
 			return;
 		}
 	} else {
 		// push version
 		if (std::find(this->broadcasted_msgs_all_nodes.begin(), this->broadcasted_msgs_all_nodes.end(), msg.get_broadcast_id()) != this->broadcasted_msgs_all_nodes.end()) {
 			// do not need to broadcast anymore
-			BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "No need to broadcast | " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "]";
+			BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "No need to broadcast | " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "] from [" << sender_ip << ":" << sender_port << "]";
 			return;
 		} else {
 			// continue to broadcast with ttl decreasing by 1
 			broadcasted_msgs_all_nodes.push_back(msg.get_broadcast_id());
-			BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "Continue to broadcast | " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "]";
+			BOOST_LOG_TRIVIAL(trace) << this->node->get_id() << " - " << "Continue to broadcast | " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "] from [" << sender_ip << ":" << sender_port << "]";
 			this->broadcast(data, msg.get_TTL()-1, msg.get_broadcast_id());
 		}
 	}
@@ -308,7 +359,19 @@ int PeerManagerETH::random_num_in_range(int low, int high) {
 
 // HASH - generate a random alpha-numeric string of length len
 std::string PeerManagerETH::random_string_of_length(size_t length) {
-    auto randchar = [&]() -> char {
+	char randchar[length];
+	const char charset[] =
+        "0123456789"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz";
+    const size_t max_index = (sizeof(charset) - 1);
+	for (size_t i = 0; i < length; i++) {
+		int random_num = this->random_num_in_range(0, max_index);
+		randchar[i] = charset[random_num];
+	}
+	std::string result = randchar;
+	return result;
+    /*auto randchar = [&]() -> char {
         const char charset[] =
         "0123456789"
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -319,7 +382,7 @@ std::string PeerManagerETH::random_string_of_length(size_t length) {
     };
     std::string str(length,0);
     std::generate_n(str.begin(), length, randchar);
-    return str;
+    return str;*/
 }
 
 // write messages received and sent to the file system

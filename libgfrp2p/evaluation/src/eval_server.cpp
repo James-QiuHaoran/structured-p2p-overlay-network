@@ -198,6 +198,37 @@ void EvalServer::send_pull_log(const std::string& run_id, const std::string& ip,
 	tcp_server_->send(ip, port, buffer);
 }
 
+int EvalServer::sendBroadcast(void *data, int argc, char **argv, char **azColName){
+	uint32 workload_size = *((uint32*) data);
+	unsigned short port = std::stoi(argv[1]);
+
+	bootstrap_message::BootstrapMessage msg;
+	msg.set_type(bootstrap_message::BootstrapMessage::BROADCAST);
+
+	msg.mutable_broadcast()->set_wordload_size(wordload_size);
+
+	std::string buffer;
+	msg.SerializeToString(&buffer);
+
+	tcp_server->send(argv[0], port, buffer);
+	return 0;
+}
+
+void EvalServer::broadcast(uint32 node_id, uint32 workload_size) {
+	char* errMsg;
+	int rc;
+   	char sql[100];
+	sprintf(sql, "SELECT * FROM Node WHERE id = %d", node_id);
+
+	rc = sqlite3_exec(db, sql, sendBroadcast, (void*) &workload_size, &errMsg);
+   	if(rc != SQLITE_OK){
+		std::cerr << "SQL error: " << errMsg << std::endl;
+		num_node++;
+   	}
+	else{
+		std::cout << "Operation done successfully" << std::endl;
+   	}
+}
 
 
 int main(int argc, char* argv[]) {
