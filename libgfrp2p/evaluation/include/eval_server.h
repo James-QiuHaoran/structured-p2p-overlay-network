@@ -17,7 +17,8 @@ using bootstrap_message::Init;
 
 struct NodeRecord {
 	std::string ip;
-	unsigned short port;
+	unsigned short bootstrap_port;
+	unsigned short broadcast_port;
 };
 
 using NodeDatabase = std::unordered_map<std::size_t, NodeRecord>;

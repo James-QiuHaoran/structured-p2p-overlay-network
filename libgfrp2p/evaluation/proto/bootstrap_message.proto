@@ -25,7 +25,8 @@ message BootstrapMessage {
 }
 
 message Init {
-    uint32 port = 1;
+    uint32 bootstrap_port = 1;
+    uint32 broadcast_port = 2;
 }
 
 message Config {
