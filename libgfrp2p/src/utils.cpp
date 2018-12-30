@@ -24,7 +24,6 @@ std::string convert_ID_int_to_string(int id,
     int num_nodes_in_state, int num_cnodes_in_state, 
     int num_nodes_in_country, int num_cnodes_in_country, 
     int num_nodes_in_continent) {
-    std::cout << "entered into function int to string\n";
 
     int num_dists_in_city, num_cities_in_state, num_states_in_country, num_countries_in_continent;
     
