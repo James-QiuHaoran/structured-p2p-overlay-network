@@ -17,7 +17,7 @@ void EvalClient::receive(const std::string & ip, unsigned short port, const std:
     if (msg.type() == BootstrapMessage::CONFIG) {
         if (msg.config().eval_type() == Config::HGFRR)  {
             if (this->self_) return; // TODO: Resetting mechanism
-
+            std::cout << "DEBUG: EvalClient::receive: converting int id to string" << std::endl;
             // TODO: Convert id to string function
             std::string str_self_id = convert_ID_int_to_string(msg.config().node_id(),
                 msg.config().num_nodes_in_dist(), msg.config().num_cnodes_in_dist(), 
@@ -26,10 +26,13 @@ void EvalClient::receive(const std::string & ip, unsigned short port, const std:
                 msg.config().num_nodes_in_country(), msg.config().num_cnodes_in_country(), 
                 msg.config().num_nodes_in_continent());
 
+            std::cout << "DEBUG: EvalClient::receive: Copying self information" << std::endl;
             this->self_ = std::make_shared<Node>(str_self_id, "127.0.0.1", local_broadcast_port);
+            std::cout << "DEBUG: EvalClient::receive: Creating node table" << std::endl;            
             this->node_table_ = std::make_shared<NodeTable>(str_self_id);
-
+            
             // Extract the node list from msg
+            std::cout << "DEBUG: EvalClient::receive: Unzipping node table" << std::endl;            
             std::unordered_map<std::string, std::pair<std::string, unsigned short>> node_list;
             for (int i = 0; i < msg.config().table_size(); i++) {
                 std::string str_id = convert_ID_int_to_string(msg.config().table_ids(i),
@@ -277,7 +280,7 @@ void EvalClient::send_init() {
     // Send init message
     BootstrapMessage msg;
     msg.set_type(BootstrapMessage::INIT);
-    msg.mutable_init()->set_port(local_broadcast_port);
+    msg.mutable_init()->set_port(local_bootstrap_port);
     
     std::string serialized;
     if (!msg.SerializeToString(&serialized)) {

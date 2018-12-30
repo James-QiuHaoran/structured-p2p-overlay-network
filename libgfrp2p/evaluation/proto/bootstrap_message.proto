@@ -55,6 +55,8 @@ message Config {
     uint32 num_nodes_in_country = 26;
     uint32 num_cnodes_in_country = 27;
     uint32 num_nodes_in_continent = 28;
+    uint32 num_cnodes_in_continent = 29;
+    uint32 num_continents = 30;
 }
 
 message Broadcast {
@@ -66,6 +68,7 @@ message PullLog {
 }
 
 message PushLog {
-    string run_id = 1;
-    string log = 2;
+    string node_id = 1;
+    string run_id = 2;
+    string log = 3;
 }
