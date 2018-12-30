@@ -587,6 +587,8 @@ void PeerManager::on_lost_connection(std::shared_ptr<Node> node) {
 
 // start the server
 void PeerManager::start() {
+	mkdir(("../test/log/" + this->run_id + '/').c_str(), S_IRWXU);
+
 	BOOST_LOG_TRIVIAL(trace) << "Starting the TCP server on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
     this->tcp_server = new AsyncUDPServer(std::static_pointer_cast<Receiver>(this->shared_from_this()), this->node->get_port());
     
