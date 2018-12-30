@@ -2,6 +2,7 @@
 #include <iomanip>
 #include <algorithm>
 #include <time.h>
+#include <iostream>
 
 #include "param_constants.h"
 

@@ -113,9 +113,9 @@ do
 	num_cnodes_in_city=2
 	num_nodes_in_state=4
 	num_cnodes_in_state=2
-	num_nodes_in_country=1
+	num_nodes_in_country=0
 	num_cnodes_in_country=1
-	num_nodes_in_continent=1
+	num_nodes_in_continent=0
 	num_cnodes_in_continent=1
 	num_continents=1
 

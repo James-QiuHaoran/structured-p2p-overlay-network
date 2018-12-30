@@ -294,6 +294,22 @@ int main(int argc, char** argv) {
     int starting_port_number = std::atoi(argv[15]);
     std::string start_time = argv[16];
 
+    /*
+    int order = convert_ID_string_to_int(id, num_nodes_in_dist, num_cnodes_in_dist, 
+                                            num_nodes_in_city, num_cnodes_in_city, 
+                                            num_nodes_in_state, num_cnodes_in_state, 
+                                            num_nodes_in_country, num_cnodes_in_country, 
+                                            num_nodes_in_continent);
+    BOOST_LOG_TRIVIAL(debug) << "Order: " << order;
+    std::string id_string = convert_ID_int_to_string(order, num_nodes_in_dist, num_cnodes_in_dist, 
+                                            num_nodes_in_city, num_cnodes_in_city, 
+                                            num_nodes_in_state, num_cnodes_in_state, 
+                                            num_nodes_in_country, num_cnodes_in_country, 
+                                            num_nodes_in_continent);
+    BOOST_LOG_TRIVIAL(debug) << "ID: " << id_string;
+    BOOST_LOG_TRIVIAL(debug) << "ID: " << id << "\n";
+    return 0;*/
+
     // initialize the app
     BOOST_LOG_TRIVIAL(debug) << "Creating HGFR base application on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]";
     BaseApp app = BaseApp(ip, port, id);

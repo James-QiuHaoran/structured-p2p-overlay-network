@@ -24,16 +24,36 @@ std::string convert_ID_int_to_string(int id,
     int num_nodes_in_state, int num_cnodes_in_state, 
     int num_nodes_in_country, int num_cnodes_in_country, 
     int num_nodes_in_continent) {
+    std::cout << "entered into function int to string\n";
 
+    int num_dists_in_city, num_cities_in_state, num_states_in_country, num_countries_in_continent;
+    
     int num_nodes_in_one_dist = num_nodes_in_dist;
-    int num_dists_in_city = num_nodes_in_city/num_cnodes_in_dist;
+    // std::cout << "num_nodes_in_one_dist: " << num_nodes_in_one_dist << "\n";
+    num_dists_in_city = num_nodes_in_city/num_cnodes_in_dist;
+    if (num_dists_in_city == 0)
+        num_dists_in_city = 1;
+    // std::cout << "num_dists_in_city: " << num_dists_in_city << "\n";
     int num_nodes_in_one_city = num_nodes_in_one_dist * num_dists_in_city;
-    int num_cities_in_state = num_nodes_in_state/num_cnodes_in_dist;
+    // std::cout << "num_nodes_in_one_city: " << num_nodes_in_one_city << "\n";
+    num_cities_in_state = num_nodes_in_state/num_cnodes_in_city;
+    if (num_cities_in_state == 0)
+        num_cities_in_state = 1;
+    // std::cout << "num_cities_in_state: " << num_cities_in_state << "\n";
     int num_nodes_in_one_state = num_nodes_in_one_city * num_cities_in_state;
-    int num_states_in_country = num_nodes_in_country/num_cnodes_in_state;
+    // std::cout << "num_nodes_in_one_state: " << num_nodes_in_one_state << "\n";
+    num_states_in_country = num_nodes_in_country/num_cnodes_in_state;
+    if (num_states_in_country == 0)
+        num_states_in_country = 1;
+    // std::cout << "num_states_in_country: " << num_states_in_country << "\n";
     int num_nodes_in_one_country = num_nodes_in_one_state * num_states_in_country;
-    int num_countries_in_continent = num_nodes_in_continent/num_cnodes_in_country;
+    // std::cout << "num_nodes_in_one_country: " << num_nodes_in_one_country << "\n";
+    num_countries_in_continent = num_nodes_in_continent/num_cnodes_in_country;
+    if (num_countries_in_continent == 0)
+        num_countries_in_continent = 1;
+    // std::cout << "num_countries_in_continent: " << num_countries_in_continent << "\n";
     int num_nodes_in_one_continent = num_nodes_in_one_country * num_countries_in_continent;
+    // std::cout << "num_nodes_in_one_continent: " << num_nodes_in_one_continent << "\n";
 
     std::stringstream ss;
     std::string id_string = "";
