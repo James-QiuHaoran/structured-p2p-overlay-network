@@ -43,7 +43,7 @@ echo ""
 
 echo ""
 
-./time_spent.sh $1
+./time_spent.sh $1 $size
 
 echo ""
 
