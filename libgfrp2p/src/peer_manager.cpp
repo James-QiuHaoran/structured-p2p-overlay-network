@@ -587,6 +587,8 @@ void PeerManager::on_lost_connection(std::shared_ptr<Node> node) {
 
 // start the server
 void PeerManager::start() {
+	mkdir(("../test/log/" + this->run_id + '/').c_str(), S_IRWXU);
+
 	BOOST_LOG_TRIVIAL(trace) << "Starting the TCP server on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
     this->tcp_server = new AsyncUDPServer(std::static_pointer_cast<Receiver>(this->shared_from_this()), this->node->get_port());
     
@@ -629,24 +631,38 @@ std::string PeerManager::random_string_of_length(size_t length) {
 // write messages received and sent to the file system
 void PeerManager::log_message_records() {
 	std::ofstream ofs;
-	ofs.open("../test/log/" + this->run_id + "/" + this->node->get_id() + ".csv", std::ofstream::out | std::ofstream::app);
+	std::string filename = "../test/log/" + this->run_id + '/' + this->node->get_id() + ".csv";
+	ofs.open(filename, std::ofstream::out | std::ofstream::app);
+	if (!ofs.is_open()) {
+		std::cerr << "ERROR: PeerManager::log_message_records: Cannot open " << filename << std::endl;
+		return;
+	}
 
-	ofs << this->msg_table.to_csv_string();
+	ofs << this->msg_table.to_csv_string() << std::endl;
 
 	ofs.close();
 }
 
 void PeerManager::append_message_record(const Message& msg) {
 	std::ofstream ofs;
-	ofs.open("../test/log/" + this->run_id + "/" + this->node->get_id() + ".csv", std::ofstream::out | std::ofstream::app);
-
-	ofs << msg.to_csv_string() + "\n";
+	std::string filename = "../test/log/" + this->run_id + '/' + this->node->get_id() + ".csv";
+	ofs.open(filename, std::ofstream::out | std::ofstream::app);
+	if (!ofs.is_open()) {
+		std::cerr << "ERROR: PeerManager::append_message_records: Cannot open " << filename << std::endl;
+		return;
+	}
+	ofs << msg.to_csv_string() << std::endl;
 
 	ofs.close();
 }
 
 std::string PeerManager::get_all_records_csv() {
-	std::ifstream ifs("../test/log/" + this->run_id + "/" + this->node->get_id() + ".csv", std::ofstream::out | std::ofstream::app);
+	std::string filename = "../test/log/" + this->run_id + '/' + this->node->get_id() + ".csv";
+	std::ifstream ifs(filename);
+	if (!ifs.is_open()) {
+		std::cerr << "ERROR: PeerManager::get_all_records_csv: Cannot open " << filename << std::endl;
+		return std::string(); 
+	}
     return std::string(std::istreambuf_iterator<char>(ifs), std::istreambuf_iterator<char>());
 }
 

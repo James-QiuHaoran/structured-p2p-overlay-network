@@ -32,7 +32,7 @@ void EvalClient::receive(const std::string & ip, unsigned short port, const std:
             this->node_table_ = std::make_shared<NodeTable>(str_self_id);
             
             // Extract the node list from msg
-            std::cout << "DEBUG: EvalClient::receive: Unzipping node table" << std::endl;            
+            std::cout << "DEBUG: EvalClient::receive: Deserializing node table" << std::endl;            
             std::unordered_map<std::string, std::pair<std::string, unsigned short>> node_list;
             for (int i = 0; i < msg.config().table_size(); i++) {
                 std::string str_id = convert_ID_int_to_string(msg.config().table_ids(i),
@@ -50,11 +50,12 @@ void EvalClient::receive(const std::string & ip, unsigned short port, const std:
                 msg.config().num_nodes_in_country(), msg.config().num_cnodes_in_country(), 
                 msg.config().num_nodes_in_continent(), node_list);
             
-            this->peer_manager_ = std::make_shared<PeerManager>(self_, node_table_, str_self_id);
+            this->peer_manager_ = std::make_shared<PeerManager>(self_, node_table_, msg.config().run_id());
+            this->peer_manager_->start();
 
             std::cout << "DEBUG: EvalClient::receive: HGFR evaluation configured, info:" << std::endl;
             for (const auto& table : this->node_table_->get_tables()) {
-                std::cout << "DEBUG: EvalClient::receive: \tLevel " << table.ring_level << " has "  << table.peer_list.size() << " peers and " << table.contact_nodes.size() << "contact nodes" << std::endl;
+                std::cout << "DEBUG: EvalClient::receive: \tLevel " << table.ring_level << " has "  << table.peer_list.size() << " peers and " << table.contact_nodes.size() << " contact nodes" << std::endl;
             }
         } else if (false) {
             /* TODO: handle other messages*/
@@ -78,7 +79,7 @@ void EvalClient::receive(const std::string & ip, unsigned short port, const std:
 }
 
 std::string EvalClient::generate_random_workload(unsigned int workload_size) {
-    return std::string(workload_size, 'a');
+    return std::string(workload_size, 'S');
 }
 
 
@@ -280,7 +281,8 @@ void EvalClient::send_init() {
     // Send init message
     BootstrapMessage msg;
     msg.set_type(BootstrapMessage::INIT);
-    msg.mutable_init()->set_port(local_bootstrap_port);
+    msg.mutable_init()->set_bootstrap_port(local_bootstrap_port);
+    msg.mutable_init()->set_broadcast_port(local_broadcast_port);
     
     std::string serialized;
     if (!msg.SerializeToString(&serialized)) {
@@ -301,6 +303,7 @@ void EvalClient::send_push_log() {
     BootstrapMessage msg;
     msg.set_type(BootstrapMessage::PUSH_LOG);
     msg.mutable_push_log()->set_run_id(peer_manager_->get_run_id());
+    msg.mutable_push_log()->set_node_id(self_->get_id());
     msg.mutable_push_log()->set_log(peer_manager_->get_all_records_csv());
 
     std::string serialized;

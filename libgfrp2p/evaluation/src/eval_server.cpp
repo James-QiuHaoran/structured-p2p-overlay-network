@@ -26,14 +26,15 @@ void EvalServer::receive(const std::string & ip, unsigned short port, const std:
 		// On receive node registration
 		NodeRecord record;
 		record.ip = ip;
-		record.port = static_cast<unsigned short>(msg.init().port());
+		record.bootstrap_port = static_cast<unsigned short>(msg.init().bootstrap_port());
+		record.broadcast_port = static_cast<unsigned short>(msg.init().broadcast_port());
 		std::lock_guard<std::mutex> lock(mlock_);
 		db_->insert({db_->size(), record});
-		std::cout << "INFO: EvalServer::receive: " << record.ip << ':' << record.port << " registered";
+		std::cout << "INFO: EvalServer::receive: " << record.ip << ": (bootstrap)" << record.bootstrap_port << " and (broadcast)" << record.broadcast_port << " registered" << std::endl;
  	} else if (msg.type() == BootstrapMessage::PUSH_LOG) {
 		// On receive node message log
 		std::ofstream fout;
-		std::string filename = log_dir_+'/'+ msg.push_log().run_id() + '_' + msg.push_log().node_id() + ".txt";
+		std::string filename = log_dir_ + '/' + msg.push_log().run_id() + '_' + msg.push_log().node_id() + ".txt";
 		fout.open(filename);
 		if (!fout.is_open()) {
 			std::cerr << "ERROR: EvalServer::receive: Failed to open " << filename << std::endl;
@@ -105,13 +106,13 @@ void EvalServer::handle_config(const EvalConfig& config) {
 	for (const auto& kv: *db_) {
 		eval_config_->mutable_config()->add_table_ids(kv.first);
 		eval_config_->mutable_config()->add_table_ips(kv.second.ip);
-		eval_config_->mutable_config()->add_table_ports(kv.second.port);
+		eval_config_->mutable_config()->add_table_ports(kv.second.broadcast_port);
 	}
 
 	std::cout << "INFO:: EvalServer::handle_config: Sending config: " << std::endl;
 	int counter = 0;
 	for (const auto& kv : *db_) {
-		send_config(kv.first, kv.second.ip, kv.second.port);
+		send_config(kv.first, kv.second.ip, kv.second.bootstrap_port);
 
 		counter ++;
 		if (int(double(counter)/db_->size()*10) == int(double(counter-1)/db_->size()*10) + 1)
@@ -131,7 +132,7 @@ void EvalServer::handle_broadcast(std::size_t node_id, std::uint32_t workload_si
 		return;
 	}
 
-	send_broadcast(workload_size, iter->second.ip, iter->second.port);
+	send_broadcast(workload_size, iter->second.ip, iter->second.bootstrap_port);
 }
 
 void EvalServer::handle_pull_log(std::size_t node_id, const std::string& run_id) {
@@ -146,7 +147,7 @@ void EvalServer::handle_pull_log(std::size_t node_id, const std::string& run_id)
 		return;
 	}
 
-	send_pull_log(run_id, iter->second.ip, iter->second.port );
+	send_pull_log(run_id, iter->second.ip, iter->second.bootstrap_port);
 }
 
 
@@ -224,8 +225,7 @@ int main(int argc, char* argv[]) {
 
 			NodeRecord r = eval_server->handle_check(node_id);
 
-			std::cout << "Node " << node_id << ":\n\tIP: " << r.ip 
-				<< "\n\tPort: " << r.port << std::endl;
+			std::cout << "Node " << node_id << ": ip: " << r.ip << "; bootstrap port: " << r.bootstrap_port << "; broadcast port: " << r.broadcast_port << std::endl;
 		} else if (command == "config") {
 			EvalConfig eval_config;
 			
@@ -239,7 +239,7 @@ int main(int argc, char* argv[]) {
 				>> eval_config.num_continents;
 
 			eval_server->handle_config(eval_config);
-		} else if (command == "broadast") {
+		} else if (command == "broadcast") {
 			std::size_t node_id;
 			std::uint32_t workload_size;
 			std::cout << "Enter node_id workload_size >>> ";
@@ -255,10 +255,10 @@ int main(int argc, char* argv[]) {
 			eval_server->handle_pull_log(node_id, run_id);
 
 		} else if (command == "help") {
-			std::cout << "count\t# of registered nodes\ncheck node_id\tinfo of the node\n \
-				config run_id eval_type(0/1) n_dist cn_dist n_city cn_city n_state cn_state n_country cn_country n_continent\tconfig the experiment\n \
-				broadcast node_id workload_size\tmake node_id broadcast a work_size long message\n \
-				pull_log node_id run_id\tmake node_id upload its log of experiment run_id" << std::endl;
+			std::cout << "count - # of registered nodes\ncheck node_id - info of the node\n"
+				<< "config run_id eval_type(0/1) n_dist cn_dist n_city cn_city n_state cn_state n_country cn_country n_continent - config the experiment\n"
+				<< "broadcast node_id workload_size - make node_id broadcast a work_size long message\n"
+				<< "pull_log node_id run_id - make node_id upload its log of experiment run_id" << std::endl;
 		} else {
 			std::cout << "Illegal command" << std::endl;
 		}

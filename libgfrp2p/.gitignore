@@ -61,3 +61,7 @@ bin/
 
 # Editor files
 .vscode/
+
+# Log files
+log/
+test/log/

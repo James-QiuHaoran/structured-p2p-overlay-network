@@ -12,6 +12,8 @@
 #include <fstream>
 #include <time.h>
 
+#include <sys/stat.h>
+
 #include <boost/random/uniform_int_distribution.hpp>
 #include <boost/random/mersenne_twister.hpp>
 
