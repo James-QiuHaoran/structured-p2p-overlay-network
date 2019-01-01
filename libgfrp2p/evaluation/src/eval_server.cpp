@@ -96,28 +96,65 @@ void EvalServer::handle_config(const EvalConfig& config) {
 
 	std::lock_guard<std::mutex> lock(mlock_);
 
-	if (!db_) {
-		std::cerr << "ERROR: EvalServer::handle_config: Database not initialized" << std::endl;
-		return;
-	} 
-
-	std::cout << "DEBUG: EvalServer::handle_config: Preparing node table" << std::endl;
-	eval_config_->mutable_config()->set_table_size(db_->size());
-	for (const auto& kv: *db_) {
-		eval_config_->mutable_config()->add_table_ids(kv.first);
-		eval_config_->mutable_config()->add_table_ips(kv.second.ip);
-		eval_config_->mutable_config()->add_table_ports(kv.second.broadcast_port);
-	}
-
 	std::cout << "INFO:: EvalServer::handle_config: Sending config: " << std::endl;
-	int counter = 0;
+	std::size_t counter = 0;
 	for (const auto& kv : *db_) {
 		send_config(kv.first, kv.second.ip, kv.second.bootstrap_port);
 
 		counter ++;
 		if (int(double(counter)/db_->size()*10) == int(double(counter-1)/db_->size()*10) + 1)
-			std::cout << "INFO:: EvalServer::handle_config: ... " << int(double(counter)/db_->size()*100) << '%' << std::endl;
+			std::cout << "DEBUG:: EvalServer::handle_config: ... " << int(double(counter)/db_->size()*100) << '%' << std::endl;
+
+		std::this_thread::sleep_for(std::chrono::microseconds(100));
 	}
+
+}
+
+void EvalServer::handle_table() {
+	std::lock_guard<std::mutex> lock(mlock_);
+
+	if (!db_) {
+		std::cerr << "ERROR: EvalServer::handle_table: Database not initialized" << std::endl;
+		return;
+	} 
+
+	std::cout << "DEBUG: EvalServer::handle_table: Preparing node table" << std::endl;
+
+	std::unique_ptr<BootstrapMessage> msg(new BootstrapMessage());
+	msg->set_type(BootstrapMessage::TABLE);
+	std::size_t i = 0;
+	for (const auto& kv : *db_) {
+		msg->mutable_table()->add_table_ids(kv.first);
+		msg->mutable_table()->add_table_ips(kv.second.ip);
+		msg->mutable_table()->add_table_ports(kv.second.broadcast_port);
+
+
+		i++;
+		if (i % 2000 == 0 || i == db_->size()) {
+			msg->mutable_table()->set_table_size(i > 2000 ? i % 2000 : i);
+			msg->mutable_table()->set_is_end(i >= db_->size());
+
+			std::string buffer;
+			msg->SerializeToString(&buffer);
+
+			std::cout << "DEBUG: EvalServer::handle_table: Sending page " << i << " out of " << db_->size() << std::endl;
+			std::size_t counter = 0;
+			for (const auto& kv2 : *db_) {
+				tcp_server_->send(kv2.second.ip, kv2.second.bootstrap_port, buffer);
+
+				counter ++;
+				if (int(double(counter)/db_->size()*10) == int(double(counter-1)/db_->size()*10) + 1)
+					std::cout << "DEBUG:: EvalServer::handle_table: ... " << int(double(counter)/db_->size()*100) << '%' << std::endl;
+
+				std::this_thread::sleep_for(std::chrono::microseconds(100));
+			}
+	
+			msg.reset(new BootstrapMessage());
+			msg->set_type(BootstrapMessage::TABLE);
+		}
+	}
+
+
 }
 
 void EvalServer::handle_broadcast(std::size_t node_id, std::uint32_t workload_size) {
@@ -239,6 +276,8 @@ int main(int argc, char* argv[]) {
 				>> eval_config.num_continents;
 
 			eval_server->handle_config(eval_config);
+		} else if (command == "table") {
+			eval_server->handle_table();
 		} else if (command == "broadcast") {
 			std::size_t node_id;
 			std::uint32_t workload_size;

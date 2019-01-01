@@ -16,49 +16,72 @@ void EvalClient::receive(const std::string & ip, unsigned short port, const std:
 
     if (msg.type() == BootstrapMessage::CONFIG) {
         if (msg.config().eval_type() == Config::HGFRR)  {
-            if (this->self_) return; // TODO: Resetting mechanism
-            std::cout << "DEBUG: EvalClient::receive: converting int id to string" << std::endl;
-            // TODO: Convert id to string function
-            std::string str_self_id = convert_ID_int_to_string(msg.config().node_id(),
+            if (this->eval_config_) return; // TODO: Resetting mechanism
+            eval_config_.reset(new EvalConfig);
+            std::cout << "DEBUG: EvalClient::receive: Config received" << std::endl;
+            
+            eval_config_->str_node_id = convert_ID_int_to_string(msg.config().node_id(),
                 msg.config().num_nodes_in_dist(), msg.config().num_cnodes_in_dist(), 
                 msg.config().num_nodes_in_city(), msg.config().num_cnodes_in_city(), 
                 msg.config().num_nodes_in_state(), msg.config().num_cnodes_in_state(), 
                 msg.config().num_nodes_in_country(), msg.config().num_cnodes_in_country(), 
                 msg.config().num_nodes_in_continent());
 
-            std::cout << "DEBUG: EvalClient::receive: Copying self information" << std::endl;
-            this->self_ = std::make_shared<Node>(str_self_id, "127.0.0.1", local_broadcast_port);
-            std::cout << "DEBUG: EvalClient::receive: Creating node table" << std::endl;            
-            this->node_table_ = std::make_shared<NodeTable>(str_self_id);
+            eval_config_->run_id = msg.config().run_id();
+            eval_config_->num_nodes_in_dist = msg.config().num_nodes_in_dist();
+            eval_config_->num_cnodes_in_dist = msg.config().num_cnodes_in_dist();
+            eval_config_->num_nodes_in_city = msg.config().num_nodes_in_city();
+            eval_config_->num_cnodes_in_city = msg.config().num_cnodes_in_city();
+            eval_config_->num_nodes_in_state = msg.config().num_nodes_in_state();
+            eval_config_->num_cnodes_in_state = msg.config().num_cnodes_in_state();
+            eval_config_->num_nodes_in_country = msg.config().num_nodes_in_country();
+            eval_config_->num_cnodes_in_country = msg.config().num_cnodes_in_country();
+            eval_config_->num_nodes_in_continent = msg.config().num_nodes_in_continent();
             
-            // Extract the node list from msg
-            std::cout << "DEBUG: EvalClient::receive: Deserializing node table" << std::endl;            
-            std::unordered_map<std::string, std::pair<std::string, unsigned short>> node_list;
-            for (size_t i = 0; i < msg.config().table_size(); i++) {
-                std::string str_id = convert_ID_int_to_string(msg.config().table_ids(i),
-                    msg.config().num_nodes_in_dist(), msg.config().num_cnodes_in_dist(), 
-                    msg.config().num_nodes_in_city(), msg.config().num_cnodes_in_city(), 
-                    msg.config().num_nodes_in_state(), msg.config().num_cnodes_in_state(), 
-                    msg.config().num_nodes_in_country(), msg.config().num_cnodes_in_country(), 
-                    msg.config().num_nodes_in_continent());
-                node_list[str_id] = std::make_pair(msg.config().table_ips(i), msg.config().table_ports(i));
-            }
+        } else if (false) {
+            /* TODO: handle other messages*/
+        }
+    } else if (msg.type() == BootstrapMessage::TABLE) {
+        if (!this->eval_config_) {
+            std::cerr << "ERROR: EvalClient::receive: Table received but evaluation not configured" << std::endl;
+            return;
+        }
+        if (!this->node_list_) {        
+            std::cout << "DEBUG: EvalClient::receive: Creating node table" << std::endl;
+            node_list_.reset(new std::unordered_map<std::string, std::pair<std::string, unsigned short>>());    
+        } else {
+            std::cout << "DEBUG: EvalClient::receive: Appending node table" << std::endl;  
+        }
+        // Extract the node list from msg           
+        for (size_t i = 0; i < msg.table().table_size(); i++) {
+            std::string str_id = convert_ID_int_to_string(msg.table().table_ids(i),
+                eval_config_->num_nodes_in_dist, eval_config_->num_cnodes_in_dist, 
+                eval_config_->num_nodes_in_city, eval_config_->num_cnodes_in_city, 
+                eval_config_->num_nodes_in_state, eval_config_->num_cnodes_in_state, 
+                eval_config_->num_nodes_in_country, eval_config_->num_cnodes_in_country, 
+                eval_config_->num_nodes_in_continent);
+            (*node_list_)[str_id] = std::make_pair(msg.table().table_ips(i), msg.table().table_ports(i));
+        }
 
-            create_hgfr_table(msg.config().num_nodes_in_dist(), msg.config().num_cnodes_in_dist(), 
-                msg.config().num_nodes_in_city(), msg.config().num_cnodes_in_city(), 
-                msg.config().num_nodes_in_state(), msg.config().num_cnodes_in_state(), 
-                msg.config().num_nodes_in_country(), msg.config().num_cnodes_in_country(), 
-                msg.config().num_nodes_in_continent(), node_list);
+        // Paging finished
+        if (msg.table().is_end()) {
+            std::cout << "DEBUG: EvalClient::receive: Last page received, creating evaluation" << std::endl;
             
-            this->peer_manager_ = std::make_shared<PeerManager>(self_, node_table_, msg.config().run_id());
+            this->node_table_ = std::make_shared<NodeTable>(eval_config_->str_node_id);
+
+            create_hgfr_table(eval_config_->num_nodes_in_dist, eval_config_->num_cnodes_in_dist, 
+                eval_config_->num_nodes_in_city, eval_config_->num_cnodes_in_city, 
+                eval_config_->num_nodes_in_state, eval_config_->num_cnodes_in_state, 
+                eval_config_->num_nodes_in_country, eval_config_->num_cnodes_in_country, 
+                eval_config_->num_nodes_in_continent, *node_list_);
+        
+            this->peer_manager_ = std::make_shared<PeerManager>(self_, node_table_, eval_config_->run_id);
             this->peer_manager_->start();
 
             std::cout << "DEBUG: EvalClient::receive: HGFR evaluation configured, info:" << std::endl;
             for (const auto& table : this->node_table_->get_tables()) {
                 std::cout << "DEBUG: EvalClient::receive: \tLevel " << table.ring_level << " has "  << table.peer_list.size() << " peers and " << table.contact_nodes.size() << " contact nodes" << std::endl;
             }
-        } else if (false) {
-            /* TODO: handle other messages*/
         }
     } else if (msg.type() == BootstrapMessage::BROADCAST) {
         if(!peer_manager_) {

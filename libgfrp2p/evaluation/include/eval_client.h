@@ -25,6 +25,9 @@ private:
     const unsigned short bootstrap_server_port;
 
     // p2p layer info
+    std::unique_ptr<EvalConfig> eval_config_;
+    std::unique_ptr< std::unordered_map<std::string, std::pair<std::string, unsigned short>> > node_list_;
+
     std::shared_ptr<Node> self_;
     std::shared_ptr<NodeTable> node_table_;
     std::shared_ptr<PeerManager> peer_manager_;
