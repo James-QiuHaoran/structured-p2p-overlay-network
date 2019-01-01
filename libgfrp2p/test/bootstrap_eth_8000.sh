@@ -119,7 +119,7 @@ do
 	num_cnodes_in_continent=2
 	num_continents=1
 
-	../bin/app $ip $port $id \
+	../bin/app_eth $ip $port $id \
 		$num_nodes_in_dist $num_cnodes_in_dist \
 		$num_nodes_in_city $num_cnodes_in_city \
 		$num_nodes_in_state $num_cnodes_in_state \
