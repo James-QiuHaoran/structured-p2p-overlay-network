@@ -5,10 +5,12 @@
 #include <unordered_map>
 #include <memory>
 #include <fstream>
+#include <chrono>
 
 #include <cstring>
 
 #include "transport.h"
+#include "utils.h"
 #include "bootstrap_message.pb.h"
 
 using bootstrap_message::BootstrapMessage;
@@ -22,24 +24,6 @@ struct NodeRecord {
 };
 
 using NodeDatabase = std::unordered_map<std::size_t, NodeRecord>;
-
-struct EvalConfig {
-	std::string run_id;
-
-	std::uint32_t eval_type;
-
-	std::uint32_t num_nodes_in_dist;
-    std::uint32_t num_cnodes_in_dist;
-    std::uint32_t num_nodes_in_city;
-    std::uint32_t num_cnodes_in_city;
-    std::uint32_t num_nodes_in_state;
-    std::uint32_t num_cnodes_in_state;
-    std::uint32_t num_nodes_in_country;
-    std::uint32_t num_cnodes_in_country;
-	std::uint32_t num_nodes_in_continent;
-	std::uint32_t num_cnodes_in_continent;
-	std::uint32_t num_continents;
-};
 
 class EvalServer: public Receiver, public std::enable_shared_from_this<EvalServer> {
 private:
@@ -70,6 +54,7 @@ public:
 	std::size_t handle_count();
 	NodeRecord handle_check(std::size_t node_id);
 	void handle_config(const EvalConfig& config);
+	void handle_table();
 	void handle_broadcast(std::size_t node_id, std::uint32_t workload_size);
 	void handle_pull_log(std::size_t node_id, const std::string& run_id);
 
