@@ -1,6 +1,7 @@
 #ifndef NODE_TABLE_H
 #define NODE_TABLE_H
 
+#include <iostream>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>

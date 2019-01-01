@@ -404,8 +404,8 @@ void BaseApp::start(const std::string &start_time, int num_nodes_in_dist, int nu
         int num_nodes_in_continent, int num_continents,
         int num_cnodes_in_continent,
         unsigned short starting_port_number) {
-    BOOST_LOG_TRIVIAL(debug) << "Setting up NodeTable for node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
-    BOOST_LOG_TRIVIAL(debug) << "Establishing structure on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
+    std::cout << "Setting up NodeTable for node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]\n";
+    std::cout << "Establishing structure on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]\n";
     
     this->form_structure(num_nodes_in_dist, num_cnodes_in_dist, 
         num_nodes_in_city, num_cnodes_in_city, 
@@ -415,26 +415,25 @@ void BaseApp::start(const std::string &start_time, int num_nodes_in_dist, int nu
         num_cnodes_in_continent,
         starting_port_number);
     
-    BOOST_LOG_TRIVIAL(debug) << "Structure established on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
-    BOOST_LOG_TRIVIAL(debug) << "Node Tables on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
+    std::cout << "Structure established on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]\n";
+    std::cout << "Node Tables on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]\n";
     for (auto table : this->node_table->get_tables()) {
-        BOOST_LOG_TRIVIAL(debug) << "Level: " + std::to_string(table.ring_level);
+	std::cout << "Level: " << std::to_string(table.ring_level) << "\n";
         for (auto peer : table.peer_list) {
-            BOOST_LOG_TRIVIAL(debug) << "Peer - " + peer->get_id() + " " + peer->get_ip() + ":" + std::to_string(peer->get_port());
+	    std::cout << "Peer - " + peer->get_id() + " " + peer->get_ip() + ":" + std::to_string(peer->get_port()) << "\n";
         }
         for (auto contact_node : table.contact_nodes) {
-            BOOST_LOG_TRIVIAL(debug) << "Contact node - " + contact_node.first + " " + contact_node.second->get_ip() + ":" + std::to_string(contact_node.second->get_port());
+	    std::cout << "Contact node - " + contact_node.first + " " + contact_node.second->get_ip() + ":" + std::to_string(contact_node.second->get_port()) << "\n";
         }
     }
 
     this->peer_manager = std::make_shared<PeerManager>(node, node_table, start_time);
 
-    BOOST_LOG_TRIVIAL(debug) << "Starting HGFR PeerManager on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
+    std::cout << "Starting HGFR PeerManager on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]\n";
     this->peer_manager->start();
 }
 
 void BaseApp::stop() {
-    // BOOST_LOG_TRIVIAL(debug) << "Stopping HGFR PeerManager on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
     this->peer_manager->stop();
 }
 
@@ -444,7 +443,7 @@ void BaseApp::broadcast(const std::string &data) {
 
 int main(int argc, char** argv) {
     if (argc != 17) {
-        BOOST_LOG_TRIVIAL(info) << "Wrong arguments. Correct usage: "
+	std::cout << "Wrong arguments. Correct usage: "
                                         << "./app_eth ip_addr port_num id "
                                             << "num_nodes_in_dist num_cnodes_in_dist " 
                                             << "num_nodes_in_city num_cnodes_in_city " 
@@ -481,22 +480,20 @@ int main(int argc, char** argv) {
                                             num_nodes_in_state, num_cnodes_in_state, 
                                             num_nodes_in_country, num_cnodes_in_country, 
                                             num_nodes_in_continent);
-    BOOST_LOG_TRIVIAL(debug) << "Order: " << order;
+    std::cout << "Order: " << order << "\n";
     std::string id_string = convert_ID_int_to_string(order, num_nodes_in_dist, num_cnodes_in_dist, 
                                             num_nodes_in_city, num_cnodes_in_city, 
                                             num_nodes_in_state, num_cnodes_in_state, 
                                             num_nodes_in_country, num_cnodes_in_country, 
                                             num_nodes_in_continent);
-    BOOST_LOG_TRIVIAL(debug) << "ID: " << id_string;
-    BOOST_LOG_TRIVIAL(debug) << "ID: " << id << "\n";
-    return 0;*/
+    */
 
     // initialize the app
-    BOOST_LOG_TRIVIAL(debug) << "Creating HGFR base application on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]";
+    std::cout << "Creating HGFR base application on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]\n";
     BaseApp app = BaseApp(ip, port, id);
 
     // start the app service
-    BOOST_LOG_TRIVIAL(debug) << "Starting HGFR base service on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]";
+    std::cout << "Starting HGFR base service on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]\n";
     app.start(start_time, num_nodes_in_dist, num_cnodes_in_dist, 
         num_nodes_in_city, num_cnodes_in_city, 
         num_nodes_in_state, num_cnodes_in_state,
@@ -512,7 +509,7 @@ int main(int argc, char** argv) {
         ofs << Message::csv_header << "\n";
         ofs.close();
     } else {
-        BOOST_LOG_TRIVIAL(trace) << "Error opening file";
+	std::cout << "Error opening file\n";
     }
     
     // broadcast a message
@@ -523,19 +520,12 @@ int main(int argc, char** argv) {
                                             num_nodes_in_continent);
     if (order < 180) {
         std::this_thread::sleep_for (std::chrono::seconds(5));
-        BOOST_LOG_TRIVIAL(debug) << "Slept for 5 seconds";
-        BOOST_LOG_TRIVIAL(debug) << "Broadcasting message ...";
-        // app.broadcast("MSG #1: Hello world (1)!");
-        // app.broadcast("MSG #2: Hello world (2)!");
-        // app.broadcast("MSG #3: Hello world (3)!");
-        // app.broadcast(one_kb_data);
+	std::cout << "Slept for 5 seconds\n";
+	std::cout << "Broadcasting message ...\n";
         app.broadcast(data_of_block_size);
-        //app.broadcast(data_of_block_size);
-        //app.broadcast(data_of_block_size);
     }
 
-    // stop the app service
-    // BOOST_LOG_TRIVIAL(debug) << "Stopping HGFR base service on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]";
+    // block
     app.stop();
 
     return 0;

@@ -25,7 +25,7 @@ NodeTableETH::NodeTableETH() {
 NodeTableETH::NodeTableETH(const std::string& self_id):
     self_id(self_id) { 
         this->mlock = new std::mutex();
-        BOOST_LOG_TRIVIAL(trace) << "NodeTable is created for node with ID " + self_id;
+        std::cout << "NodeTable is created for node with ID " + self_id << "\n";
     }
 
 std::string NodeTableETH::get_self_id() const {

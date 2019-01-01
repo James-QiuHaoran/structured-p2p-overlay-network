@@ -46,9 +46,6 @@ public:
         int num_cnodes_in_continent,
         unsigned short starting_port_number);
 
-    // generate random number in range [low, high]
-    int random_num_in_range(int low, int high);
-
     // start the application
     void start(const std::string &start_time, int num_nodes_in_dist, int num_cnodes_in_dist, 
         int num_nodes_in_city, int num_cnodes_in_city, 
