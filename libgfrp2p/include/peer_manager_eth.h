@@ -13,9 +13,6 @@
 #include <functional>
 #include <ctime>
 
-#include <boost/random/uniform_int_distribution.hpp>
-#include <boost/random/mersenne_twister.hpp>
-
 #include "node.h"
 #include "node_table_eth.h"
 #include "transport.h"
@@ -61,9 +58,6 @@ private:
 
     // UDP server
     AsyncUDPServer* tcp_server;
-
-    // seed for random number generator
-    boost::random::mt19937 gen;
 
     // for message logging, contains all sent and received messages
     MessageTable msg_table;

@@ -38,8 +38,6 @@ void EvalClient::receive(const std::string & ip, unsigned short port, const std:
             eval_config_->num_cnodes_in_country = msg.config().num_cnodes_in_country();
             eval_config_->num_nodes_in_continent = msg.config().num_nodes_in_continent();
             
-            this->self_ = std::make_shared<Node>(eval_config_->str_node_id, "127.0.0.1", local_broadcast_port);
-            std::cout << "DEBUG: EvalClient::receive: Config done" << std::endl;
         } else if (false) {
             /* TODO: handle other messages*/
         }
@@ -55,7 +53,7 @@ void EvalClient::receive(const std::string & ip, unsigned short port, const std:
             std::cout << "DEBUG: EvalClient::receive: Appending node table" << std::endl;  
         }
         // Extract the node list from msg           
-        for (int i = 0; i < msg.table().table_size(); i++) {
+        for (size_t i = 0; i < msg.table().table_size(); i++) {
             std::string str_id = convert_ID_int_to_string(msg.table().table_ids(i),
                 eval_config_->num_nodes_in_dist, eval_config_->num_cnodes_in_dist, 
                 eval_config_->num_nodes_in_city, eval_config_->num_cnodes_in_city, 

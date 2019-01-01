@@ -1,9 +1,7 @@
 #include "node.h"
 
 // Constructors
-Node::Node() {
-
-}
+Node::Node() {}
 
 Node::Node(std::string id, std::string ip, unsigned short port): 
 	id(id), 

@@ -68,7 +68,6 @@ void BaseAppETH::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
     neighbor_ids.insert((self_order+1) % num_nodes_total);
 
     for (int i = 0; i < TABLE_SIZE_ETH; i++) {
-        // int id = this->random_num_in_range(0, num_nodes_total-1);
         int id = rand() % num_nodes_total;
         if (neighbor_ids.find(id) == neighbor_ids.end() && id != self_order) {
             neighbor_ids.insert(id);
@@ -147,8 +146,8 @@ void BaseAppETH::start(const std::string &start_time, int num_nodes_in_dist, int
         int num_nodes_in_continent, int num_continents,
         int num_cnodes_in_continent,
         unsigned short starting_port_number) {
-    BOOST_LOG_TRIVIAL(debug) << "Setting up NodeTable for node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
-    BOOST_LOG_TRIVIAL(debug) << "Establishing structure on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
+    std::cout << "Setting up NodeTable for node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]\n";
+    std::cout << "Establishing structure on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]\n";
     
     // form the geographical structure
     this->form_structure(num_nodes_in_dist, num_cnodes_in_dist, 
@@ -159,11 +158,11 @@ void BaseAppETH::start(const std::string &start_time, int num_nodes_in_dist, int
         num_cnodes_in_continent,
         starting_port_number);
     
-    BOOST_LOG_TRIVIAL(debug) << "Structure established on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
-    BOOST_LOG_TRIVIAL(debug) << "Node Tables on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
+    std::cout << "Structure established on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]\n";
+    std::cout << "Node Tables on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]\n";
     
     for (auto peer : this->node_table->get_table()) {
-        BOOST_LOG_TRIVIAL(debug) << "Peer - " + peer->get_id() + " " + peer->get_ip() + ":" + std::to_string(peer->get_port());
+	std::cout << "Peer - " + peer->get_id() + " " + peer->get_ip() + ":" + std::to_string(peer->get_port()) << "\n";
     }
 
     this->peer_manager = std::make_shared<PeerManagerETH>(node, node_table, start_time);
@@ -172,16 +171,15 @@ void BaseAppETH::start(const std::string &start_time, int num_nodes_in_dist, int
     this->peer_manager->set_mode(PeerManagerETH::PUSH);  // PUSH version
     // this->peer_manager->set_mode(PeerManagerETH::PULL);  // PULL version
 
-    BOOST_LOG_TRIVIAL(debug) << "Starting ETH PeerManager on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
+    std::cout << "Starting ETH PeerManager on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]\n";
     this->peer_manager->start();
 
     return;
 }
 
 void BaseAppETH::stop() {
-    // BOOST_LOG_TRIVIAL(debug) << "Stopping ETH PeerManager on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
     this->peer_manager->stop();
-
+    
     return;
 }
 
@@ -191,18 +189,11 @@ void BaseAppETH::broadcast(const std::string &data) {
     return;
 }
 
-// random number generated uniformly from [low, high]
-int BaseAppETH::random_num_in_range(int low, int high) {
-    boost::random::uniform_int_distribution<> dist(low, high);
-    return dist(gen_seed);
-}
-
 int main(int argc, char** argv) {
-    // srand ( time(NULL) );
     srand(std::atoi(argv[2]) + time(NULL));
 
     if (argc != 17) {
-        BOOST_LOG_TRIVIAL(info) << "Wrong arguments. Correct usage: "
+	std::cout << "Wrong arguments. Correct usage: "
                                         << "./app_eth ip_addr port_num id "
                                             << "num_nodes_in_dist num_cnodes_in_dist " 
                                             << "num_nodes_in_city num_cnodes_in_city " 
@@ -234,11 +225,11 @@ int main(int argc, char** argv) {
     std::string start_time = argv[16];
 
     // initialize the app
-    BOOST_LOG_TRIVIAL(debug) << "Creating ETH base application on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]";
+    std::cout << "Creating ETH base application on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]\n";
     BaseAppETH app = BaseAppETH(ip, port, id);
 
     // start the app service
-    BOOST_LOG_TRIVIAL(debug) << "Starting ETH base service on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]";
+    std::cout << "Starting ETH base service on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]\n";
     app.start(start_time, num_nodes_in_dist, num_cnodes_in_dist, 
         num_nodes_in_city, num_cnodes_in_city, 
         num_nodes_in_state, num_cnodes_in_state,
@@ -254,7 +245,7 @@ int main(int argc, char** argv) {
         ofs << Message::csv_header << "\n";
         ofs.close();
     } else {
-        BOOST_LOG_TRIVIAL(trace) << "Error opening file";
+	std::cout << "Error opening file\n";
     }
     
     // broadcast a message
@@ -263,25 +254,24 @@ int main(int argc, char** argv) {
                                             num_nodes_in_state, num_cnodes_in_state, 
                                             num_nodes_in_country, num_cnodes_in_country, 
                                             num_nodes_in_continent);*/
-    // if (order < 180) {
+    /* if (order < 180) {
         int num_messages_to_broadcast = 2;
         int mean_interval = 10;
         int variance = 2;
         int random_sleep_time = rand() % 180;
         std::this_thread::sleep_for (std::chrono::seconds(random_sleep_time));
-        BOOST_LOG_TRIVIAL(trace) << "Slept for " << random_sleep_time << " seconds";
-        BOOST_LOG_TRIVIAL(trace) << "Broadcasting message ...";
+	std::cout << "Slept for " << random_sleep_time << " seconds\n";
+	std::cout << "Broadcasting message ...\n";
 
         for (int i = 0; i < num_messages_to_broadcast-1; i++) {
-            BOOST_LOG_TRIVIAL(trace) << "Broadcast a message of size " << data_of_block_size.length() / 1000 << "kb";
+	    std::cout << "Broadcast a message of size " << data_of_block_size.length() / 1000 << "kb\n";
             app.broadcast(data_of_block_size);
             std::this_thread::sleep_for (std::chrono::seconds(mean_interval-variance + rand() % variance));
-            BOOST_LOG_TRIVIAL(trace) << "Slept for several seconds";
         }
         app.broadcast(data_of_block_size);
-    //}
+    }*/
 
-    // stop the app service
+    // block
     app.stop();
 
     return 0;
