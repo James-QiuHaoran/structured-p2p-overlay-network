@@ -1,5 +1,3 @@
-This is the introduction.\\
-
 Flow: \\
 start from talking about current blockchain systems, transaction rate is getting increasing \\
 $\rightarrow$
@@ -20,3 +18,11 @@ $\rightarrow$
 summarize our feature \& contributions\\
 $\rightarrow$
 paper structure overview
+
+A blockchain is essentially a distributed ledger that permanently records the transactions among parties \cite{iansiti2018truth}. The transactions recorded are verifiable and resistant to modification. This feature of security has led to the emergence of cryptocurrencies that leverage the blockchain as their cornerstone, the most salient example being Bitcoin \cite{nakamoto2008bitcoin}. Despite the popularity of cryptocurrencies, general and all-purpose blockchains that accommodate various applications, such as Ethereum \cite{wood2014ethereum} have been proposed. However, although Ethereum is a Turing-complete system \cite{wood2014ethereum}, it is in essence designed for the cryptocurrency based on it. Hence the Proof-of-Work (PoW) consensus has been utilized used to support the valuation of the cryptocurrency in the socioeconomic sense, which results in poor efficiency. To facilitate general-purpose applications in a more efficient manner, other consensus protocols have been proposed to improve the performance of the blockchain in different scenarios (See Section 1.1.1).  
+
+The emergence of Trusted Execution Environments (TEE) has enabled developers to eliminate the assumption of adversarial nodes in a distributed system. Consequently, several more efficient blockchain-based distributed computing systems along with the underlying consensus protocols have been proposed, for example, the Proof-of-Elapsed-Time (PoET) consensus under Hyperledger Sawtooth \cite{sawtooth}. While much effort has been devoted to the development of new consensus protocols, one aspect where fewer works have explored is the Peer-to-Peer (P2P) Network beneath the blockchain system. Improving the P2P network protocol is not a novel field, but it has been shown that it can be enhanced with TEE \cite{jia2017robust}. 
+
+One of the techniques that may enable further improvements of the existing P2P network protocols under blockchains is Network Function Virtualization. With NFV, upper-layer applications are allowed to control the lower-layer functionalities of the network such as routing. One problem of the existing P2P network protocols is the bandwidth consumption caused by redundant messages, which is a waste of resource. One possible way to optimize the resource usage can be to choose trusted (TEE-guarded) nodes as privileged ones to store information like routing table and design an algorithm for them to collaborate so as to reduce redundancy. 
+
+The remaining part of introduction section includes the background, the design overview, proof of analysis, implementation, and evaluation, related works.
