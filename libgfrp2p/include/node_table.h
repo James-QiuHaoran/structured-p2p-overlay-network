@@ -8,8 +8,6 @@
 #include <mutex>
 #include <vector>
 
-#include <boost/log/trivial.hpp>
-
 #include "node.h"
 
 // If an id exists in multiple maps, they must be the same object

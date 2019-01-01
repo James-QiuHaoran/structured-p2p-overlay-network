@@ -6,8 +6,6 @@
 #include <mutex>
 #include <vector>
 
-#include <boost/log/trivial.hpp>
-
 #include "node.h"
 
 // Node table and maintenance

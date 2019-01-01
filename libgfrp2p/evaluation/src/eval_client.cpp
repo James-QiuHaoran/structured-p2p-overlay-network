@@ -34,7 +34,7 @@ void EvalClient::receive(const std::string & ip, unsigned short port, const std:
             // Extract the node list from msg
             std::cout << "DEBUG: EvalClient::receive: Deserializing node table" << std::endl;            
             std::unordered_map<std::string, std::pair<std::string, unsigned short>> node_list;
-            for (int i = 0; i < msg.config().table_size(); i++) {
+            for (size_t i = 0; i < msg.config().table_size(); i++) {
                 std::string str_id = convert_ID_int_to_string(msg.config().table_ids(i),
                     msg.config().num_nodes_in_dist(), msg.config().num_cnodes_in_dist(), 
                     msg.config().num_nodes_in_city(), msg.config().num_cnodes_in_city(), 

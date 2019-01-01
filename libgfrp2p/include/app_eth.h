@@ -11,17 +11,12 @@
 #include <chrono>         // std::chrono::seconds
 #include <ctime>
 
-#include <boost/random/uniform_int_distribution.hpp>
-#include <boost/random/mersenne_twister.hpp>
-
 #include "peer_manager_eth.h"
 #include "node.h"
 #include "node_table_eth.h"
 #include "message.h"
 #include "param_constants.h"
 #include "utils.h"
-
-boost::random::mt19937 gen_seed;
 
 // string of data of length 1024 bytes
 static const std::string one_kb_data(1024, 'S');
