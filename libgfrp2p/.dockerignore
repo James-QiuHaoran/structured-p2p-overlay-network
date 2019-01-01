@@ -17,6 +17,10 @@ CTestTestfile.cmake
 # Build folder
 build/
 
+# Output folders
+lib/
+bin/
+
 # Deprecated
 deprecated/
 

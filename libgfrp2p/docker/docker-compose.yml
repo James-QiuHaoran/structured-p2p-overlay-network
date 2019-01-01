@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+  server:
+    image: jitaodocker/hgfr_eval_client
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+    networks:
+      hgfrnet:
+        ipv4_address: 10.0.0.1
+    # volumes:
+    #   - /hgfreval/test/log:/tmp/log
+    
+  client:
+    image: jitaodocker/hgfr_eval_client
+    deploy:
+      replicas: 40
+    depends_on:
+      - server
+    networks:
+      - hgfrnet
+    # volumes:
+    #   - /hgfreval/test/log:/tmp/log
+    environment:
+      - bootstrap_ip=10.0.0.1
+
+networks:
+  hgfrnet:
+    driver: overlay
+    ipam:
+      config:
+        - subnet: 10.0.0.0/16
+
+# vim: set ts=2 sts=2 sw=2 et:
