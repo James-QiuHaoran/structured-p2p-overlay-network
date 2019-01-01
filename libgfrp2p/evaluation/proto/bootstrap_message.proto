@@ -7,20 +7,22 @@ message BootstrapMessage {
     enum Type {
         INIT = 0;
         CONFIG = 1;
+        TABLE = 3;
         // CONFIG_ACK = 2;
-        BROADCAST = 3;
-        PULL_LOG = 5;
-        PUSH_LOG = 6;
+        BROADCAST = 5;
+        PULL_LOG = 7;
+        PUSH_LOG = 8;
     }
     
     Type type = 1;
     
     Init init = 2;
     Config config = 3;
+    Table table = 5;
     // ConfigAck config_ack = 4;
-    Broadcast broadcast = 4;
-    PullLog pull_log = 5;
-    PushLog push_log = 6;
+    Broadcast broadcast = 7;
+    PullLog pull_log = 9;
+    PushLog push_log = 10;
 
 }
 
@@ -42,10 +44,10 @@ message Config {
     // Experiment-specific config
     uint32 node_id = 3;
 
-    uint32 table_size = 4;
-    repeated uint32 table_ids = 5;
-    repeated string table_ips = 6;
-    repeated uint32 table_ports = 7;
+    // uint32 table_size = 4;
+    // repeated uint32 table_ids = 5;
+    // repeated string table_ips = 6;
+    // repeated uint32 table_ports = 7;
 
     uint32 num_nodes_in_dist = 20;
     uint32 num_cnodes_in_dist = 21;
@@ -58,6 +60,17 @@ message Config {
     uint32 num_nodes_in_continent = 28;
     uint32 num_cnodes_in_continent = 29;
     uint32 num_continents = 30;
+}
+
+message Table {
+    uint32 table_size = 1;
+    
+    repeated uint32 table_ids = 2;
+    repeated string table_ips = 3;
+    repeated uint32 table_ports = 4;
+    
+    bool is_end = 5;
+
 }
 
 message Broadcast {
