@@ -5,9 +5,8 @@
 #define RING_LOWER_LIMIT  10
 #define HEARTBEAT_TIMEOUT  5
 #define NUM_CONTACT_NODES  3
-#define MSG_HASH_LENGTH   50
-#define BROADCAST_ID_LEN  48
-#define NUM_MSG_LIMIT     16
+#define MSG_ID_LEN        24
+#define BROADCAST_ID_LEN  16
 
 // eth
 #define TABLE_SIZE_ETH    13

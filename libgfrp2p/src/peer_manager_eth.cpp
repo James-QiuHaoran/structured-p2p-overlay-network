@@ -45,12 +45,19 @@ void PeerManagerETH::set_mode(unsigned short mode) { this->mode = mode; }
 // send message using transport layer 
 // using wire protcol - TCP Transportation
 void PeerManagerETH::send(std::shared_ptr<Node> node, const Message &msg, const std::string &data) {
+	// construct message id
+	std::stringstream ss;
+	ss.str("");
+    ss.clear();
+    ss << std::setw(MSG_ID_LEN) << std::setfill('0') << this->msg_table.num_msgs_in_total();
+    std::string message_id = this->node->get_id() + ss.str();
+
 	// generate data to send
 	// data format: sender_id,receiver_id,broadcast_id,msg_id,type,ttl,data
 	std::string data_string = this->node->get_id() + "," + 
 							   node->get_id() + "," +
 							   msg.get_broadcast_id() + "," +
-							   msg.get_message_id() + "," +
+							   message_id + "," + // msg.get_message_id() + "," +
 							   std::to_string(msg.get_type()) + "," + 
 							   std::to_string(msg.get_TTL()) + "," + 
 							   data;
@@ -87,18 +94,13 @@ void PeerManagerETH::broadcast(const std::string &data, int ttl, std::string bro
 	if (broadcastID == "") {
 		ss.str("");
 	    ss.clear();
-	    ss << std::setw(NUM_MSG_LIMIT) << std::setfill('0') << this->broadcasted_msgs.size();
+	    ss << std::setw(BROADCAST_ID_LEN) << std::setfill('0') << this->broadcasted_msgs.size();
 		broadcastID = this->node->get_id()+ss.str();
 		new_broadcast = true;
 	}
 
 	// wrap the data into a Message
-	ss.str("");
-	ss.clear();
-	ss << std::setw(MSG_HASH_LENGTH) << std::setfill('0') << this->msg_table.num_msgs_in_total();
-	// std::string message_id = this->random_string_of_length(MSG_HASH_LENGTH);
-	std::string message_id = this->node->get_id() + ss.str();
-	Message msg(broadcastID, message_id, this->node->get_id(), "");
+	Message msg(broadcastID, "", this->node->get_id(), "");
 	msg.set_TTL(ttl);
 
 	if (new_broadcast) {
@@ -150,39 +152,21 @@ void PeerManagerETH::broadcast(const std::string &data, int ttl, std::string bro
 
 // send data hash as invitation
 void PeerManagerETH::send_inv(std::shared_ptr<Node> node, const std::string &data_hash, const std::string &broadcast_id) {
-	std::stringstream ss;
-	ss.str("");
-	ss.clear();
-	ss << std::setw(MSG_HASH_LENGTH) << std::setfill('0') << this->msg_table.num_msgs_in_total();
-	// std::string message_id = this->random_string_of_length(MSG_HASH_LENGTH);
-	std::string message_id = this->node->get_id() + ss.str();
-	Message msg(broadcast_id, message_id, this->node->get_id(), node->get_id());
+	Message msg(broadcast_id, "", this->node->get_id(), node->get_id());
 	msg.set_type(1);
 	send(node, msg, data_hash);
 }
 
 // send real data
 void PeerManagerETH::send_data(std::shared_ptr<Node> node, const std::string &data, const std::string &broadcast_id) {
-	std::stringstream ss;
-	ss.str("");
-	ss.clear();
-	ss << std::setw(MSG_HASH_LENGTH) << std::setfill('0') << this->msg_table.num_msgs_in_total();
-	// std::string message_id = this->random_string_of_length(MSG_HASH_LENGTH);
-	std::string message_id = this->node->get_id() + ss.str();
-	Message msg(broadcast_id, message_id, this->node->get_id(), node->get_id());
+	Message msg(broadcast_id, "", this->node->get_id(), node->get_id());
 	msg.set_type(2);
 	send(node, msg, data);
 }
 
 // send request for data
 void PeerManagerETH::send_request(std::shared_ptr<Node> node, const std::string &data_hash, const std::string &broadcast_id) {
-	std::stringstream ss;
-	ss.str("");
-	ss.clear();
-	ss << std::setw(MSG_HASH_LENGTH) << std::setfill('0') << this->msg_table.num_msgs_in_total();
-	// std::string message_id = this->random_string_of_length(MSG_HASH_LENGTH);
-	std::string message_id = this->node->get_id() + ss.str();
-	Message msg(broadcast_id, message_id, this->node->get_id(), node->get_id());
+	Message msg(broadcast_id, "", this->node->get_id(), node->get_id());
 	msg.set_type(3);
 	send(node, msg, data_hash);
 }
