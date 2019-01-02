@@ -63,7 +63,7 @@ private:
     MessageTable msg_table;
     std::vector<std::string> broadcasted_msgs;
     std::vector<std::string> broadcasted_msgs_all_nodes; // store broadcast_id
-    std::string start_time;
+    std::string run_id;
 
     // broadcast mode
     unsigned short mode;
@@ -79,7 +79,7 @@ public:
     // constructors
     PeerManagerETH();
     PeerManagerETH(unsigned short port);
-    PeerManagerETH(const std::shared_ptr<Node>& node, const std::shared_ptr<NodeTableETH>& node_table, const std::string &start_time);
+    PeerManagerETH(const std::shared_ptr<Node>& node, const std::shared_ptr<NodeTableETH>& node_table, const std::string &run_id);
 
     // getters
     std::shared_ptr<Node> get_node();
@@ -126,6 +126,8 @@ public:
     // write messages to file system
     void log_message_records();
     void append_message_record(const Message& msg);
+    std::string get_all_records_csv();
+    std::string get_run_id();
 };
 
 #endif

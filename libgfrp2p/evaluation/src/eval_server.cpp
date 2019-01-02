@@ -289,7 +289,7 @@ int main(int argc, char* argv[]) {
 			long long interval_in_ms;
 			long long duration_in_s;
 			std::uint32_t workload_size;
-			std::cout << "Enter broadcast interval_in_ms duration_in_s workload_size >>> ";
+			std::cout << "Enter interval_in_ms duration_in_s workload_size >>> ";
 			std::cin >> interval_in_ms >> duration_in_s >> workload_size;
 
 			std::size_t num_nodes = eval_server->handle_count();

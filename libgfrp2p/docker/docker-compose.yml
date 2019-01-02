@@ -2,7 +2,7 @@ version: '3'
 
 services:
   server:
-    image: jitaodocker/hgfr_eval_client
+    image: jitaodocker/hgfr_eval_server
     deploy:
       placement:
         constraints:

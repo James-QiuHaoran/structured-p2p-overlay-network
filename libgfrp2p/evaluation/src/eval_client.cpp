@@ -15,9 +15,21 @@ void EvalClient::receive(const std::string & ip, unsigned short port, const std:
     }
 
     if (msg.type() == BootstrapMessage::CONFIG) {
-        if (this->eval_config_) return; // TODO: Resetting mechanism
-        eval_config_.reset(new EvalConfig);
+        
         std::cout << "DEBUG: EvalClient::receive: Config received" << std::endl;
+        if (this->eval_config_) {
+            // Reset
+            std::cout << "DEBUG: EvalClient::receive: Resetting config" << std::endl;
+            if (eval_config_->eval_type) {
+                peer_manager_eth_.reset();
+                node_table_eth_.reset();
+            } else {
+                peer_manager_.reset();
+                node_table_.reset();
+            }
+            self_.reset();
+        } 
+        eval_config_.reset(new EvalConfig);
         
         eval_config_->str_node_id = convert_ID_int_to_string(msg.config().node_id(),
             msg.config().num_nodes_in_dist(), msg.config().num_cnodes_in_dist(), 
@@ -656,10 +668,10 @@ void EvalClient::send_init() {
 void EvalClient::send_push_log() {
     BootstrapMessage msg;
     msg.set_type(BootstrapMessage::PUSH_LOG);
-    msg.mutable_push_log()->set_run_id(peer_manager_->get_run_id());
+    msg.mutable_push_log()->set_run_id(eval_config_->eval_type ? peer_manager_eth_->get_run_id() : peer_manager_->get_run_id());
     msg.mutable_push_log()->set_node_id(self_->get_id());
 
-    std::stringstream ss(peer_manager_->get_all_records_csv());
+    std::stringstream ss(eval_config_->eval_type ? peer_manager_eth_->get_all_records_csv() : peer_manager_->get_all_records_csv());
     std::string line, buffer;
     std::size_t counter = 0;
     while (std::getline(ss, line)) {
