@@ -8,11 +8,11 @@ services:
         constraints:
           - node.role == manager
     networks:
-      hgfrnet:
+      default:
         ipv4_address: 10.0.0.1
 
 networks:
-  hgfrnet:
+  default:
     driver: overlay
     ipam:
       config:
