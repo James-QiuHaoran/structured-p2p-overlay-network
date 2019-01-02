@@ -68,6 +68,8 @@ void PeerManager::send(std::shared_ptr<Node> node, const Message &msg, const std
 							   sent_ids_string + "|" +
 							   data;
 
+	msg.set_message_id(message_id);
+
 	// for message logging
 	Message inserted_msg = this->msg_table.insert_sent(msg);
 	this->append_message_record(inserted_msg);
