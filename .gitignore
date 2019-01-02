@@ -13,3 +13,6 @@ paper-atc/paper-src/*.log
 paper-atc/paper-src/*.aux
 paper-atc/paper-src/*.ent
 paper-atc/paper-src/*.gz
+paper-atc/paper-src/*.bbl
+paper-atc/paper-src/*.blg
+*.glsdefs

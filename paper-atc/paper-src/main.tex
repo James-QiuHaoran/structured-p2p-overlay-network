@@ -25,6 +25,7 @@
 
 \documentclass[letterpaper,twocolumn,10pt]{article}
 \usepackage{usenix2019,epsfig,endnotes}
+
 \begin{document}
 
 %don't want date printed
@@ -55,7 +56,6 @@
 % Use the following at camera-ready time to suppress page numbers.
 % Comment it out when you first submit the paper for review.
 \thispagestyle{empty}
-
 
 \subsection*{Abstract}
 \input{abstract.tex}
@@ -182,28 +182,6 @@ most {\tt nobj} objects of size {\tt size}.   {\tt fread} returns
 the number of objects read. 
 \end{itemize}
 This concludes the definitions tag.
-
-\subsection{How to Build Your Paper}
-
-You have to run {\tt latex} once to prepare your references for
-munging.  Then run {\tt bibtex} to build your bibliography metadata.
-Then run {\tt latex} twice to ensure all references have been resolved.
-If your source file is called {\tt usenixTemplate.tex} and your {\tt
-  bibtex} file is called {\tt usenixTemplate.bib}, here's what you do:
-{\tt \small
-\begin{verbatim}
-latex usenixTemplate
-bibtex usenixTemplate
-latex usenixTemplate
-latex usenixTemplate
-\end{verbatim}
-}
-
-
-\subsection{Last SubSection}
-
-Well, it's getting boring isn't it.  This is the last subsection
-before we wrap it up.
 
 {\normalsize \bibliographystyle{acm}
 \bibliography{./main}}
