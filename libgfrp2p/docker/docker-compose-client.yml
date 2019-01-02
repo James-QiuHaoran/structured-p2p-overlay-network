@@ -5,9 +5,12 @@ services:
     image: jitaodocker/hgfr_eval_client
     deploy:
       replicas: 40
-    networks:
-      - hgfrnet
     # volumes:
     #   - /hgfreval/test/log:/tmp/log
     environment:
-      - bootstrap_ip=10.0.0.1
+      - bootstrap_ip=${EVAL_SERVER_IP}
+
+networks:
+  default:
+    external:
+      name: hgfr_default

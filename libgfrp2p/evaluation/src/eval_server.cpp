@@ -253,6 +253,17 @@ int main(int argc, char* argv[]) {
 	for (;;) {
 		std::cout << "Enter a commnand (\"help\" for hints) >>> ";
 		std::cin >> command;
+		if (std::cin.eof()) {
+			std::cout << "EOF read, resetting" << std::endl;
+			std::cin.clear();
+			continue;
+		}
+		if (std::cin.fail()) {
+			std::cout << "std::cin filed read, resetting, throwing a whole line" << std::endl;
+			std::cin.clear();
+			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+			continue;
+		}
 
 		if (command == "count") {
 			std::cout << "Current # of nodes: " << eval_server->handle_count() << std::endl;
