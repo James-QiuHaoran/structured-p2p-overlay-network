@@ -71,6 +71,7 @@ void EvalClient::receive(const std::string & ip, unsigned short port, const std:
         // Paging finished
         if (msg.table().is_end()) {
             std::cout << "DEBUG: EvalClient::receive: Last page received, creating evaluation" << std::endl;
+            mkdir(("../test/log/" + eval_config_->run_id + '/').c_str(), S_IRWXU);
             if (eval_config_->eval_type) {
                 this->node_table_eth_ = std::make_shared<NodeTableETH>(eval_config_->str_node_id);
                 create_kad_table(eval_config_->num_nodes_in_dist, eval_config_->num_cnodes_in_dist, 
@@ -121,7 +122,7 @@ void EvalClient::receive(const std::string & ip, unsigned short port, const std:
         }
     } else if (msg.type() == BootstrapMessage::PULL_LOG) {
 
-        std::cout << "DEBUG: EvalClient::receive: Pushing required push" << std::endl;
+        std::cout << "DEBUG: EvalClient::receive: Pushing log" << std::endl;
         send_push_log();
     } else {
         std::cerr << "ERROR: EvalClient::receive: Unknown message type received from bootstrap" << std::endl;
