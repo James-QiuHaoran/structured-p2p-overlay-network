@@ -68,10 +68,11 @@ void PeerManager::send(std::shared_ptr<Node> node, const Message &msg, const std
 							   sent_ids_string + "|" +
 							   data;
 
-	msg.set_message_id(message_id);
+	Message msg2 = msg;
+	msg2.set_message_id(message_id);
 
 	// for message logging
-	Message inserted_msg = this->msg_table.insert_sent(msg);
+	Message inserted_msg = this->msg_table.insert_sent(msg2);
 	this->append_message_record(inserted_msg);
 
 	std::cout << this->node->get_id() << " - " << "Send msg - (" << msg.get_type() << ") | " << "[" << this->node->get_ip() << ":" << this->node->get_port() << "] -> " << "[" << node->get_ip() << ":" << node->get_port() << "]" << " | FL: " << msg.get_from_level() << "\n";
