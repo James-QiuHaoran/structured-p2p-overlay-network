@@ -16,25 +16,25 @@ PeerManagerETH::PeerManagerETH(const std::shared_ptr<Node>& node, const std::sha
 	this->mode = PeerManagerETH::PUSH;
 }
 
-PeerError::PeerError() {}
+// PeerError::PeerError() {}
 
-PeerError::PeerError(std::string errorType, std::string errorMessage):
-	errorType(errorType),
-	errorMessage(errorMessage) {}
+// PeerError::PeerError(std::string errorType, std::string errorMessage):
+// 	errorType(errorType),
+// 	errorMessage(errorMessage) {}
 
 // getters
-std::string PeerError::get_errorType() const { return this->errorType; }
+// std::string PeerError::get_errorType() const { return this->errorType; }
 
-std::string PeerError::get_errorMessage() const { return this->errorMessage; }
+// std::string PeerError::get_errorMessage() const { return this->errorMessage; }
 
 std::shared_ptr<Node> PeerManagerETH::get_node() { return this->node; }
 
 std::shared_ptr<NodeTableETH> PeerManagerETH::get_node_table() { return this->node_table; }
 
 // setters
-void PeerError::set_errorType(std::string type) { this->errorType = type; }
+// void PeerError::set_errorType(std::string type) { this->errorType = type; }
 
-void PeerError::set_errorMessage(std::string message) { this->errorMessage = message; }
+// void PeerError::set_errorMessage(std::string message) { this->errorMessage = message; }
 
 void PeerManagerETH::set_node(std::shared_ptr<Node> node) { this->node = node; }
 

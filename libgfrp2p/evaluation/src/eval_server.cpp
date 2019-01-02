@@ -35,7 +35,7 @@ void EvalServer::receive(const std::string & ip, unsigned short port, const std:
 		// On receive node message log
 		std::ofstream fout;
 		std::string filename = log_dir_ + '/' + msg.push_log().run_id() + '_' + msg.push_log().node_id() + ".txt";
-		fout.open(filename);
+		fout.open(filename, std::ofstream::out | std::ofstream::app);
 		if (!fout.is_open()) {
 			std::cerr << "ERROR: EvalServer::receive: Failed to open " << filename << std::endl;
 			return;
@@ -285,14 +285,37 @@ int main(int argc, char* argv[]) {
 			std::cin >> node_id >> workload_size;
 
 			eval_server->handle_broadcast(node_id, workload_size);
-		
+		} else if (command == "expr") {
+			long long interval_in_ms;
+			long long duration_in_s;
+			std::uint32_t workload_size;
+			std::cout << "Enter broadcast interval_in_ms duration_in_s workload_size >>> ";
+			std::cin >> interval_in_ms >> duration_in_s >> workload_size;
+
+			std::size_t num_nodes = eval_server->handle_count();
+			long long ms_remaining = duration_in_s*1000;
+
+			while (ms_remaining > 0) {
+				std::size_t node_id = rand() % num_nodes;
+				std::cout << "Sending command to " << node_id << ": ";
+				eval_server->handle_broadcast(node_id, workload_size);
+				ms_remaining -= interval_in_ms;
+				std::cout << ms_remaining << "ms out of " << duration_in_s * 1000 << "ms remaining" << std::endl;
+				std::this_thread::sleep_for(std::chrono::milliseconds(interval_in_ms));
+			}
 		} else if (command == "pull_log") {
 			std::size_t node_id;
 			std::string run_id;
 			std::cout << "Enter node_id run_id >>> ";
 			std::cin >> node_id >> run_id;
 			eval_server->handle_pull_log(node_id, run_id);
-
+		} else if (command == "pull_log_all") {
+			std::string run_id;
+			std::cout << "Enter run_id >>> ";
+			std::cin >> run_id;
+			for (std::size_t i = 0; i < eval_server->handle_count(); i++) {
+				eval_server->handle_pull_log(i, run_id);
+			}
 		} else if (command == "help") {
 			std::cout << "count - # of registered nodes\ncheck node_id - info of the node\n"
 				<< "config run_id eval_type(0/1) n_dist cn_dist n_city cn_city n_state cn_state n_country cn_country n_continent - config the experiment\n"

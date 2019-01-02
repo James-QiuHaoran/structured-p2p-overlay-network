@@ -23,24 +23,24 @@
 /* Error Class
  * define error types and error messages
  */
-class PeerError {
-private:
-    std::string errorType;
-    std::string errorMessage;
+// class PeerError {
+// private:
+//     std::string errorType;
+//     std::string errorMessage;
 
-public:
-    // constructor
-    PeerError();
-    PeerError(std::string errorType, std::string errorMessage);
+// public:
+//     // constructor
+//     PeerError();
+//     PeerError(std::string errorType, std::string errorMessage);
     
-    // getters
-    std::string get_errorType() const;
-    std::string get_errorMessage() const;
+//     // getters
+//     std::string get_errorType() const;
+//     std::string get_errorMessage() const;
 
-    // setters
-    void set_errorType(std::string errorType);
-    void set_errorMessage(std::string errorMessage);
-};
+//     // setters
+//     void set_errorType(std::string errorType);
+//     void set_errorMessage(std::string errorMessage);
+// };
 
 /* PeerManager class -- ethereum version
  * responsible for broadcasting messages, Kademlia is used to form the routing table of each node
