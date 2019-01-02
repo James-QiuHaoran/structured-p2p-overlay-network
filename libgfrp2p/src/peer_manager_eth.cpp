@@ -62,8 +62,11 @@ void PeerManagerETH::send(std::shared_ptr<Node> node, const Message &msg, const 
 							   std::to_string(msg.get_TTL()) + "," + 
 							   data;
 
+	Message msg2 = msg;
+	msg2.set_message_id(message_id);
+
 	// for message logging
-	Message inserted_msg = this->msg_table.insert_sent(msg);
+	Message inserted_msg = this->msg_table.insert_sent(msg2);
 	this->append_message_record(inserted_msg);
 
 	if (this->mode == PeerManagerETH::PUSH)
