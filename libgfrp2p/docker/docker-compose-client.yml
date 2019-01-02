@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  client:
+    image: jitaodocker/hgfr_eval_client
+    deploy:
+      replicas: 40
+    networks:
+      - hgfrnet
+    # volumes:
+    #   - /hgfreval/test/log:/tmp/log
+    environment:
+      - bootstrap_ip=10.0.0.1

@@ -4,4 +4,4 @@ WORKDIR /hgfreval/test
 
 EXPOSE 2000/udp
 
-CMD mkdir -p log && ../bin/eval_server log 2000
+ENTRYPOINT [ "../bin/eval_server", "2000", "log" ]
