@@ -6,11 +6,11 @@ services:
     deploy:
       replicas: ${NUM_NODES}
       restart_policy:
-        condition: "no"
+        condition: on-failure
     environment:
       - BOOTSTRAP_IP=${EVAL_SERVER_IP}
 
 networks:
   default:
     external:
-      name: hgfr_default
+      name: hgfr_net

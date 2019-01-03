@@ -15,7 +15,7 @@ IDS=`docker ps -q`
 while [ -z $IDS ]; do
     echo "Waiting for server to be ready"
     sleep 5
-    
+    IDS=`docker ps -q`    
 done
 export EVAL_SERVER_IP=`docker inspect --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}} {{.Name}}' $IDS | grep hgfr_server | cut -d ' ' -f 1`
 

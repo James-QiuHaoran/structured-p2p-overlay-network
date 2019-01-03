@@ -8,14 +8,14 @@ services:
         constraints:
           - node.role == manager
       restart_policy:
-        condition: "no"
+        condition: on-failure
     stdin_open: true
     tty: true
     networks:
-      - default
+      - net
 
 networks:
-  default:
+  net:
     driver: overlay
     ipam:
       config:
