@@ -11,12 +11,13 @@ docker stack deploy -c docker-compose-server.yml hgfr
 
 export NUM_NODES=$1
 
-export EVAL_SERVER_IP=`docker inspect --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}} {{.Name}}' $(docker ps -q) | grep hgfr_server | cut -d ' ' -f 1`
-while [ -z $EVAL_SERVER_IP ]; do
+IDS=`$(docker ps -q)`
+while [ -z $IDS ]; do
     echo "Waiting for server to be ready"
     sleep 5
-    export EVAL_SERVER_IP=`docker inspect --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}} {{.Name}}' $(docker ps -q) | grep hgfr_server | cut -d ' ' -f 1`
+    
 done
+export EVAL_SERVER_IP=`docker inspect --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}} {{.Name}}' $IDS | grep hgfr_server | cut -d ' ' -f 1`
 
 echo "Starting clients"
 

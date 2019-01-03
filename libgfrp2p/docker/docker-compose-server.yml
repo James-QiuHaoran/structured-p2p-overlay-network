@@ -7,12 +7,12 @@ services:
       placement:
         constraints:
           - node.role == manager
-    restart: "no"
+      restart_policy:
+        condition: "no"
     stdin_open: true
     tty: true
     networks:
-      default:
-        ipv4_address: 10.0.0.2
+      - default
 
 networks:
   default:

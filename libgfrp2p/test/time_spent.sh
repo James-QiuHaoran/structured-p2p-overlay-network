@@ -71,11 +71,11 @@ do
 		do
         		echo $i >> "tmp"
 		done
-		start_time=`cat tmp | sort | uniq | head -n 1`
-		end_time=`cat tmp | sort | uniq | tail -1`
-		end_time_half=`cat tmp | sort | uniq | head -n $thre_half | tail -1`
-		end_time_two_third=`cat tmp | sort | uniq | head -n $thre_two_third | tail -1`
-		end_time_five_sixth=`cat tmp | sort | uniq | head -n $thre_five_sixth | tail -1`
+		start_time=`cat tmp | sort | head -n 1`
+		end_time=`cat tmp | sort | tail -1`
+		end_time_half=`cat tmp | sort | head -n $thre_half | tail -1`
+		end_time_two_third=`cat tmp | sort | head -n $thre_two_third | tail -1`
+		end_time_five_sixth=`cat tmp | sort | head -n $thre_five_sixth | tail -1`
 
 		total=$(($total + $end_time - $start_time))
 		count=$(($count + 1))
@@ -98,10 +98,10 @@ do
                 do
                         echo $i >> "tmp"
                 done
-                start_time=`cat tmp | sort | uniq | head -n 1`
-                end_time_half=`cat tmp | sort | uniq | head -n $thre_half | tail -1`
-                end_time_two_third=`cat tmp | sort | uniq | head -n $thre_two_third | tail -1`
-                end_time_five_sixth=`cat tmp | sort | uniq | head -n $thre_five_sixth | tail -1`
+                start_time=`cat tmp | sort | head -n 1`
+                end_time_half=`cat tmp | sort | head -n $thre_half | tail -1`
+                end_time_two_third=`cat tmp | sort | head -n $thre_two_third | tail -1`
+                end_time_five_sixth=`cat tmp | sort | head -n $thre_five_sixth | tail -1`
                 total_half=$(($total_half + $end_time_half - $start_time))
                 count_half=$(($count_half + 1))
                 total_two_third=$(($total_two_third + $end_time_two_third - $start_time))
@@ -121,9 +121,9 @@ do
                 do
                         echo $i >> "tmp"
                 done
-                start_time=`cat tmp | sort | uniq | head -n 1`
-                end_time_half=`cat tmp | sort | uniq | head -n $thre_half | tail -1`
-                end_time_two_third=`cat tmp | sort | uniq | head -n $thre_two_third | tail -1`
+                start_time=`cat tmp | sort | head -n 1`
+                end_time_half=`cat tmp | sort | head -n $thre_half | tail -1`
+                end_time_two_third=`cat tmp | sort | head -n $thre_two_third | tail -1`
                 total_half=$(($total_half + $end_time_half - $start_time))
                 count_half=$(($count_half + 1))
                 total_two_third=$(($total_two_third + $end_time_two_third - $start_time))
@@ -141,8 +141,8 @@ do
                 do
                         echo $i >> "tmp"
                 done
-                start_time=`cat tmp | sort | uniq | head -n 1`
-                end_time_half=`cat tmp | sort | uniq | head -n $thre_half | tail -1`
+                start_time=`cat tmp | sort | head -n 1`
+                end_time_half=`cat tmp | sort | head -n $thre_half | tail -1`
                 total_half=$(($total_half + $end_time_half - $start_time))
                 count_half=$(($count_half + 1))
                 rm -rf tmp
