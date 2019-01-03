@@ -56,6 +56,7 @@ std::string Message::to_csv_string() const {
     int length = std::sprintf(buffer, "%lld,%hu,%s,%s,%s,%s,%d,%lu,%d", io_timestamp, io_type, sender_id.c_str(), broadcastID.c_str(), message_id.c_str(), receiver_id.c_str(), type, from_level, node_order);
     if (length < 0) {
         std::cerr << "ERROR: Message::to_csv_string: Failed to write format string" << std::endl;
+        return std::string();
     }
     return std::string(buffer, length);
     // return std::to_string(io_timestamp) + ',' +

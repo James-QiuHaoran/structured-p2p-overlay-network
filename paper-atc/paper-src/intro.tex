@@ -1,28 +1,35 @@
-Flow: \\
-start from talking about current blockchain systems, transaction rate is getting increasing \\
-$\rightarrow$
-problem is: current blockchain systems are based on kademlia (dht) structure, which is efficient on node discovery and data look up, however, broadcast suffers traffic congesion and inefficient convergence (gossip)\\
-$\rightarrow$
-many improvements are made on gossip, not quite efficient, still suffers bandwidth problem\\
-$\rightarrow$
-less p2p network are designed for blockchain, talk about p2p networks in other domains\\
-$\rightarrow$
-analysis blockchain needs and those p2p networks does not fit\\
-$\rightarrow$
-moreover, current blockchain systems didn't address geographical feature\\
-$\rightarrow$
-moreover, current blockchain systems didn't address security problem from the p2p layer\\
-$\rightarrow$
-talk about hgfrr, give a overview, analysis result, implementation overview, evaluation result\\
-$\rightarrow$
-summarize our feature \& contributions\\
-$\rightarrow$
-paper structure overview
+% Flow:
+%
+% start from talking about current blockchain systems, transaction rate is getting increasing
+% ->
+% problem is: current blockchain systems are based on kademlia (dht) structure, which is efficient on node discovery and data look up, however, broadcast suffers traffic congesion and inefficient convergence (gossip)
+% ->
+% many improvements are made on gossip, not quite efficient, still suffers bandwidth problem
+% ->
+% less p2p network are designed for blockchain, talk about p2p networks in other domains
+% ->
+% analysis blockchain needs and those p2p networks does not fit\\
+% ->
+% moreover, current blockchain systems didn't address geographical feature
+% ->
+% moreover, current blockchain systems didn't address security problem from the p2p layer
+% ->
+% talk about hgfrr, give a overview, analysis result, implementation overview, evaluation result
+% ->
+% summarize our feature \& contributions
+% ->
+% paper structure overview
 
-A blockchain is essentially a distributed ledger that permanently records the transactions among parties \cite{iansiti2018truth}. The transactions recorded are verifiable and resistant to modification. This feature of security has led to the emergence of cryptocurrencies that leverage the blockchain as their cornerstone, the most salient example being Bitcoin \cite{nakamoto2008bitcoin}. Despite the popularity of cryptocurrencies, general and all-purpose blockchains that accommodate various applications, such as Ethereum \cite{wood2014ethereum} have been proposed. However, although Ethereum is a Turing-complete system \cite{wood2014ethereum}, it is in essence designed for the cryptocurrency based on it. Hence the Proof-of-Work (PoW) consensus has been utilized used to support the valuation of the cryptocurrency in the socioeconomic sense, which results in poor efficiency. To facilitate general-purpose applications in a more efficient manner, other consensus protocols have been proposed to improve the performance of the blockchain in different scenarios (See Section 1.1.1).  
+A blockchain is essentially a distributed ledger that permanently records the transactions among parties \cite{iansiti2018truth}. The transactions recorded are verifiable and resistant to modification. This feature of security has led to the emergence of cryptocurrencies which leverages the blockchain system as their cornerstone, the most salient example being Bitcoin \cite{nakamoto2008bitcoin}. Despite the popularity of cryptocurrencies, general and all-purpose blockchain systems that accommodate various applications, such as Ethereum \cite{wood2014ethereum} have been proposed. However, although Ethereum is a Turing-complete system \cite{wood2014ethereum}, it is in essence designed for the cryptocurrency based on it. Hence the Proof-of-Work (PoW) consensus has been utilized used to support the valuation of the cryptocurrency in the socioeconomic sense, which results in poor efficiency. To facilitate general-purpose applications in a more efficient manner, other consensus protocols have been proposed to improve the performance of the blockchain system in different scenarios such as Proof-of-Stake \cite{kiayias2017ouroboros} and Proof-of-Luck \cite{milutinovic2016proof}. Hyperledger Sawtooth \cite{sawtooth} utilizes Intel Software Guard eXtentions (SGX, introduced below) to trust nodes and proposes Proof-of-Elapsed Time believed to be highly efficient, yet scalibility might not be a critical performance in this consensus. GEEC is a new public blockchain protocol which leverages the strong confidentiality and integrity of the  hardware \cite{2018arXiv180802252C}. Its throughput is comparable to Visa's and is 1.7X to 88.5X higher than Ethereum \cite{buterin2014next}, EOS \cite{eosio}, and Intel-PoET \cite{prisco2016intel}.
 
-The emergence of Trusted Execution Environments (TEE) has enabled developers to eliminate the assumption of adversarial nodes in a distributed system. Consequently, several more efficient blockchain-based distributed computing systems along with the underlying consensus protocols have been proposed, for example, the Proof-of-Elapsed-Time (PoET) consensus under Hyperledger Sawtooth \cite{sawtooth}. While much effort has been devoted to the development of new consensus protocols, one aspect where fewer works have explored is the Peer-to-Peer (P2P) Network beneath the blockchain system. Improving the P2P network protocol is not a novel field, but it has been shown that it can be enhanced with TEE \cite{jia2017robust}. 
+With the increasing of the blockchain system efficiency and transaction rate, broadcast frequency is growing. However, current blockchain systems are based on Distributed Hash Table (DHT) structure. It is efficient in terms of node discovery and data look up, however, broadcasting messages on top of this kind of network structure suffers from traffic congestion and inefficient convergence problems when transaction rate gets higher. Our key insights is that the Gossip algorithm used to broadcast a message does not fit in the demand for P2P networks from blockchain systems. Although many improvements has been made on Gossip algorithm such as adding unique message ID, using Time-to-Live field to control flooding, using pull-version sending mechanism to reduce repeated messages, our evaluations show that they are not efficient, and still suffer from traffic congestion problem. 
 
-One of the techniques that may enable further improvements of the existing P2P network protocols under blockchains is Network Function Virtualization. With NFV, upper-layer applications are allowed to control the lower-layer functionalities of the network such as routing. One problem of the existing P2P network protocols is the bandwidth consumption caused by redundant messages, which is a waste of resource. One possible way to optimize the resource usage can be to choose trusted (TEE-guarded) nodes as privileged ones to store information like routing table and design an algorithm for them to collaborate so as to reduce redundancy. 
+Blockchain systems' requirements are different from other Peer-to-Peer applications: (i) on-demand streaming allows users to look up data in the P2P network and download stream data from the source, e.g. BitTorrent-based streaming systems like BASS \cite{dana2005bass}, Peer-Assisted \cite{carlsson2007peer}, LiveBT \cite{lv2007livebt}, and Give-To-Get \cite{mol2008give}; (ii) audio/video conferencing applications deal with small scale point-to-point connected networks which requires low latency, e.g. Skype \cite{baset2004analysis}; (iii) peer-to-peer file sharing makes efficient indexing and searching possible, e.g. Napster \cite{saroiu2003measuring}, Gnutella \cite{ripeanu2001peer}, and KaZaA \cite{good2003usability}; (iv) video streaming applications enables single-source broadcasting efficient, e.g. SplitStream \cite{castro2003splitstream}, Bullet \cite{kostic2003bullet}, and ChainSaw \cite{pai2005chainsaw}. (i) and (ii) are not relevant to the context of blockchain systems since nodes in a blockchain system network should be in a large scale and broadcasting a message is an active operation instead of searching and downloading data. (iii) and (iv) are more similar to blockchain systems' use case. However, P2P file sharing is not real-time and the broadcast model in a blockchain system is not indexing and searching. In video streaming, time is stringent and the network size can be large-scale. However, it is a data or bandwidth-intensive communication which means control messages in a broadcast operation are relatively small compared to the data to transmit.
 
-The remaining part of introduction section includes the background, the design overview, proof of analysis, implementation, and evaluation, related works.
+Through our study, we summarized two requirements for the underlying P2P network from blockchain systems: peer discovery and message dissemination. There are related works focused on improving peer discovery and message dissemination in a separated way. For example, DHT-based protocols such as Kademlia, Chord, Pastry, Tapestry, CAN focus on peer discovery, while Gossip-based protocols and tree-based protocols focus on message dissemination. There is very few works addressing both issues at the same time. To fill to gap, our key insight is that broadcasting using the DHT-based structure can improve the broadcast efficiency in terms of both time complexity and message complexity.
+
+We implemented our idea in HGFRR, which is a \textbf{H}idden \textbf{G}eographical \textbf{F}ractal \textbf{R}andom \textbf{R}ing structured P2P network. HGFRR contains multi-level fractal random rings. Each ring at the lower level will have a couple of contact nodes which is randomly selected to represent the ring in the upper level ring. Unlike DHT-based protocols which indexes the whole network as a ring, HGFRR recursively constructs rings based on the proximity of peers and the number of peers in a ring. The broadcast on HGFRR is recursively performed on each ring. The in-ring broadcast uses the k-ary distributed spanning tree formed within the ring. Both the proof and evaluation show that the broadcast operation in HGFRR is more efficient than the P2P network in Ethereum, in terms of time complexity and message complexity. The message complexity of our network with $N$ nodes is $O(N)$ and time complexity of message broadcast is logarithm, which are both better than extant work.
+
+The paper makes the following contributions. First, the requirements for the P2P networks from blockchain systems are summarized. Second, a new network protocol that addresses both peer discovery and message dissemination. Third, HGFRR is the first P2P network in blockchain systems that addresses geographical locality and security problems. Fourth, HGFRR is implemented in C++, which is portable and cross-platform.
+
+The remaining of this paper is structured as follows: the background, the design overview, proof of analysis, implementation, and evaluation, related works. [TODO]
