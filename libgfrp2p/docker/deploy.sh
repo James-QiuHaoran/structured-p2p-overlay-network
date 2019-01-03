@@ -11,7 +11,7 @@ docker stack deploy -c docker-compose-server.yml hgfr
 
 export NUM_NODES=$1
 
-IDS=`$(docker ps -q)`
+IDS=`docker ps -q`
 while [ -z $IDS ]; do
     echo "Waiting for server to be ready"
     sleep 5
