@@ -5,6 +5,7 @@ services:
     image: jitaodocker/hgfr_eval_client
     deploy:
       replicas: ${NUM_NODES}
+    restart: "no"
     environment:
       - BOOTSTRAP_IP=${EVAL_SERVER_IP}
 

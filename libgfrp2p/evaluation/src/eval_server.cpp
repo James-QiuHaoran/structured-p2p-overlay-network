@@ -298,20 +298,18 @@ int main(int argc, char* argv[]) {
 			eval_server->handle_broadcast(node_id, workload_size);
 		} else if (command == "expr") {
 			long long interval_in_microseonds;
-			long long duration_in_s;
+			std::uint32_t num_times;
 			std::uint32_t workload_size;
-			std::cout << "Enter interval_in_micros duration_in_s workload_size >>> ";
-			std::cin >> interval_in_microseonds >> duration_in_s >> workload_size;
+			std::cout << "Enter interval_in_micros num_times workload_size >>> ";
+			std::cin >> interval_in_microseonds >> num_times >> workload_size;
 
 			std::size_t num_nodes = eval_server->handle_count();
-			long long micros_remaining = duration_in_s*1000*1000;
-
-			while (micros_remaining > 0) {
+			for (std::uint32_t i = 0; i < num_times; i++ ) {
 				std::size_t node_id = rand() % num_nodes;
 				std::cout << "Sending command to " << node_id << ": ";
 				eval_server->handle_broadcast(node_id, workload_size);
-				micros_remaining -= interval_in_microseonds;
-				std::cout << micros_remaining << "micros out of " << duration_in_s * 1000 * 1000 << "micros remaining" << std::endl;
+				// micros_remaining -= interval_in_microseonds;
+				std::cout << num_times-i << " times out of " << num_times << " times remaining" << std::endl;
 				std::this_thread::sleep_for(std::chrono::microseconds(interval_in_microseonds));
 			}
 		} else if (command == "pull_log") {
