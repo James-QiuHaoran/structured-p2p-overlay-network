@@ -88,7 +88,7 @@ void Message::set_receiver_id(const std::string &receiver_id) { this->receiver_i
 
 void Message::set_from_level(unsigned long level) { this->from_level = level; }
 
-void Message::set_message_id(std::string msgID) { this->message_id = msgID; }
+void Message::set_message_id(const std::string& msgID) { this->message_id = msgID; }
 
 void Message::set_node_order(int order) { this->node_order = order; }
 

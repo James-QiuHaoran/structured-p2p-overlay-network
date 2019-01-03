@@ -57,7 +57,7 @@ public:
     void set_sender_id(const std::string &sender_id);
     void set_receiver_id(const std::string &receiver_id);
     void set_from_level(unsigned long level);
-    void set_message_id(std::string message_id);
+    void set_message_id(const std::string& message_id);
     void set_type(int type);
     void set_node_order(int order);
     void set_TTL(int ttl);

@@ -9,32 +9,32 @@ PeerManagerETH::PeerManagerETH(unsigned short port) {
 	this->mode = PeerManagerETH::PUSH;
 }
 
-PeerManagerETH::PeerManagerETH(const std::shared_ptr<Node>& node, const std::shared_ptr<NodeTableETH>& node_table, const std::string &start_time): 
+PeerManagerETH::PeerManagerETH(const std::shared_ptr<Node>& node, const std::shared_ptr<NodeTableETH>& node_table, const std::string &run_id): 
 	node(node), node_table(node_table) {
-	this->start_time = start_time;
+	this->run_id = run_id;
 
 	this->mode = PeerManagerETH::PUSH;
 }
 
-PeerError::PeerError() {}
+// PeerError::PeerError() {}
 
-PeerError::PeerError(std::string errorType, std::string errorMessage):
-	errorType(errorType),
-	errorMessage(errorMessage) {}
+// PeerError::PeerError(std::string errorType, std::string errorMessage):
+// 	errorType(errorType),
+// 	errorMessage(errorMessage) {}
 
 // getters
-std::string PeerError::get_errorType() const { return this->errorType; }
+// std::string PeerError::get_errorType() const { return this->errorType; }
 
-std::string PeerError::get_errorMessage() const { return this->errorMessage; }
+// std::string PeerError::get_errorMessage() const { return this->errorMessage; }
 
 std::shared_ptr<Node> PeerManagerETH::get_node() { return this->node; }
 
 std::shared_ptr<NodeTableETH> PeerManagerETH::get_node_table() { return this->node_table; }
 
 // setters
-void PeerError::set_errorType(std::string type) { this->errorType = type; }
+// void PeerError::set_errorType(std::string type) { this->errorType = type; }
 
-void PeerError::set_errorMessage(std::string message) { this->errorMessage = message; }
+// void PeerError::set_errorMessage(std::string message) { this->errorMessage = message; }
 
 void PeerManagerETH::set_node(std::shared_ptr<Node> node) { this->node = node; }
 
@@ -62,8 +62,11 @@ void PeerManagerETH::send(std::shared_ptr<Node> node, const Message &msg, const 
 							   std::to_string(msg.get_TTL()) + "," + 
 							   data;
 
+	Message msg2 = msg;
+	msg2.set_message_id(message_id);
+
 	// for message logging
-	Message inserted_msg = this->msg_table.insert_sent(msg);
+	Message inserted_msg = this->msg_table.insert_sent(msg2);
 	this->append_message_record(inserted_msg);
 
 	if (this->mode == PeerManagerETH::PUSH)
@@ -351,18 +354,41 @@ std::string PeerManagerETH::random_string_of_length(size_t length) {
 // write messages received and sent to the file system
 void PeerManagerETH::log_message_records() {
 	std::ofstream ofs;
-	ofs.open("../test/log/" + this->start_time + "/" + this->node->get_id() + ".csv", std::ofstream::out | std::ofstream::app);
+	std::string filename = "../test/log/" + this->run_id + '/' + this->node->get_id() + ".csv";
+	ofs.open(filename, std::ofstream::out | std::ofstream::app);
+	if (!ofs.is_open()) {
+		std::cerr << "ERROR: PeerManager::log_message_records: Cannot open " << filename << std::endl;
+		return;
+	}
 
-	ofs << this->msg_table.to_csv_string();
+	ofs << this->msg_table.to_csv_string() << std::endl;
 
 	ofs.close();
 }
 
 void PeerManagerETH::append_message_record(const Message& msg) {
 	std::ofstream ofs;
-	ofs.open("../test/log/" + this->start_time + "/" + this->node->get_id() + ".csv", std::ofstream::out | std::ofstream::app);
-
-	ofs << msg.to_csv_string() + "\n";
+	std::string filename = "../test/log/" + this->run_id + '/' + this->node->get_id() + ".csv";
+	ofs.open(filename, std::ofstream::out | std::ofstream::app);
+	if (!ofs.is_open()) {
+		std::cerr << "ERROR: PeerManager::append_message_records: Cannot open " << filename << std::endl;
+		return;
+	}
+	ofs << msg.to_csv_string() << std::endl;
 
 	ofs.close();
+}
+
+std::string PeerManagerETH::get_all_records_csv() {
+	std::string filename = "../test/log/" + this->run_id + '/' + this->node->get_id() + ".csv";
+	std::ifstream ifs(filename);
+	if (!ifs.is_open()) {
+		std::cerr << "ERROR: PeerManager::get_all_records_csv: Cannot open " << filename << std::endl;
+		return std::string(); 
+	}
+    return std::string(std::istreambuf_iterator<char>(ifs), std::istreambuf_iterator<char>());
+}
+
+std::string PeerManagerETH::get_run_id() {
+	return run_id;
 }

@@ -7,7 +7,7 @@ then
     exit 1
 fi
 
-mkdir ../test/log
+mkdir -p log
 
 echo $'== HGFRR Evaluation ==\n'
 

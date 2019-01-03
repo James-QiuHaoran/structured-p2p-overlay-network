@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  client:
+    image: jitaodocker/hgfr_eval_client
+    deploy:
+      replicas: ${NUM_NODES}
+    environment:
+      - BOOTSTRAP_IP=${EVAL_SERVER_IP}
+
+networks:
+  default:
+    external:
+      name: hgfr_default
