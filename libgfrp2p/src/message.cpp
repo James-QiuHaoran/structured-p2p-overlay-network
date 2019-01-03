@@ -1,7 +1,7 @@
 #include "message.h"
 
-unsigned long get_milliseconds_since_epoch() {
-    return static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count());
+long long get_milliseconds_since_epoch() {
+    return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
 // Message member 
@@ -52,15 +52,22 @@ Message::Message(unsigned short io_type, std::string broadcastID, std::string me
 message_key_t Message::get_key() const { return this->io_timestamp; }
 
 std::string Message::to_csv_string() const { 
-    return std::to_string(io_timestamp) + ',' +
-        std::to_string(io_type) + ',' +
-        sender_id + ','+ 
-        broadcastID + ',' +
-        message_id + ',' + 
-        receiver_id + ',' +
-        std::to_string(type) + ',' + 
-        std::to_string(from_level) + ',' +         
-        std::to_string(node_order);        
+    char buffer[1000];
+    int length = std::sprintf(buffer, "%lld,%hu,%s,%s,%s,%s,%d,%lu,%d", io_timestamp, io_type, sender_id.c_str(), broadcastID.c_str(), message_id.c_str(), receiver_id.c_str(), type, from_level, node_order);
+    if (length < 0) {
+        std::cerr << "ERROR: Message::to_csv_string: Failed to write format string" << std::endl;
+        return std::string();
+    }
+    return std::string(buffer, length);
+    // return std::to_string(io_timestamp) + ',' +
+    //     std::to_string(io_type) + ',' +
+    //     sender_id + ','+ 
+    //     broadcastID + ',' +
+    //     message_id + ',' + 
+    //     receiver_id + ',' +
+    //     std::to_string(type) + ',' + 
+    //     std::to_string(from_level) + ',' +         
+    //     std::to_string(node_order);        
 }
 
 // Getters and setters
