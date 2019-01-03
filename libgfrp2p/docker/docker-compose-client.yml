@@ -5,10 +5,12 @@ services:
     image: jitaodocker/hgfr_eval_client
     deploy:
       replicas: ${NUM_NODES}
+      restart_policy:
+        condition: on-failure
     environment:
       - BOOTSTRAP_IP=${EVAL_SERVER_IP}
 
 networks:
   default:
     external:
-      name: hgfr_default
+      name: hgfr_net
