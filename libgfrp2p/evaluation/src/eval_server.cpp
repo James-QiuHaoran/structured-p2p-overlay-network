@@ -105,7 +105,7 @@ void EvalServer::handle_config(const EvalConfig& config) {
 		if (int(double(counter)/db_->size()*10) == int(double(counter-1)/db_->size()*10) + 1)
 			std::cout << "DEBUG:: EvalServer::handle_config: ... " << int(double(counter)/db_->size()*100) << '%' << std::endl;
 
-		std::this_thread::sleep_for(std::chrono::microseconds(100));
+		std::this_thread::sleep_for(std::chrono::microseconds(200));
 	}
 
 }
@@ -146,7 +146,7 @@ void EvalServer::handle_table() {
 				if (int(double(counter)/db_->size()*10) == int(double(counter-1)/db_->size()*10) + 1)
 					std::cout << "DEBUG:: EvalServer::handle_table: ... " << int(double(counter)/db_->size()*100) << '%' << std::endl;
 
-				std::this_thread::sleep_for(std::chrono::microseconds(100));
+				std::this_thread::sleep_for(std::chrono::microseconds(200));
 			}
 	
 			msg.reset(new BootstrapMessage());
@@ -297,22 +297,22 @@ int main(int argc, char* argv[]) {
 
 			eval_server->handle_broadcast(node_id, workload_size);
 		} else if (command == "expr") {
-			long long interval_in_ms;
+			long long interval_in_microseonds;
 			long long duration_in_s;
 			std::uint32_t workload_size;
-			std::cout << "Enter interval_in_ms duration_in_s workload_size >>> ";
-			std::cin >> interval_in_ms >> duration_in_s >> workload_size;
+			std::cout << "Enter interval_in_micros duration_in_s workload_size >>> ";
+			std::cin >> interval_in_microseonds >> duration_in_s >> workload_size;
 
 			std::size_t num_nodes = eval_server->handle_count();
-			long long ms_remaining = duration_in_s*1000;
+			long long micros_remaining = duration_in_s*1000*1000;
 
-			while (ms_remaining > 0) {
+			while (micros_remaining > 0) {
 				std::size_t node_id = rand() % num_nodes;
 				std::cout << "Sending command to " << node_id << ": ";
 				eval_server->handle_broadcast(node_id, workload_size);
-				ms_remaining -= interval_in_ms;
-				std::cout << ms_remaining << "ms out of " << duration_in_s * 1000 << "ms remaining" << std::endl;
-				std::this_thread::sleep_for(std::chrono::milliseconds(interval_in_ms));
+				micros_remaining -= interval_in_microseonds;
+				std::cout << micros_remaining << "micros out of " << duration_in_s * 1000 * 1000 << "micros remaining" << std::endl;
+				std::this_thread::sleep_for(std::chrono::microseconds(interval_in_microseonds));
 			}
 		} else if (command == "pull_log") {
 			std::size_t node_id;
@@ -326,6 +326,7 @@ int main(int argc, char* argv[]) {
 			std::cin >> run_id;
 			for (std::size_t i = 0; i < eval_server->handle_count(); i++) {
 				eval_server->handle_pull_log(i, run_id);
+				std::this_thread::sleep_for(std::chrono::microseconds(200));
 			}
 		} else if (command == "help") {
 			std::cout << "count - # of registered nodes\ncheck node_id - info of the node\n"
