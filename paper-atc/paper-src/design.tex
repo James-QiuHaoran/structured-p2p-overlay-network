@@ -1,23 +1,31 @@
-This is the design. \\
+In this section, we first introduce the design principles of HGFRR (Section \cref{principles}). Then we present the topology of the network (Section \cref{topo}), how the structure is formed (Section \cref{formation}) and maintained (Section \cref{maintain}), and the broadcast algorithm (Section \cref{broadcast}). Security issues are also addressed in the design of HGFRR (Section \cref{security}).
 
-\subsection{Design Principles}
+\subsection{Design Principles} \label{principles}
 
-Talk about the basis of the design.
+The design of HGFRR as a Peer-to-Peer network layer under a blockchain system follows four principles:
+\begin{itemize}[noitemsep, topsep=0pt]
+	\item Fair;
+	\item Self-organizing;
+	\item Anonymous;
+	\item Low convergence time;
+	\item Robust in the dynamic environment;
+	\item Scalable to large number of nodes;
+\end{itemize}
 
-\subsection{Topology}
+\subsection{Topology} \label{topo}
 
 Talk about the p2p network structure. [TODO: add figure]
 
 The network topology is basically a recursive ring-fractal structure. At the top level resides the largest ring where several sub-ring resides on. The figure shows a network of 3 levels. Level 1 is the largest ring. On the largest ring, there are three sub-rings of 2 levels. Level 2 is the second largest ring and level 3 is the smallest ring. The nodes in red are contact nodes.
 
 Before presenting the protocol, several key concepts should be defined clearly:
-\begin{itemize}
+\begin{itemize}[noitemsep, topsep=0pt]
 	\item Node: One instance of a server/virtual machine in the network;
 	\item Ring: A group of nodes connected in a ring-like structure.
 	\item Contact Node: the node on the ring who is in charge of adding new nodes, contacting the nodes in the upper level of the network, and broadcasting the message.
 \end{itemize}
 
-\subsubsection{Structure Formation}
+\subsubsection{Structure Formation} \label{formation}
 
 Talk about the p2p network formation. boostrap.
 
@@ -25,7 +33,7 @@ Talk about the p2p network formation. boostrap.
 
 If the number of node on a ring exceeds a threshold, then this ring will transform to a two-level ring (See Figure 4.2), i.e. several groups of nodes on the large ring will form several rings.
 
-\subsubsection{Structure Maintenance}
+\subsubsection{Structure Maintenance} \label{maintain}
 
 Talk about the p2p network maintenance.
 
@@ -33,7 +41,7 @@ Talk about the p2p network maintenance.
 
 If the missing node is the contact node, then the next generation of contact node(s) will be elected. If the number of nodes on the ring is smaller than the lower limit, a transformation from right to left in Figure 4.2 will be performed.
 
-\subsection{Broadcast}
+\subsection{Broadcast} \label{broadcast}
 
 Talk about broadcast mechanism.
 
@@ -41,13 +49,13 @@ Talk about broadcast mechanism.
 
 We devised a k-ary distributed spanning tree method to broadcast message in a ring. Details will be presented in the subsection. Based on this method, the time complexity of broadcast will be $O(logN)$ and message complexity will be $(O(N))$, which are currently the best among related works.
 
-\subsubsection{Broadcast Mechanism}
+\subsubsection{Broadcast Within-Ring Mechanism}
 
 We devised a k-ary distributed spanning tree method to facilitate the in-ring broadcast in the protocol. The basic idea is to generate a random number $k$, form a k-ary spanning tree, and broadcast from the root to every node in the tree. The reason we choose to randomize the parameter k is that the network should be hidden from the attacker. If it keeps using the same k, the routing pattern will be known easily by watching the network activities for a long time. The spanning tree are formed by using the broadcaster (which is numbered 0) as the root. Node 0 will connect to node $0+k^0$, $0+k^1$, $0+k^2$, and so on. Similarly, node 1 will connect to $1+k^0$, $1+k^1$, $1+k^2$, and so on. The pattern is: node $i$ will connect to $i+k^0$, $i+k^1$, $i+k^2$, and so on. The overall time complexity of this method will be $O(logN)$, where $N$ is the number of nodes in the ring. 
 
 For example, Figure 4.3(a) shows a ring of 10 nodes numbered from 0 to 9. As the k-ary spanning tree algorithm states, when $k=2$: node 0 will connect to node 1, 2, 4, 8; node 1 will connect to node 3, 5, 9; node 2 will connect to node 6; node 3 will connect to node 7. After a spanning tree is formed (see Figure 4.3(b)), the message will be disseminated from node 0 down to every node in the spanning tree.
 
 
-\subsection{Security Consideration}
+\subsection{Security Consideration} \label{security}
 
 Talk about the usage of Intel SGX, fake messages, contact node election.
