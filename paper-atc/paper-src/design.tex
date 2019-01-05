@@ -15,47 +15,38 @@ The design of HGFRR as a Peer-to-Peer network layer under a blockchain system fo
 
 \subsection{Topology} \label{topo}
 
-Talk about the p2p network structure. [TODO: add figure]
-
-The network topology is basically a recursive ring-fractal structure. At the top level resides the largest ring where several sub-ring resides on. The figure shows a network of 3 levels. Level 1 is the largest ring. On the largest ring, there are three sub-rings of 2 levels. Level 2 is the second largest ring and level 3 is the smallest ring. The nodes in red are contact nodes.
-
 Before presenting the protocol, several key concepts should be defined clearly:
 \begin{itemize}[noitemsep, topsep=0pt]
 	\item Node: One instance of a server/virtual machine in the network;
 	\item Ring: A group of nodes connected in a ring-like structure.
-	\item Contact Node: the node on the ring who is in charge of adding new nodes, contacting the nodes in the upper level of the network, and broadcasting the message.
+	\item Contact Node: the node on the ring who is in charge of adding new nodes, contacting the nodes in the upper level of the network, and broadcasting the message.\\
 \end{itemize}
+
+[TODO: add figure - network topology]\\
+
+The network topology of HGFRR is basically a fractal-ring structure, where lower level rings reside on higher level rings (See Figure [TODO]) in a recursive way. At the top level resides the largest ring where several sub-ring resides on while at the bottom level resides the smallest rings. The figure shows a network of 3 levels. Level 2 contains the largest ring. On the largest ring, there are three sub-rings of 2 levels. Level 1 contains the second largest rings and level 0 contains the smallest rings. The nodes in red are contact nodes of each ring. They are elected to be normal nodes of the upper level ring.
 
 \subsubsection{Structure Formation} \label{formation}
 
-Talk about the p2p network formation. boostrap.
+When a new node wants to join the network, it will first send ping-messages to each of the contact nodes of the largest ring (at the top level). The new node will pick the contact node with the shorted response time to send a join-message. The contact node will then decide which sub-ring it should add this new node to, by sending the node information of contact nodes of each sub-ring back to the new node. Recursively, the new node will then choose the sub-ring which is optimal in terms of response time. And the contact node of the sub-ring will then introduce the new node to the sub-sub-ring. In the end, the contact node of a ring at the bottom level will then add the new node to the ring. If the number of node on the ring that the new node join to exceeds the threshold, then this ring will transform to a two-level ring (See Figure TODO), i.e. several groups of nodes on the large ring will form several rings. The transformation will be further elaborated in Section \cref{maintain}. After a new node joins the network, the contact node of this ring will broadcast within ring this node's information. The member nodes of this ring will then tell their information by sending welcome-messages to the new node.
 
-\textbf{Node-Join} is the process of a new node joining the network. When a new node wants to join the network, it will send message to the contact nodes of the largest ring. The contact node will judge which sub-ring this new node should be added to, based on some metrics related to locality. Recursively, the contact node of the sub-ring will then introduce the new node to the sub-sub-ring. In the end, the contact node of a ring in the lowest level will then add the new node to the ring.
-
-If the number of node on a ring exceeds a threshold, then this ring will transform to a two-level ring (See Figure 4.2), i.e. several groups of nodes on the large ring will form several rings.
+The upper level rings are formed by contact node election. When a ring is first formed, the first member node of the ring will be the contact node of this ring. Each generation of contact nodes have their term of service. At the end of the term, one of the contact nodes will generate random IDs from all member node IDs. This election result will be dispersed within ring, and multi-casted to the contact nodes of the upper level ring and the lower level rings.
 
 \subsubsection{Structure Maintenance} \label{maintain}
 
-Talk about the p2p network maintenance.
-
-\textbf{Node-Leave} is the process of the network reacting to node-leave. Each node on the ring will send heart-beat messages to its successor and predecessor to check the aliveness of them. Once a node are not responding to the heart-beat message, the node will double check this with the neighbor of the dead node. If they agree that this node left the network (intentionally or accidentally), the information will be disseminated to the ring and this node will be officially removed from the network.
-
-If the missing node is the contact node, then the next generation of contact node(s) will be elected. If the number of nodes on the ring is smaller than the lower limit, a transformation from right to left in Figure 4.2 will be performed.
+Each node on the bottom ring will send heart-beat messages to its successor and predecessor to check the aliveness of them. Once a node are not responding to the heart-beat message after the timeout value, the node will double check the liveness of this node with its, e.g. if A's predecessor B does not respond, A will check with the predecessor of B. If they agree that this node left the network (intentionally or accidentally), the information will be disseminated to the ring and this node will be officially removed from the network. If the missing node is the contact node, then the next generation of contact nodes will be elected. If the number of nodes on the ring is smaller than the lower limit, a transformation from right to left in Figure [TODO] will be performed.
 
 \subsection{Broadcast} \label{broadcast}
 
-Talk about broadcast mechanism.
+\textbf{Broadcast} is the process of disseminating a message from any node to the whole network. When a node wants to send a message to the whole network, it will first send broadcast-message to one of the contact nodes of the ring it resides on. Then the message will be routed to two directions: one direction is downwards, i.e. the contact node will broadcast the message in the ring and recursively in the sub-rings; the other direction is upwards, i.e. the contact node will send broadcast-message to one of the contact nodes of the upper level ring. Recursively, the broadcast-message will be received by one of the contact nodes of the largest ring. Then the contact node will broadcast recursively in the sub-rings. Till the bottom level, each node in the fractal ring will receive this message.
 
-\textbf{Broadcast} is the process of disseminating a message from one node to the whole network. When a node wants to send a message to the whole network, it will first contact the contact node of the ring it resides on. Then the message will be routed to two directions: one direction is downwards, i.e. the contact node will broadcast the message in the ring and recursively in the sub-rings; the other direction is upwards, i.e. the contact node will find the contact node of the largest ring by recursively contacting the contact node in the upper level. Once the contact node in the largest ring is found, it will broadcast recursively in the rings and sub-rings.
-
-We devised a k-ary distributed spanning tree method to broadcast message in a ring. Details will be presented in the subsection. Based on this method, the time complexity of broadcast will be $O(logN)$ and message complexity will be $(O(N))$, which are currently the best among related works.
+The k-ary distributed spanning tree method \cite{el2003efficient} is used to broadcast message in a ring. Details will be presented in the subsection. Based on this method, the time complexity of a broadcast operation will be $O(logN)$ and message complexity will be $(O(N))$, which are currently the best among related works.
 
 \subsubsection{Broadcast Within-Ring Mechanism}
 
-We devised a k-ary distributed spanning tree method to facilitate the in-ring broadcast in the protocol. The basic idea is to generate a random number $k$, form a k-ary spanning tree, and broadcast from the root to every node in the tree. The reason we choose to randomize the parameter k is that the network should be hidden from the attacker. If it keeps using the same k, the routing pattern will be known easily by watching the network activities for a long time. The spanning tree are formed by using the broadcaster (which is numbered 0) as the root. Node 0 will connect to node $0+k^0$, $0+k^1$, $0+k^2$, and so on. Similarly, node 1 will connect to $1+k^0$, $1+k^1$, $1+k^2$, and so on. The pattern is: node $i$ will connect to $i+k^0$, $i+k^1$, $i+k^2$, and so on. The overall time complexity of this method will be $O(logN)$, where $N$ is the number of nodes in the ring. 
+In-ring broadcast is based on the k-ary distributed spanning tree method. The basic idea is that the broadcast starter will first generate a random number $k$, and then a k-ary spanning tree can be formed in a distributed manner. Broadcast will then be triggered from the root to every node in the tree. The reason we choose to randomize the parameter k is that the network should be hidden from the attacker. If it keeps using the same parameter k, the routing pattern will be known easily by watching the network activities for a long time. The spanning tree are formed by using the broadcaster (which is numbered 0) as the root. Node 0 will connect to node $0+k^0$, $0+k^1$, $0+k^2$, and so on. Similarly, node 1 will connect to $1+k^0$, $1+k^1$, $1+k^2$, and so on. The pattern is: node $i$ will connect to $i+k^0$, $i+k^1$, $i+k^2$, and so on. The overall time complexity of this method will be $O(logN)$, where $N$ is the number of nodes in the ring.
 
-For example, Figure 4.3(a) shows a ring of 10 nodes numbered from 0 to 9. As the k-ary spanning tree algorithm states, when $k=2$: node 0 will connect to node 1, 2, 4, 8; node 1 will connect to node 3, 5, 9; node 2 will connect to node 6; node 3 will connect to node 7. After a spanning tree is formed (see Figure 4.3(b)), the message will be disseminated from node 0 down to every node in the spanning tree.
-
+[TODO] For example, Figure 4.3(a) shows a ring of 10 nodes numbered from 0 to 9. As the k-ary spanning tree algorithm states, when $k=2$: node 0 will connect to node 1, 2, 4, 8; node 1 will connect to node 3, 5, 9; node 2 will connect to node 6; node 3 will connect to node 7. After a spanning tree is formed (see Figure 4.3(b)), the message will be disseminated from node 0 down to every node in the spanning tree.
 
 \subsection{Security Consideration} \label{security}
 
