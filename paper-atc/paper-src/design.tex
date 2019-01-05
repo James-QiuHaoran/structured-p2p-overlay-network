@@ -3,13 +3,14 @@ In this section, we first introduce the design principles of HGFRR (Section \cre
 \subsection{Design Principles} \label{principles}
 
 The design of HGFRR as a Peer-to-Peer network layer under a blockchain system follows four principles:
+\noindent
 \begin{itemize}[noitemsep, topsep=0pt]
-	\item Fair;
-	\item Self-organizing;
-	\item Anonymous;
-	\item Low convergence time;
-	\item Robust in the dynamic environment;
-	\item Scalable to large number of nodes;
+	\item Fair: An unfair P2P network may ascend free-riders, frustrate majority of users and consequently lead to instability of the network \cite{naghizadeh2016improving}.
+	\item Self-organizing: No central server should be responsible for organizing the structure of the network. In other words, the decentralization nature of the P2P network should not be affected.
+	\item Anonymous: Each node in the network and the network topology should be hidden from the outsider so that target attack can be avoided to some extent.
+	\item Efficient on broadcast: The converge time of each message to broadcast should be as small as possible. Therefore, the number of concurrent messages on flight will be reduced.
+	\item Robust in the dynamic environment: The network is unstable due to the frequent disconnection or node-join. The structure of the network should be easy to maintain in a distributed manner.
+	\item Scalable to large number of nodes: The P2P network should be able to scale up to tremendous number of nodes as a public block chain may grow up to millions of nodes.
 \end{itemize}
 
 \subsection{Topology} \label{topo}
