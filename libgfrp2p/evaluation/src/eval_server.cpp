@@ -105,7 +105,7 @@ void EvalServer::handle_config(const EvalConfig& config) {
 		if (int(double(counter)/db_->size()*10) == int(double(counter-1)/db_->size()*10) + 1)
 			std::cout << "DEBUG:: EvalServer::handle_config: ... " << int(double(counter)/db_->size()*100) << '%' << std::endl;
 
-		std::this_thread::sleep_for(std::chrono::microseconds(200));
+		std::this_thread::sleep_for(std::chrono::microseconds(300));
 	}
 
 }
@@ -131,7 +131,7 @@ void EvalServer::handle_table() {
 
 		i++;
 		if (i % 2000 == 0 || i == db_->size()) {
-			msg->mutable_table()->set_table_size(i > 2000 ? i % 2000 : i);
+			msg->mutable_table()->set_table_size(i > 2000 ? (i % 2000 == 0 ? 2000 : i % 2000) : i);
 			msg->mutable_table()->set_is_end(i >= db_->size());
 
 			std::string buffer;
@@ -146,7 +146,7 @@ void EvalServer::handle_table() {
 				if (int(double(counter)/db_->size()*10) == int(double(counter-1)/db_->size()*10) + 1)
 					std::cout << "DEBUG:: EvalServer::handle_table: ... " << int(double(counter)/db_->size()*100) << '%' << std::endl;
 
-				std::this_thread::sleep_for(std::chrono::microseconds(200));
+				std::this_thread::sleep_for(std::chrono::microseconds(300));
 			}
 	
 			msg.reset(new BootstrapMessage());
@@ -324,7 +324,7 @@ int main(int argc, char* argv[]) {
 			std::cin >> run_id;
 			for (std::size_t i = 0; i < eval_server->handle_count(); i++) {
 				eval_server->handle_pull_log(i, run_id);
-				std::this_thread::sleep_for(std::chrono::microseconds(200));
+				std::this_thread::sleep_for(std::chrono::microseconds(300));
 			}
 		} else if (command == "help") {
 			std::cout << "count - # of registered nodes\ncheck node_id - info of the node\n"

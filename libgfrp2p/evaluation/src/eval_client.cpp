@@ -133,7 +133,7 @@ void EvalClient::receive(const std::string & ip, unsigned short port, const std:
             peer_manager_->broadcast(generate_random_workload(msg.broadcast().workload_size()));
         }
     } else if (msg.type() == BootstrapMessage::PULL_LOG) {
-        unsigned int ms = rand() % 10000;
+        unsigned int ms = rand() % 30000 + 3000;
         std::cout << "DEBUG: EvalClient::receive: Pushing log after " << ms << std::endl;
         std::this_thread::sleep_for(std::chrono::milliseconds(ms));
         send_push_log();
@@ -695,7 +695,7 @@ void EvalClient::send_push_log() {
             std::cout << "DEBUG: EvalClient::send_push_log: Sending accumulative " << counter << " records" << std::endl;
             tcp_server_->send(bootstrap_server_ip, bootstrap_server_port, serialized);
             buffer.clear();
-            std::this_thread::sleep_for(std::chrono::microseconds(200));
+            std::this_thread::sleep_for(std::chrono::microseconds(300));
         } 
     }
 
