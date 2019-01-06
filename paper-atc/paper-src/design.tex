@@ -22,7 +22,10 @@ Before presenting the protocol, several key concepts should be defined clearly:
 	\item Contact Node: the node on the ring who is in charge of adding new nodes, contacting the nodes in the upper level of the network, and broadcasting the message.\\
 \end{itemize}
 
-[TODO: add figure - network topology]\\
+\begin{figure}
+	\includegraphics[width=0.5\textwidth]{figures/topo.jpg}
+	\caption{Network Topology and Hierarchical Structure of HGFRR}
+\end{figure}
 
 The network topology of HGFRR is basically a fractal-ring structure, where lower level rings reside on higher level rings (See Figure [TODO]) in a recursive way. At the top level resides the largest ring where several sub-ring resides on while at the bottom level resides the smallest rings. The figure shows a network of 3 levels. Level 2 contains the largest ring. On the largest ring, there are three sub-rings of 2 levels. Level 1 contains the second largest rings and level 0 contains the smallest rings. The nodes in red are contact nodes of each ring. They are elected to be normal nodes of the upper level ring.
 
@@ -149,7 +152,7 @@ In-ring broadcast is based on the k-ary distributed spanning tree method. The ba
 			\State $\var{args=(targetNodeID, currentLevel)}$
 			\State $\var{receiver} \gets (\var{this.getPeer(args)})$
 			\State $\var{i++}$
-			\State $\var{sendTo(receiver, message)}}$
+			\State $\var{sendTo(receiver, message)}$
 			\EndIf
 		\EndWhile
 		\EndFunction
@@ -158,4 +161,8 @@ In-ring broadcast is based on the k-ary distributed spanning tree method. The ba
 
 \subsection{Security Consideration} \label{security}
 
-Talk about the usage of Intel SGX, fake messages, contact node election.
+Talk about the usage of Intel SGX.\\
+
+To hide the existence of HGFRR contact nodes from outsiders, there are two mechanisms.
+Fake messages;
+Contact node election;
