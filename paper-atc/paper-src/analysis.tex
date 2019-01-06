@@ -1,8 +1,14 @@
 \subsection{Proof of Broadcast Performance}
 
-Consider a network of size $N$. All nodes in the network are geographically distributed evenly. In HGFRR, every $r$ nodes that are geographically near to each other will be gathered into a ring at the bottom level. If there are $c$ contact nodes in each ring at the bottom level, then the number of nodes elected to be the normal nodes at the second level will be: $$L(1) = \frac{cN}{r}$$ Then according to the protocol of HGFRR, the number of nodes elected to be the normal nodes at the next level will be the number of rings at the second level multiply with parameter $c$, which is: $$L(2) = \frac{c^2N}{r^2}$$ Recursively, the number of rings at level $h$ will be $$L(h) = \frac{c^hN}{r^h}$$ Let there be $t$ nodes in the top level (which are DNS seeds for a networked system), then the number of levels will be $$l = log_{\frac{c}{r}}{\frac{tc}{N}}$$
-
-give a proof of time complexity and message comlexity of broadcast, node join and contact node election. Compare to current works.
+Consider a network of size $N$. All nodes in the network are geographically distributed evenly. 
+In HGFRR, every $r$ nodes that are geographically near to each other will be gathered into a ring at the bottom level. 
+If there are $c$ contact nodes in each ring at the bottom level, then the number of nodes elected to be the normal nodes at the second level will be: $$L(1) = \frac{cN}{r}$$ 
+Then according to the protocol of HGFRR, the number of nodes elected to be the normal nodes at the next level will be the number of rings at the second level multiply with parameter $c$, which is: $$L(2) = \frac{c^2N}{r^2}$$ 
+Recursively, the number of nodes $L(h)$ and the number of rings $R(h)$ at level $h$ will be: $$L(h) = \frac{c^hN}{r^h}, R(h)=\frac{c^hN}{r^{h+1}}$$ 
+Let there be $T$ nodes in the top level (which are DNS seeds for a networked system), let $C = c/r$ be the contact node/normal node ratio at each ring, then the number of levels will be: $$l = log_{C}{\frac{T}{N}}$$ Considering that the cost to transmit a data packet between two nodes in two different continents is far larger than the cost to transmit between two nodes in the same city, let the cost of transmit data packets in different rings at level $h$ be $C(h)$, which is a mapping from level to cost constants.\\
+To broadcast a message from a node in the bottom level, the message will first be broadcasted upwards until it reached the ring at the top level. The number of messages used to reach any contact nodes at the top level is: $$M_1(N)=1+l=1+log_{C}{\frac{T}{N}}$$
+The number of messages used to broadcast from the top level rings recursively to all nodes in each ring at each level is: $$M_2(N)=\sum_{i=0}^{l} N\frac{c}{r}^i=N\frac{1-C^{l-1}}{1-C}$$
+$$=\frac{CN-T}{C(1-C)}$$ Hence the message complexity of a broadcast operation is $O(N)$.
 
 \subsection{Robustness Analysis}
 
