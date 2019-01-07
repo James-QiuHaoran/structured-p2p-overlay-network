@@ -33,3 +33,23 @@ performance of node join and leave, which may lead to structure change
 \subsection{Security Evaluation}
 
 wireshark analysis to show the anonymity of contact nodes
+
+\begin{table} \label{packet}
+	\begin{tabular}{l*{6}{c}r}
+		Node Type & $\sim17 KB$ & $\sim200 B$ & $<150 B$ \\
+		\hline		
+		Normal node in one term & 33.10\%	& 58.60\% & 5.90\% \\
+		Contact node in one term & 34.00\%	& 61.20\% &4.50\%  \\
+		Node at all time  & 33.70\%	& 60.90\% &4.60\%  \\
+	\end{tabular}
+	\caption{Send-Packet Analysis of Node in HGFRR}
+	\vspace{2mm}
+	\begin{tabular}{l*{6}{c}r}
+		Node Type & $\sim17 KB$ & $\sim200 B$ & $<150 B$ \\
+		\hline		
+		Normal node in one term & 35.50\% & 58.60\% & 5.60\% \\
+		Contact node in one term & 34.40\% & 59.20\% & 4.70\%  \\
+		Node at all time  & 34.60\% & 59.10\% & 5.10\%  \\
+	\end{tabular}
+	\caption{Receive-Packet Analysis of Node in HGFRR}
+\end{table}
