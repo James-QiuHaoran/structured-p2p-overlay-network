@@ -24,7 +24,16 @@
 % Updated July 2018: Text block size changed from 6.5" to 7"
 
 \documentclass[letterpaper,twocolumn,10pt]{article}
-\usepackage{usenix2019,epsfig,endnotes, cleveref, enumitem}
+\usepackage{usenix2019, epsfig, endnotes, amsmath, cleveref, enumitem, algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage{graphics}
+
+\makeatletter
+\def\BState{\State\hskip-\ALG@thistlm}
+\makeatother
+\algnewcommand\algorithmicforeach{\textbf{for each}}
+\algdef{S}[FOR]{ForEach}[1]{\algorithmicforeach\ #1\ \algorithmicdo}
+\newcommand{\var}{\texttt}
 
 \crefformat{section}{\S#2#1#3} % see manual of cleveref, section 8.2.1
 \crefformat{subsection}{\S#2#1#3}
@@ -67,7 +76,7 @@
 \section{Introduction}
 \input{intro.tex}
 
-\section{Background and Motivation}
+\section{Background and Related Works}
 \input{background.tex}
 
 \section{HGFRR Design}
@@ -82,28 +91,27 @@
 \section{Evaluation}
 \input{eval.tex}
 
-\section{Related Work}
-\input{related.tex}
+%\section{Related Work}
+%\input{related.tex}
 
 \section{Conclusion}
 \input{conclusion.tex}
 
-\section*{Acknowledgments}
+%\section*{Acknowledgments}
 
-A polite author always includes acknowledgments.  Thank everyone,
-especially those who funded the work. 
+%A polite author always includes acknowledgments. Thank everyone, especially those who funded the work. 
 
 %%%%%%%%%%%%%%%%%%%%%% End %%%%%%%%%%%%%%%%%%%%%%%%%
 
-\section*{ATC Template For Reference}
+%\section*{ATC Template For Reference}
 
-More fascinating text. Features\endnote{Remember to use endnotes, not footnotes!} galore, plethora of promises.\\
+%More fascinating text. Features\endnote{Remember to use endnotes, not footnotes!} galore, plethora of promises.\\
 
 %%%%%%%%%%%%%%%%%%%%%% End %%%%%%%%%%%%%%%%%%%%%%%%%
 
 {\normalsize \bibliographystyle{acm}
 \bibliography{./main}}
 
-\theendnotes
+%\theendnotes
 
 \end{document}

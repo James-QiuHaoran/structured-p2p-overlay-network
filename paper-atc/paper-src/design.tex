@@ -22,9 +22,13 @@ Before presenting the protocol, several key concepts should be defined clearly:
 	\item Contact Node: the node on the ring who is in charge of adding new nodes, contacting the nodes in the upper level of the network, and broadcasting the message.\\
 \end{itemize}
 
-[TODO: add figure - network topology]\\
+\begin{figure}[t]
+	\includegraphics[width=0.5\textwidth]{figures/topo.jpg}
+	\caption{Network Topology and Hierarchical Structure of HGFRR}
+	\label{fig:topo}
+\end{figure}
 
-The network topology of HGFRR is basically a fractal-ring structure, where lower level rings reside on higher level rings (See Figure [TODO]) in a recursive way. At the top level resides the largest ring where several sub-ring resides on while at the bottom level resides the smallest rings. The figure shows a network of 3 levels. Level 2 contains the largest ring. On the largest ring, there are three sub-rings of 2 levels. Level 1 contains the second largest rings and level 0 contains the smallest rings. The nodes in red are contact nodes of each ring. They are elected to be normal nodes of the upper level ring.
+The network topology of HGFRR is basically a fractal-ring structure, where lower level rings reside on higher level rings (See Figure \ref{fig:topo}) in a recursive way. At the top level resides the largest ring where several sub-ring resides on while at the bottom level resides the smallest rings. The figure shows a network of 3 levels. Level 2 contains the largest ring. On the largest ring, there are three sub-rings of 2 levels. Level 1 contains the second largest rings and level 0 contains the smallest rings. The nodes in red are contact nodes of each ring. They are elected to be normal nodes of the upper level ring.
 
 \subsubsection{Structure Formation} \label{formation}
 
@@ -32,9 +36,77 @@ When a new node wants to join the network, it will first send ping-messages to e
 
 The upper level rings are formed by contact node election. When a ring is first formed, the first member node of the ring will be the contact node of this ring. Each generation of contact nodes have their term of service. At the end of the term, one of the contact nodes will generate random IDs from all member node IDs. This election result will be dispersed within ring, and multi-casted to the contact nodes of the upper level ring and the lower level rings.
 
+\begin{algorithm}
+	\caption{Bootstrap}\label{euclid}
+	\begin{algorithmic}[1]
+		\Procedure{Node Join}{}
+		\State $\var{response} \gets \var{queryDNSSeeds}()$
+		\State $\var{contactNodeList} \gets \var{response.nodes}$
+		\State $\var{level} \gets \var{response.topLevel}$
+		\BState \emph{loop}:
+		\If {$\var{level} = \var{0}$}
+		\State $\textbf{break}$
+		\Else
+		\State $\var{optimalMetric} \gets \var{0}$
+		\For {$\var{contactNode} : \var{contactNodeList}$}
+		\State $\var{metric} \gets \var{testProximity}(\var{contactNode})$
+		\If {$\var{metric} > \var{optimalMetric}$}
+		\State $\var{optimalMetric} \gets \var{metric}$
+		\State $\var{targetNode} \gets \var{contactNode}$
+		\EndIf
+		\EndFor
+		\State $\var{response} \gets \var{queryNode}(\var{contactNode}, \var{level})$
+		\State $\var{contactNodeList} \gets \var{response.nodes}$
+		\State $\var{level} \gets \var{level}\var{-1}$
+		\State \textbf{goto} \emph{loop}.
+		\EndIf
+		\State $/* \text{contact node of level 0 ring broadcast node-join}$
+		\State $\text{\; * message withing the ring */}$
+		\State $\var{this.}\var{nodeTable.insert}(\var{recvMsg.node})$
+		\If {$\var{recvMsg.node.contactNode} = \var{true}$}
+		\State $\var{contactNode} \gets \var{recvMsg.node}$
+		\State $\var{contactNodeList.insert}(\var{contactNode})$
+		\EndIf
+		\EndProcedure
+	\end{algorithmic}
+\end{algorithm}
+
 \subsubsection{Structure Maintenance} \label{maintain}
 
 Each node on the bottom ring will send heart-beat messages to its successor and predecessor to check the aliveness of them. Once a node are not responding to the heart-beat message after the timeout value, the node will double check the liveness of this node with its, e.g. if A's predecessor B does not respond, A will check with the predecessor of B. If they agree that this node left the network (intentionally or accidentally), the information will be disseminated to the ring and this node will be officially removed from the network. If the missing node is the contact node, then the next generation of contact nodes will be elected. If the number of nodes on the ring is smaller than the lower limit, a transformation from right to left in Figure [TODO] will be performed.
+
+\begin{algorithm}
+	\caption{Maintenance}\label{euclid}
+	\begin{algorithmic}[1]
+		\State {\text{// This function will be called every \var{TIME\_INTERVAL}}}
+		\Function{detect\_node\_left}{}
+		\If{$\var{liveness\_check\_predecessor}() = \var{false}$}
+		\State $\var{msg} \gets \var{constructNodeLeaveMSG}()$
+		\State $\var{this.inRingBroadcast(msg)}$
+		\EndIf
+		\If{$\var{liveness\_check\_successor}() = \var{false}$}
+		\State $\var{msg} \gets \var{constructNodeLeaveMSG}()$
+		\State $\var{this.inRingBroadcast(msg)}$
+		\EndIf
+		\EndFunction
+		\\
+		\Function{liveness\_check\_predecessor}{}
+		\State $\var{ret} = \var{sendHeartBeatMSG(this.predecessor)}$
+		\If{$\var{ret.type} = \var{TIMEOUT}$}
+		\State $\var{status} \gets \var{confirmWithPrePredecessor}()$
+		\State \Return $\var{status}$
+		\EndIf
+		\EndFunction
+		\\
+		\Function{liveness\_check\_successor}{}
+		\State $\var{ret} = \var{sendHeartBeatMSG(this.successor)}$
+		\If{$\var{ret.type} = \var{TIMEOUT}$}
+		\State $\var{status} \gets \var{confirmWithSucSuccessor}()$
+		\State \Return $\var{status}$
+		\EndIf
+		\EndFunction
+	\end{algorithmic}
+\end{algorithm}
 
 \subsection{Broadcast} \label{broadcast}
 
@@ -48,6 +120,49 @@ In-ring broadcast is based on the k-ary distributed spanning tree method. The ba
 
 [TODO] For example, Figure 4.3(a) shows a ring of 10 nodes numbered from 0 to 9. As the k-ary spanning tree algorithm states, when $k=2$: node 0 will connect to node 1, 2, 4, 8; node 1 will connect to node 3, 5, 9; node 2 will connect to node 6; node 3 will connect to node 7. After a spanning tree is formed (see Figure 4.3(b)), the message will be disseminated from node 0 down to every node in the spanning tree.
 
+\begin{algorithm}
+	\caption{Broadcast}\label{euclid}
+	\begin{algorithmic}[1]
+		\Function{broadcast}{\var{data}}
+		\State $\var{level} \gets \var{0}$
+		\State $\var{contactNode} \gets \var{selectFromContactNodes(level)}$
+		\State $\var{message} \gets \var{wrapMessage(data)}$
+		\State $\var{sendTo(contactNode, message)}$
+		\EndFunction
+		\\
+		\Function{broadcast\_up}{\var{currentLevel, data}}
+		\State $\var{level} \gets \var{currentLevel+1}$
+		\State $\var{contactNode} \gets \var{selectFromContactNodes(level)}$
+		\State $\var{message} \gets \var{wrapMessage(data)}$
+		\State $\var{sendTo(contactNode, message)}$
+		\EndFunction
+		\\
+		\Function{broadcast\_within\_ring}{\var{currentLevel, message, sentIDs, k}}
+		\State $\var{endID} \gets \var{this.getNodeTableSize(currentLevel)}$
+		\State $\var{i} \gets \var{0}$
+		\State $\var{nodeOrder} \gets \var{message.nodeOrder}$
+		\While {$\var{nodeOrder + pow(k, i)} < \var{endID}$}
+		\State $\var{currentID = nodeOrder + pow(k, i)}$
+			\If{$\var{pow(k, i) <= nodeOrder}$}
+			\State $\var{i++}$
+			\State $\textbf{continue}$
+			\Else
+			\State $\var{targetNodeID = NodeID + pow(k, i)}$
+			\If{$\var{targetNodeID > endID}$}
+			\State $\var{targetNodeID -= endID + 1}$
+			\EndIf
+			\State $\var{args=(targetNodeID, currentLevel)}$
+			\State $\var{receiver} \gets (\var{this.getPeer(args)})$
+			\State $\var{i++}$
+			\State $\var{sendTo(receiver, message)}$
+			\EndIf
+		\EndWhile
+		\EndFunction
+	\end{algorithmic}
+\end{algorithm}
+
 \subsection{Security Consideration} \label{security}
 
-Talk about the usage of Intel SGX, fake messages, contact node election.
+Talk about the usage of Intel SGX[TODO].
+
+To hide the existence of HGFRR contact nodes from outsiders, there are two mechanisms. First, fake messages are used to make the behavior of a contact node the same with that of a normal node. For a contact node, it will send messages of the same size to both one of the contact nodes and some of the past contact nodes in the upper level ring. For a normal node, it will send messages of the same size to both one of the contact nodes and some of its peers in the same level ring. When broadcasting messages withing the ring, the random parameter k will hide the relative orders of each node. Apart from broadcasting to its children in the constructed k-ary distributed spanning tree, each node will randomly choose a node to send fake message. All fake messages are of the same size of the real messages. Hackers may watch the packets sending out from a node and sending to the node for a long time. However, during one contact node service term, no difference can be discovered from the data collected. Second, contact nodes of a ring will be elected for every service term. One contact node of the last service term will generate random IDs by using Intel SGX's \texttt{sgx\_read\_rand ()} function \cite{costan2016intel}, and then broadcast the nomination result withing the ring. Due to both limited contact node service term period and the same behavior during one service term, outsider cannot differentiate contact nodes from normal nodes. HGFRR's network topology and structure are well hidden from the outsiders. Packet analysis is done by using WireShark and the evaluation result is discussed in Section [TODO].
