@@ -120,7 +120,7 @@ In-ring broadcast is based on the k-ary distributed spanning tree method. The ba
 
 [TODO] For example, Figure 4.3(a) shows a ring of 10 nodes numbered from 0 to 9. As the k-ary spanning tree algorithm states, when $k=2$: node 0 will connect to node 1, 2, 4, 8; node 1 will connect to node 3, 5, 9; node 2 will connect to node 6; node 3 will connect to node 7. After a spanning tree is formed (see Figure 4.3(b)), the message will be disseminated from node 0 down to every node in the spanning tree.
 
-\begin{algorithm}
+\begin{algorithm}[t]
 	\caption{Broadcast}\label{euclid}
 	\begin{algorithmic}[1]
 		\Function{broadcast}{\var{data}}
