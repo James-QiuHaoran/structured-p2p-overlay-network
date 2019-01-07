@@ -55,7 +55,7 @@ The upper level rings are formed by contact node election. When a ring is first 
 		\State $\var{targetNode} \gets \var{contactNode}$
 		\EndIf
 		\EndFor
-		\State $\var{response} \gets \var{queryContactNode}(\var{contactNode}, \var{level})$
+		\State $\var{response} \gets \var{queryNode}(\var{contactNode}, \var{level})$
 		\State $\var{contactNodeList} \gets \var{response.nodes}$
 		\State $\var{level} \gets \var{level}\var{-1}$
 		\State \textbf{goto} \emph{loop}.
@@ -64,7 +64,8 @@ The upper level rings are formed by contact node election. When a ring is first 
 		\State $\text{\; * message withing the ring */}$
 		\State $\var{this.}\var{nodeTable.insert}(\var{recvMsg.node})$
 		\If {$\var{recvMsg.node.contactNode} = \var{true}$}
-		\State $\var{this.}\var{contactNodeList.insert}(\var{recvMsg.node})$
+		\State $\var{contactNode} \gets \var{recvMsg.node}$
+		\State $\var{contactNodeList.insert}(\var{contactNode})$
 		\EndIf
 		\EndProcedure
 	\end{algorithmic}
