@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 
 # 40 broadcasts
 
-fd = open("eos_hgfr_micro_tps_on_input.txt", 'r')
+fd = open("eos_hgfr_e2e_tps_on_input.txt", 'r')
 lines = fd.readlines()
 x = []
 y_eth = []
@@ -27,5 +27,5 @@ plt.xlabel('Input transactions per second', fontsize=12, weight="bold")
 plt.ylabel('Transactions per second', fontsize=12, weight="bold")
 
 fig.tight_layout()
-plt.savefig('eos_hgfr_micro_tps_on_input.pdf')
+plt.savefig('eos_hgfr_e2e_tps_on_input.pdf')
 plt.show()

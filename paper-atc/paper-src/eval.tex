@@ -10,27 +10,106 @@ talk about how we set up the evaluation
 
 use kad+gossip to substitute eth
 
+\begin{figure}[ht]
+  \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+	  \includegraphics[width=\textwidth]{figures/eth_ourgossip_num_msg_on_time.pdf}
+	  \caption{Broadcast behavior.}
+	  \label{eth_ourgossip_num_msg_on_time}
+    \end{subfigure}
+
+    \begin{subfigure}[b]{0.23\textwidth}
+    \includegraphics[width=\textwidth]{figures/eth_ourgossip_num_msg_on_num_node.pdf}
+    \caption{Message complexity.}
+    \label{eth_ourgossip_num_msg_on_num_node}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[b]{0.23\textwidth}
+	  \includegraphics[width=\textwidth]{figures/eth_ourgossip_cvgtime_on_num_node.pdf}
+	  \caption{Time complexity.}
+    \label{eth_ourgossip_cvgtime_on_num_node}
+    \end{subfigure}
+
+	\caption{The comparison between Ethereum and self-implemented Kademlia-based Gossip.}
+	\label{fig_eth_ourgossip}
+	\vspace{-0.5cm}
+\end{figure}
+
+  
 \subsection{Performance Improvements}
+
+\begin{figure}[ht]
+  \centering
+    \begin{subfigure}[b]{0.23\textwidth}
+    \includegraphics[width=\textwidth]{figures/hgfr_ourgossip_num_msg_on_num_node.pdf}
+    \caption{Message complexity with respect to number of nodes.}
+    \label{hgfr_ourgossip_num_msg_on_num_node}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[b]{0.23\textwidth}
+	  \includegraphics[width=\textwidth]{figures/hgfr_ourgossip_num_msg_on_tps.pdf}
+	  \caption{Message complexity with respect to rate of broadcast operations.}
+    \label{hgfr_ourgossip_num_msg_on_tps}
+    \end{subfigure}
+
+	\caption{Comparison of message complexity between Kademlia-based Gossip and HGFRR.}
+	\label{fig_hgfr_ourgossip_msg}
+	\vspace{-0.5cm}
+\end{figure}
+  
 
 talk about the performance improvement in terms of convergence time, message complexity.
 
 \subsubsection{Broadcast}
 
-broadcast performance
+\begin{figure}[ht]
+  \centering
+    \begin{subfigure}[b]{0.46\textwidth}
+	  \includegraphics[width=\textwidth]{figures/hgfr_ourgossip_cvgtime_on_num_nodes.pdf}
+	  \caption{Convergence time with respect to number of nodes.}
+	  \label{hgfr_ourgossip_cvgtime_on_num_nodes}
+    \end{subfigure}
 
-\subsubsection{Robustness and Scalability}
+    \begin{subfigure}[b]{0.23\textwidth}
+    \includegraphics[width=\textwidth]{figures/hgfr_ourgossip_cvgtime_on_tps_2k.pdf}
+    \caption{Convergence time with respect to broadcast rate under 2K nodes.}
+    \label{hgfr_ourgossip_cvgtime_on_tps_2k}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[b]{0.23\textwidth}
+	  \includegraphics[width=\textwidth]{figures/hgfr_ourgossip_cvgtime_on_tps_6k.pdf}
+	  \caption{Convergence time with respect to broadcast rate under 6K nodes.}
+    \label{hgfr_ourgossip_cvgtime_on_tps_6k}
+    \end{subfigure}
 
-fault-tolerance and scalability of broadcast
+	\caption{Comparison of convergence time between Kademlia-based Gossip and HGFRR.}
+	\label{fig_eth_ourgossip_cvgtime}
+	\vspace{-0.5cm}
+\end{figure}
 
-\subsubsection{Contact Node Election}
+\subsection{End-to-end comparison}
 
-performance of contact node election
+\begin{figure}[ht]
+  \centering
+    \begin{subfigure}[b]{0.23\textwidth}
+    \includegraphics[width=\textwidth]{figures/eos_hgfr_e2e_tps_on_input.pdf}
+    \caption{End-to-end performance of EOS transactions.}
+    \label{eos_hgfr_e2e_tps_on_input}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[b]{0.23\textwidth}
+	  \includegraphics[width=\textwidth]{figures/eos_hgfr_micro_tps_on_input.pdf}
+	  \caption{Broadcast performace of HGFRR and the network of EOS.}
+    \label{eos_hgfr_micro_tps_on_input}
+    \end{subfigure}
 
-\subsubsection{Node Join and Leave}
+	\caption{Comparison betweem EOS and HGFRR.}
+	\label{fig_eos_hgfr}
+	\vspace{-0.5cm}
+\end{figure}
+  
 
-performance of node join and leave, which may lead to structure change
-
-\subsection{Security Evaluation}
+\subsection{Security}
 
 We uses WireShark \cite{chappell2010wireshark} to watch the packet sending out from a node and heading to the node. We counts three types of packets: around 17 kb, around 200 bytes, and less than 150 bytes, since they represents three types of messages correspondingly, i.e. the block, the transaction, and other messages including control messages or membership messages. We found that during one service term of a contact node, contact nodes of a ring cannot be differentiated from the normal nodes. By watching and recording for a long time, we found that the overall packet statistics show that all nodes have same percentages of sent and received three types of messages (See Table \ref{tab:packet1} and Table \ref{tab:packet2}). Therefore, due to the short service term of contact nodes and the similar percentages of all types of messages, it is hard for an outsider of the system to differentiate contact nodes from normal nodes.
 
