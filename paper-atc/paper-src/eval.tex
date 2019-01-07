@@ -62,21 +62,21 @@ talk about the performance improvement in terms of convergence time, message com
 
 \subsubsection{Broadcast}
 
-\begin{figure}[ht]
+\begin{figure*}[t]
   \centering
-    \begin{subfigure}[b]{0.46\textwidth}
+    \begin{subfigure}[t]{0.35\textwidth}
 	  \includegraphics[width=\textwidth]{figures/hgfr_ourgossip_cvgtime_on_num_nodes.pdf}
 	  \caption{Convergence time with respect to number of nodes.}
 	  \label{hgfr_ourgossip_cvgtime_on_num_nodes}
     \end{subfigure}
-
-    \begin{subfigure}[b]{0.23\textwidth}
+	~
+    \begin{subfigure}[t]{0.3\textwidth}
     \includegraphics[width=\textwidth]{figures/hgfr_ourgossip_cvgtime_on_tps_2k.pdf}
     \caption{Convergence time with respect to broadcast rate under 2K nodes.}
     \label{hgfr_ourgossip_cvgtime_on_tps_2k}
     \end{subfigure}
     ~
-    \begin{subfigure}[b]{0.23\textwidth}
+    \begin{subfigure}[t]{0.3\textwidth}
 	  \includegraphics[width=\textwidth]{figures/hgfr_ourgossip_cvgtime_on_tps_6k.pdf}
 	  \caption{Convergence time with respect to broadcast rate under 6K nodes.}
     \label{hgfr_ourgossip_cvgtime_on_tps_6k}
@@ -85,7 +85,7 @@ talk about the performance improvement in terms of convergence time, message com
 	\caption{Comparison of convergence time between Kademlia-based Gossip and HGFRR.}
 	\label{fig_eth_ourgossip_cvgtime}
 	\vspace{-0.5cm}
-\end{figure}
+\end{figure*}
 
 \subsection{Fault tolerance}
 \begin{figure}[ht]
