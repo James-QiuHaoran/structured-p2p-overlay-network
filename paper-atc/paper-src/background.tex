@@ -2,6 +2,21 @@
 
 Despite the popularity of cryptocurrencies, general and all-purpose blockchain systems that accommodate various applications, such as Ethereum \cite{wood2014ethereum} have been proposed. However, although Ethereum is a Turing-complete system \cite{wood2014ethereum}, it is in essence designed for the cryptocurrency based on it. Hence the Proof-of-Work (PoW) consensus has been utilized used to support the valuation of the cryptocurrency in the socioeconomic sense, which results in poor efficiency. To facilitate general-purpose applications in a more efficient manner, other consensus protocols have been proposed to improve the performance of the blockchain systems in different scenarios such as Proof-of-Stake \cite{kiayias2017ouroboros}, Proof-of-Luck \cite{milutinovic2016proof}, and Proof-of-Membership \cite{kogias2016enhancing}. Hyperledger Sawtooth \cite{sawtooth} utilizes Intel Software Guard eXtentions (SGX, introduced below) to trust nodes and proposes Proof-of-Elapsed Time believed to be highly efficient. Additionally, EOS \cite{eosio} based on DPoS, NEO \cite{hoxha2018hashgraph} based on DBFT, and Hyperledger Fabric \cite{cachin2016architecture} are all examples of new blockchain systems which are claimed to achieve more than 10k transaction rate \cite{bach2018comparative}.
 
+\begin{table}
+	\begin{tabular}{l*{6}{c}r}
+		Consensus Protocols & Tolerated & Example \\
+		\hline		
+		\textit{PoW} & $<25\%$ & Bitcoin \\
+		\textit{PoS} & $<51\%$ & PeerCoin \\
+		\textit{PBFT} & $<33.3\%$ & HyperLedger Fabric \\
+		\textit{DPOS} & $<51\%$ & Bitshares, EOS\\
+		\textit{Ripple} & $<20\%$ & Ripple \\
+		\textit{Tendermint} & $<33.3\%$ & Tendermint \\
+	\end{tabular}
+	\caption{Consensus Algorithms and Their Tolerated Percentages}
+	\label{tab:packet1}
+\end{table}
+
 \subsection{Peer-to-Peer Overlay Networks}
 
 There have been tremendous efforts and many technical innovations in the Internet broadcasting in the past three decades \cite{liu2008opportunities}. Internet protocol (IP) multicast represented an earlier attempt to tackle this problem but failed largely due to concerns regarding scalability, deployment, and support for higher level functionality. In contrast, Peer-to-peer based broadcast has been shown to be cost effective and easy to deploy. This new paradigm brings a number of unique advantages such as scalability, resilience, and effectiveness in coping with dynamics and heterogeneity. With Network Function Virtualization (NFV), upper-layer applications are allowed to control the lower-layer functionalities of the network such as routing.\\

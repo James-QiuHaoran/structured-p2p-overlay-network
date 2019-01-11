@@ -8,10 +8,11 @@ The design of HGFRR as a Peer-to-Peer network layer under a blockchain system fo
 	\item Fair: An unfair P2P network may ascend free-riders, frustrate majority of users and consequently lead to instability of the network \cite{naghizadeh2016improving}.
 	\item Self-organizing: No central server should be responsible for organizing the structure of the network. In other words, the decentralization nature of the P2P network should not be affected.
 	\item Anonymous: Each node in the network and the network topology should be hidden from the outsider so that target attack can be avoided to some extent.
-	\item Efficient on broadcast: The converge time of each message to broadcast should be as small as possible. Therefore, the number of concurrent messages on flight will be reduced.
 	\item Robust in the dynamic environment: The network is unstable due to the frequent disconnection or node-join. The structure of the network should be easy to maintain in a distributed manner.
-	\item Scalable to large number of nodes: The P2P network should be able to scale up to tremendous number of nodes as a public block chain may grow up to millions of nodes.
 \end{itemize}
+
+%\item Efficient on broadcast: The converge time of each message to broadcast should be as small as possible. Therefore, the number of concurrent messages on flight will be reduced.
+%\item Scalable to large number of nodes: The P2P network should be able to scale up to tremendous number of nodes as a public block chain may grow up to millions of nodes.
 
 \subsection{Topology} \label{topo}
 
@@ -72,12 +73,6 @@ The upper level rings are formed by contact node election. When a ring is first 
 \end{algorithm}
 
 \subsubsection{Structure Maintenance} \label{maintain}
-
-\begin{figure}[t]
-	\includegraphics[width=0.5\textwidth]{figures/transformation.jpg}
-	\caption{Transformation}
-	\label{fig:topo}
-\end{figure}
 
 Each node on the bottom ring will send heart-beat messages to its successor and predecessor to check the aliveness of them. Once a node are not responding to the heart-beat message after the timeout value, the node will double check the liveness of this node with its, e.g. if A's predecessor B does not respond, A will check with the predecessor of B. If they agree that this node left the network (intentionally or accidentally), the information will be disseminated to the ring and this node will be officially removed from the network. If the missing node is the contact node, then the next generation of contact nodes will be elected. If the number of nodes on the ring is smaller than the lower limit, a transformation from right to left in Figure [TODO] will be performed.
 
