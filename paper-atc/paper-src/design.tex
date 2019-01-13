@@ -127,8 +127,51 @@ The k-ary distributed spanning tree method \cite{el2003efficient} is used to bro
 
 In-ring broadcast is based on the k-ary distributed spanning tree method. The basic idea is that the broadcast starter will first generate a random number $k$, and then a k-ary spanning tree can be formed in a distributed manner. Broadcast will then be triggered from the root to every node in the tree. The reason we choose to randomize the parameter k is that the network should be hidden from the attacker. If it keeps using the same parameter k, the routing pattern will be known easily by watching the network activities for a long time. The spanning tree are formed by using the broadcaster (which is numbered 0) as the root. Node 0 will connect to node $0+k^0$, $0+k^1$, $0+k^2$, and so on. Similarly, node 1 will connect to $1+k^0$, $1+k^1$, $1+k^2$, and so on. The pattern is: node $i$ will connect to $i+k^0$, $i+k^1$, $i+k^2$, and so on. The overall time complexity of this method will be $O(logN)$, where $N$ is the number of nodes in the ring.
 
+\begin{lstlisting}
+// broadcast data from any node in the network
+void broadcast(data) {
+  level = 0;
+  contactNode = selectFromContactNodes(level);
+  msg = wrapMsg(data);
+  sendTo(contactNode, msg);
+  return;
+}
+
+// broadcast upwards
+void broadcast_up(currLvl, data) {
+  level = currLvl + 1;
+  contactNode = selectFromContactNodes(level);
+  msg = wrapMsg(data);
+  sendTo(contactNode, msg);
+  return;
+}
+
+// broadcast within ring
+void broadcast_down(currLvl, msg) {
+  endID = this.getNodeTableSize(currLvl);
+  i = 0;
+  nodeOrder = msg.nodeOrder;
+  k = msg.k;
+  while (nodeOrder + pow(k, i) < endID) {
+    i++;
+    if (pow(k, i) <= nodeOrder) {
+      continue;
+    } else {
+      targetID = nodeOrder + pow(k, i);
+      if (targetID > endID)
+        targetID -= endID + 1;
+      receiver = this.getPeer(targetID, currLvl);
+      msg = wrapMsg(msg);
+      sendTo(receiver, msg);
+    }
+  }	
+  return;
+}
+\end{lstlisting}
+
+\iffalse
 \begin{algorithm}[t]
-	\caption{Broadcast}\label{euclid}
+	\caption{Broadcast}\label{broadcast}
 	\begin{algorithmic}[1]
 		\Function{broadcast}{\var{data}}
 		\State $\var{level} \gets \var{0}$
@@ -167,6 +210,7 @@ In-ring broadcast is based on the k-ary distributed spanning tree method. The ba
 		\EndFunction
 	\end{algorithmic}
 \end{algorithm}
+\fi
 
 \subsection{Security Consideration} \label{security}
 

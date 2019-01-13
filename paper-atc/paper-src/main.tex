@@ -35,6 +35,18 @@
 \algdef{S}[FOR]{ForEach}[1]{\algorithmicforeach\ #1\ \algorithmicdo}
 \newcommand{\var}{\texttt}
 
+\usepackage{listings, xcolor}
+\lstset{
+	language=C++,
+	columns=fullflexible,
+	basicstyle=\ttfamily,
+	commentstyle=\mycommentstyle,
+	escapechar=\$,
+}
+
+\newcommand{\mycommentstyle}{\normalfont\itshape}
+\newcommand{\commentref}[1]{{\mycommentstyle\ref{#1}}}
+
 \newcommand{\xxx}{\textsc{HGFRR }}
 
 \crefformat{section}{\S#2#1#3} % see manual of cleveref, section 8.2.1
