@@ -24,7 +24,7 @@ Before presenting the protocol, several key concepts should be defined clearly:
 \end{itemize}
 
 \begin{figure}[t]
-	\includegraphics[width=0.5\textwidth]{figures/topo.jpg}
+	\includegraphics[width=0.47\textwidth]{figures/topo.jpg}
 	\caption{Topology Illustration of a 3-level \xxx Network}
 	\label{fig:topo}
 \end{figure}
@@ -38,7 +38,7 @@ When a new node wants to join the network, it will first send ping-messages to e
 The upper level rings are formed by contact node election. When a ring is first formed, the first member node of the ring will be the contact node of this ring. Each generation of contact nodes have their term of service. At the end of the term, one of the contact nodes will generate random IDs from all member node IDs. This election result will be dispersed within ring, and multi-casted to the contact nodes of the upper level ring and the lower level rings.
 
 \begin{figure}[t]
-	\includegraphics[width=0.5\textwidth]{figures/topo-vertical.jpg}
+	\includegraphics[width=0.47\textwidth]{figures/topo-vertical.jpg}
 	\caption{Vertical Illustration of \xxx Network Structure. The figure illustrated the relationship between two levels next to each other.}
 	\label{fig:topo}
 \end{figure}
@@ -82,6 +82,7 @@ The upper level rings are formed by contact node election. When a ring is first 
 
 Each node on the bottom ring will send heart-beat messages to its successor and predecessor to check the aliveness of them. Once a node are not responding to the heart-beat message after the timeout value, the node will double check the liveness of this node with its, e.g. if A's predecessor B does not respond, A will check with the predecessor of B. If they agree that this node left the network (intentionally or accidentally), the information will be disseminated to the ring and this node will be officially removed from the network. If the missing node is the contact node, then the next generation of contact nodes will be elected. If the number of nodes on the ring is smaller than the lower limit, a transformation from right to left in Figure [TODO] will be performed.
 
+\iffalse
 \begin{algorithm}
 	\caption{Maintenance}\label{euclid}
 	\begin{algorithmic}[1]
@@ -114,6 +115,7 @@ Each node on the bottom ring will send heart-beat messages to its successor and 
 		\EndFunction
 	\end{algorithmic}
 \end{algorithm}
+\fi
 
 \subsection{Broadcast} \label{broadcast}
 
