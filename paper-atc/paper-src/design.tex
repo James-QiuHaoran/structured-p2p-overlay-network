@@ -43,8 +43,9 @@ The upper level rings are formed by contact node election. When a ring is first 
 	\label{fig:topo}
 \end{figure}
 
+\iffalse
 \begin{algorithm}
-	\caption{Bootstrap}\label{euclid}
+	\caption{Bootstrap}\label{bootstrap}
 	\begin{algorithmic}[1]
 		\Procedure{Node Join}{}
 		\State $\var{response} \gets \var{queryDNSSeeds}()$
@@ -77,6 +78,33 @@ The upper level rings are formed by contact node election. When a ring is first 
 		\EndProcedure
 	\end{algorithmic}
 \end{algorithm}
+\fi
+
+\begin{lstlisting}
+// when a node want to join the network
+void bootstrap() {
+  response = queryDNSSeeds();
+  contactNodeList = response.nodes;
+  level = response.topLevel;
+  while (level != 0) {
+    optimalMetric = 0;
+    foreach node : contactNodeList {
+      metric = testProximity(contactNode);
+      if (metric > optimalMetric) {
+      	optimalMetric = metric;
+      	targetNode = contactNode;
+      }
+    }
+    response = queryNode(targetNode, level);
+    contactNodeList = response.nodes;
+    level -= 1;
+  }
+  
+  /* contact node of level 0 ring broadcast node-join
+     message within the ring */
+  this.nodeTable.insert(recvMsg.node);
+}
+\end{lstlisting}
 
 \subsubsection{Structure Maintenance} \label{maintain}
 
