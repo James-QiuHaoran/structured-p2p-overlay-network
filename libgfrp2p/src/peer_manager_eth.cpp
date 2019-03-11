@@ -236,14 +236,19 @@ void PeerManagerETH::on_receive(const Message &msg, const std::string &data, con
 	int sleep_time = 0;
 	if (sender_id.substr(ID_CONTINENT_START, ID_CONTINENT_START+ID_CONTINENT_LEN) != receiver_id.substr(ID_CONTINENT_START, ID_CONTINENT_START+ID_CONTINENT_LEN)) {
 		sleep_time = this->random_num_in_range(160, 200);
+		std::cout << "MICRO - HOP - 5 - 160~200 ms\n";
 	} else if (sender_id.substr(ID_COUNTRY_START, ID_COUNTRY_START+ID_COUNTRY_LEN) != receiver_id.substr(ID_COUNTRY_START, ID_COUNTRY_START+ID_COUNTRY_LEN)) {
 		sleep_time = this->random_num_in_range(120, 160);
+		std::cout << "MICRO - HOP - 4 - 120~160 ms\n";
 	} else if (sender_id.substr(ID_STATE_START, ID_STATE_START+ID_STATE_LEN) != receiver_id.substr(ID_STATE_START, ID_STATE_START+ID_STATE_LEN)) {
 		sleep_time = this->random_num_in_range(80, 120);
+		std::cout << "MICRO - HOP - 3 - 80~120 ms\n";
 	} else if (sender_id.substr(ID_CITY_START, ID_CITY_START+ID_CITY_LEN) != receiver_id.substr(ID_CITY_START, ID_CITY_START+ID_CITY_LEN)) {
 		sleep_time = this->random_num_in_range(40, 80);
+		std::cout << "MICRO - HOP - 2 - 40~80 ms\n";
 	} else if (sender_id.substr(ID_DISTRICT_START, ID_DISTRICT_START+ID_DISTRICT_LEN) != receiver_id.substr(ID_DISTRICT_START, ID_DISTRICT_START+ID_DISTRICT_LEN)) {
 		sleep_time = this->random_num_in_range(0, 40);
+		std::cout << "MICRO - HOP - 1 - 0~40 ms\n";
 	}
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
