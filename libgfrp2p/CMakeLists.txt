@@ -16,7 +16,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /O2")
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O3")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O3 -pthread")
 endif()
 
 if(WIN32)
@@ -37,8 +37,8 @@ if(WIN32)
 endif()
 
 # Check Boost
-add_definitions(-D BOOST_ALL_DYN_LINK)
-find_package(Boost 1.58.0 COMPONENTS log random REQUIRED)
+# add_definitions(-D BOOST_ALL_DYN_LINK)
+# find_package(Boost 1.58.0 COMPONENTS log random REQUIRED)
 
 # Check Protobuf
 find_package(Protobuf 3.0.0 REQUIRED)
@@ -53,7 +53,7 @@ protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS
 # find_package(SQLite3 REQUIRED)
 
 include_directories(
-    ${Boost_INCLUDE_DIRS}
+    # ${Boost_INCLUDE_DIRS}
     ${Protobuf_INCLUDE_DIRS}
     # ${SQLITE3_INCLUDE_DIRS}
     ${PROJECT_SOURCE_DIR}/include
@@ -82,8 +82,8 @@ add_library(${PROJECT_NAME} STATIC
 )
 
 target_link_libraries(${PROJECT_NAME}
-    Boost::log
-    Boost::random
+    # Boost::log
+    # Boost::random
 )
 
 # Make executables

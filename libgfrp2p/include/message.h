@@ -6,9 +6,10 @@
 #include <unordered_map>
 #include <chrono>
 #include <cstdio>
+#include <cstring>
 #include <iostream>
 
-using message_key_t = unsigned long;
+using message_key_t = long long;
 
 /* Message class
  * definition of messages transmitted among peers
@@ -16,7 +17,7 @@ using message_key_t = unsigned long;
 class Message {
     friend class MessageTable;
 private:
-    unsigned long io_timestamp;
+    long long io_timestamp;
     unsigned short io_type;
     
     std::string broadcastID;
@@ -57,7 +58,7 @@ public:
     void set_sender_id(const std::string &sender_id);
     void set_receiver_id(const std::string &receiver_id);
     void set_from_level(unsigned long level);
-    void set_message_id(std::string message_id);
+    void set_message_id(const std::string& message_id);
     void set_type(int type);
     void set_node_order(int order);
     void set_TTL(int ttl);

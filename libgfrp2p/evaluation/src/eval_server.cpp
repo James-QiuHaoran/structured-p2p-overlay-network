@@ -26,15 +26,16 @@ void EvalServer::receive(const std::string & ip, unsigned short port, const std:
 		// On receive node registration
 		NodeRecord record;
 		record.ip = ip;
-		record.port = static_cast<unsigned short>(msg.init().port());
+		record.bootstrap_port = static_cast<unsigned short>(msg.init().bootstrap_port());
+		record.broadcast_port = static_cast<unsigned short>(msg.init().broadcast_port());
 		std::lock_guard<std::mutex> lock(mlock_);
 		db_->insert({db_->size(), record});
-		std::cout << "INFO: EvalServer::receive: " << record.ip << ':' << record.port << " registered";
+		std::cout << "INFO: EvalServer::receive: " << record.ip << ": (bootstrap)" << record.bootstrap_port << " and (broadcast)" << record.broadcast_port << " registered" << std::endl;
  	} else if (msg.type() == BootstrapMessage::PUSH_LOG) {
 		// On receive node message log
 		std::ofstream fout;
-		std::string filename = log_dir_+'/'+ msg.push_log().run_id() + '_' + msg.push_log().node_id() + ".txt";
-		fout.open(filename);
+		std::string filename = log_dir_ + '/' + msg.push_log().run_id() + '_' + msg.push_log().node_id() + ".txt";
+		fout.open(filename, std::ofstream::out | std::ofstream::app);
 		if (!fout.is_open()) {
 			std::cerr << "ERROR: EvalServer::receive: Failed to open " << filename << std::endl;
 			return;
@@ -95,28 +96,65 @@ void EvalServer::handle_config(const EvalConfig& config) {
 
 	std::lock_guard<std::mutex> lock(mlock_);
 
-	if (!db_) {
-		std::cerr << "ERROR: EvalServer::handle_config: Database not initialized" << std::endl;
-		return;
-	} 
-
-	std::cout << "DEBUG: EvalServer::handle_config: Preparing node table" << std::endl;
-	eval_config_->mutable_config()->set_table_size(db_->size());
-	for (const auto& kv: *db_) {
-		eval_config_->mutable_config()->add_table_ids(kv.first);
-		eval_config_->mutable_config()->add_table_ips(kv.second.ip);
-		eval_config_->mutable_config()->add_table_ports(kv.second.port);
-	}
-
 	std::cout << "INFO:: EvalServer::handle_config: Sending config: " << std::endl;
-	int counter = 0;
+	std::size_t counter = 0;
 	for (const auto& kv : *db_) {
-		send_config(kv.first, kv.second.ip, kv.second.port);
+		send_config(kv.first, kv.second.ip, kv.second.bootstrap_port);
 
 		counter ++;
 		if (int(double(counter)/db_->size()*10) == int(double(counter-1)/db_->size()*10) + 1)
-			std::cout << "INFO:: EvalServer::handle_config: ... " << int(double(counter)/db_->size()*100) << '%' << std::endl;
+			std::cout << "DEBUG:: EvalServer::handle_config: ... " << int(double(counter)/db_->size()*100) << '%' << std::endl;
+
+		std::this_thread::sleep_for(std::chrono::microseconds(300));
 	}
+
+}
+
+void EvalServer::handle_table() {
+	std::lock_guard<std::mutex> lock(mlock_);
+
+	if (!db_) {
+		std::cerr << "ERROR: EvalServer::handle_table: Database not initialized" << std::endl;
+		return;
+	} 
+
+	std::cout << "DEBUG: EvalServer::handle_table: Preparing node table" << std::endl;
+
+	std::unique_ptr<BootstrapMessage> msg(new BootstrapMessage());
+	msg->set_type(BootstrapMessage::TABLE);
+	std::size_t i = 0;
+	for (const auto& kv : *db_) {
+		msg->mutable_table()->add_table_ids(kv.first);
+		msg->mutable_table()->add_table_ips(kv.second.ip);
+		msg->mutable_table()->add_table_ports(kv.second.broadcast_port);
+
+
+		i++;
+		if (i % 2000 == 0 || i == db_->size()) {
+			msg->mutable_table()->set_table_size(i > 2000 ? (i % 2000 == 0 ? 2000 : i % 2000) : i);
+			msg->mutable_table()->set_is_end(i >= db_->size());
+
+			std::string buffer;
+			msg->SerializeToString(&buffer);
+
+			std::cout << "DEBUG: EvalServer::handle_table: Sending page " << i << " out of " << db_->size() << std::endl;
+			std::size_t counter = 0;
+			for (const auto& kv2 : *db_) {
+				tcp_server_->send(kv2.second.ip, kv2.second.bootstrap_port, buffer);
+
+				counter ++;
+				if (int(double(counter)/db_->size()*10) == int(double(counter-1)/db_->size()*10) + 1)
+					std::cout << "DEBUG:: EvalServer::handle_table: ... " << int(double(counter)/db_->size()*100) << '%' << std::endl;
+
+				std::this_thread::sleep_for(std::chrono::microseconds(300));
+			}
+	
+			msg.reset(new BootstrapMessage());
+			msg->set_type(BootstrapMessage::TABLE);
+		}
+	}
+
+
 }
 
 void EvalServer::handle_broadcast(std::size_t node_id, std::uint32_t workload_size) {
@@ -131,7 +169,7 @@ void EvalServer::handle_broadcast(std::size_t node_id, std::uint32_t workload_si
 		return;
 	}
 
-	send_broadcast(workload_size, iter->second.ip, iter->second.port);
+	send_broadcast(workload_size, iter->second.ip, iter->second.bootstrap_port);
 }
 
 void EvalServer::handle_pull_log(std::size_t node_id, const std::string& run_id) {
@@ -146,7 +184,7 @@ void EvalServer::handle_pull_log(std::size_t node_id, const std::string& run_id)
 		return;
 	}
 
-	send_pull_log(run_id, iter->second.ip, iter->second.port );
+	send_pull_log(run_id, iter->second.ip, iter->second.bootstrap_port);
 }
 
 
@@ -215,6 +253,17 @@ int main(int argc, char* argv[]) {
 	for (;;) {
 		std::cout << "Enter a commnand (\"help\" for hints) >>> ";
 		std::cin >> command;
+		if (std::cin.eof()) {
+			std::cout << "EOF read, resetting" << std::endl;
+			std::cin.clear();
+			continue;
+		}
+		if (std::cin.fail()) {
+			std::cout << "std::cin filed read, resetting, throwing a whole line" << std::endl;
+			std::cin.clear();
+			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+			continue;
+		}
 
 		if (command == "count") {
 			std::cout << "Current # of nodes: " << eval_server->handle_count() << std::endl;
@@ -224,8 +273,7 @@ int main(int argc, char* argv[]) {
 
 			NodeRecord r = eval_server->handle_check(node_id);
 
-			std::cout << "Node " << node_id << ":\n\tIP: " << r.ip 
-				<< "\n\tPort: " << r.port << std::endl;
+			std::cout << "Node " << node_id << ": ip: " << r.ip << "; bootstrap port: " << r.bootstrap_port << "; broadcast port: " << r.broadcast_port << std::endl;
 		} else if (command == "config") {
 			EvalConfig eval_config;
 			
@@ -239,26 +287,50 @@ int main(int argc, char* argv[]) {
 				>> eval_config.num_continents;
 
 			eval_server->handle_config(eval_config);
-		} else if (command == "broadast") {
+		} else if (command == "table") {
+			eval_server->handle_table();
+		} else if (command == "broadcast") {
 			std::size_t node_id;
 			std::uint32_t workload_size;
 			std::cout << "Enter node_id workload_size >>> ";
 			std::cin >> node_id >> workload_size;
 
 			eval_server->handle_broadcast(node_id, workload_size);
-		
+		} else if (command == "expr") {
+			long long interval_in_microseonds;
+			std::uint32_t num_times;
+			std::uint32_t workload_size;
+			std::cout << "Enter interval_in_micros num_times workload_size >>> ";
+			std::cin >> interval_in_microseonds >> num_times >> workload_size;
+
+			std::size_t num_nodes = eval_server->handle_count();
+			for (std::uint32_t i = 0; i < num_times; i++ ) {
+				std::size_t node_id = rand() % num_nodes;
+				std::cout << "Sending command to " << node_id << ": ";
+				eval_server->handle_broadcast(node_id, workload_size);
+				// micros_remaining -= interval_in_microseonds;
+				std::cout << num_times-i << " times out of " << num_times << " times remaining" << std::endl;
+				std::this_thread::sleep_for(std::chrono::microseconds(interval_in_microseonds));
+			}
 		} else if (command == "pull_log") {
 			std::size_t node_id;
 			std::string run_id;
 			std::cout << "Enter node_id run_id >>> ";
 			std::cin >> node_id >> run_id;
 			eval_server->handle_pull_log(node_id, run_id);
-
+		} else if (command == "pull_log_all") {
+			std::string run_id;
+			std::cout << "Enter run_id >>> ";
+			std::cin >> run_id;
+			for (std::size_t i = 0; i < eval_server->handle_count(); i++) {
+				eval_server->handle_pull_log(i, run_id);
+				std::this_thread::sleep_for(std::chrono::microseconds(300));
+			}
 		} else if (command == "help") {
-			std::cout << "count\t# of registered nodes\ncheck node_id\tinfo of the node\n \
-				config run_id eval_type(0/1) n_dist cn_dist n_city cn_city n_state cn_state n_country cn_country n_continent\tconfig the experiment\n \
-				broadcast node_id workload_size\tmake node_id broadcast a work_size long message\n \
-				pull_log node_id run_id\tmake node_id upload its log of experiment run_id" << std::endl;
+			std::cout << "count - # of registered nodes\ncheck node_id - info of the node\n"
+				<< "config run_id eval_type(0/1) n_dist cn_dist n_city cn_city n_state cn_state n_country cn_country n_continent - config the experiment\n"
+				<< "broadcast node_id workload_size - make node_id broadcast a work_size long message\n"
+				<< "pull_log node_id run_id - make node_id upload its log of experiment run_id" << std::endl;
 		} else {
 			std::cout << "Illegal command" << std::endl;
 		}

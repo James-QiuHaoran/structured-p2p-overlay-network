@@ -1,0 +1,30 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
+\BOOKMARK [1][-]{section.2}{Background and Related Works}{}% 2
+\BOOKMARK [2][-]{subsection.2.1}{Peer-to-Peer Overlay Networks}{section.2}% 3
+\BOOKMARK [3][-]{subsubsection.2.1.1}{Data Look-up}{subsection.2.1}% 4
+\BOOKMARK [3][-]{subsubsection.2.1.2}{Message Dissemination}{subsection.2.1}% 5
+\BOOKMARK [2][-]{subsection.2.2}{P2P Networks in Blockchain Systems}{section.2}% 6
+\BOOKMARK [2][-]{subsection.2.3}{Trusted Execution Environment \(TEE\)}{section.2}% 7
+\BOOKMARK [1][-]{section.3}{HGFRR Design}{}% 8
+\BOOKMARK [2][-]{subsection.3.1}{Design Principles}{section.3}% 9
+\BOOKMARK [2][-]{subsection.3.2}{Topology}{section.3}% 10
+\BOOKMARK [3][-]{subsubsection.3.2.1}{Structure Formation}{subsection.3.2}% 11
+\BOOKMARK [3][-]{subsubsection.3.2.2}{Structure Maintenance}{subsection.3.2}% 12
+\BOOKMARK [2][-]{subsection.3.3}{Broadcast}{section.3}% 13
+\BOOKMARK [3][-]{subsubsection.3.3.1}{Broadcast Within-Ring Mechanism}{subsection.3.3}% 14
+\BOOKMARK [2][-]{subsection.3.4}{Security Consideration}{section.3}% 15
+\BOOKMARK [1][-]{section.4}{Proof and Analysis}{}% 16
+\BOOKMARK [2][-]{subsection.4.1}{Broadcast Message Complexity}{section.4}% 17
+\BOOKMARK [2][-]{subsection.4.2}{Broadcast Time Complexity}{section.4}% 18
+\BOOKMARK [2][-]{subsection.4.3}{Robustness}{section.4}% 19
+\BOOKMARK [1][-]{section.5}{Implementation Details}{}% 20
+\BOOKMARK [1][-]{section.6}{Evaluation}{}% 21
+\BOOKMARK [2][-]{subsection.6.1}{Evaluation Setup}{section.6}% 22
+\BOOKMARK [2][-]{subsection.6.2}{Ease of Use}{section.6}% 23
+\BOOKMARK [2][-]{subsection.6.3}{Performance Improvements}{section.6}% 24
+\BOOKMARK [3][-]{subsubsection.6.3.1}{Broadcast}{subsection.6.3}% 25
+\BOOKMARK [3][-]{subsubsection.6.3.2}{Robustness and Scalability}{subsection.6.3}% 26
+\BOOKMARK [3][-]{subsubsection.6.3.3}{Contact Node Election}{subsection.6.3}% 27
+\BOOKMARK [3][-]{subsubsection.6.3.4}{Node Join and Leave}{subsection.6.3}% 28
+\BOOKMARK [2][-]{subsection.6.4}{Security Evaluation}{section.6}% 29
+\BOOKMARK [1][-]{section.7}{Conclusion}{}% 30

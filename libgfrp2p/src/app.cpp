@@ -40,7 +40,9 @@ void BaseApp::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
     ss_node >> node_id_in_dist;
 
     int num_dists_in_city = num_nodes_in_city/num_cnodes_in_dist;
-    int num_cities_in_state = num_nodes_in_state/num_cnodes_in_dist;
+    int num_cities_in_state = num_nodes_in_state/num_cnodes_in_city;
+    int num_states_in_country = num_nodes_in_country/num_cnodes_in_state;
+    int num_countries_in_continent = num_nodes_in_continent/num_cnodes_in_country;
 
     std::vector<Ring> tables;
     std::unordered_map<std::string, std::shared_ptr<Node>> contact_nodes;  // contact nodes of the ring
@@ -65,7 +67,7 @@ void BaseApp::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
     for (int i = 0; i < num_nodes_in_dist; i++) {
         ss.str("");
         ss.clear();
-        ss << std::setw(9) << std::setfill('0') << i;
+        ss << std::setw(ID_SINGLE_LEN) << std::setfill('0') << i;
         std::string peer_id_in_dist = ss.str();
         std::string node_id = this->node->get_id().substr(0, ID_SINGLE_START) + peer_id_in_dist;
         unsigned short port = starting_port_number + convert_ID_string_to_int(node_id,
@@ -107,6 +109,10 @@ void BaseApp::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
     tables.push_back(table_peer);
     
     // contact nodes - dist level
+    if (num_nodes_in_city == 0) {
+        this->node_table->set_tables(tables);
+        return;
+    }
     if (contact_nodes.find(this->node->get_id()) != contact_nodes.end()) {
         // should be the contact node of the dist level ring
         Ring table_dist;
@@ -120,7 +126,7 @@ void BaseApp::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
         for (int i = 0; i < num_dists_in_city; i++) {
             ss.str("");
             ss.clear();
-            ss << std::setw(5) << std::setfill('0') << i;
+            ss << std::setw(ID_DISTRICT_LEN) << std::setfill('0') << i;
             std::string dist_id_in_city = ss.str();
             std::string node_id_until_dist = node_id_until_city + dist_id_in_city;
             for (auto contact_node : contact_nodes_list) {
@@ -162,6 +168,10 @@ void BaseApp::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
     }
 
     // contact nodes - city level
+    if (num_nodes_in_state == 0) {
+        this->node_table->set_tables(tables);
+        return;
+    }
     if (contact_nodes.find(this->node->get_id()) != contact_nodes.end()) {
         // should be the contact node of the city level ring
         Ring table_city;
@@ -176,7 +186,7 @@ void BaseApp::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
         for (int i = 0; i < num_cities_in_state; i++) {
             ss.str("");
             ss.clear();
-            ss << std::setw(6) << std::setfill('0') << i;
+            ss << std::setw(ID_CITY_LEN) << std::setfill('0') << i;
             std::string city_id_in_state = ss.str();
             std::string node_id_until_city = node_id_until_state + city_id_in_state;
             for (auto contact_node : contact_nodes_list) {
@@ -206,14 +216,185 @@ void BaseApp::form_structure(int num_nodes_in_dist, int num_cnodes_in_dist,
         table_city.peer_list = peer_list;
 
         tables.push_back(table_city);
+
+        // exchange contact_nodes and contact_nodes_next
+        contact_nodes.clear();
+        contact_nodes_list.clear();
+        for (auto contact_node : contact_nodes_next) {
+            contact_nodes.insert(contact_node);
+            contact_nodes_list.push_back(contact_node.second);
+        }
+        contact_nodes_next.clear();
+    }
+
+    // contact nodes - state level
+    if (num_nodes_in_country == 0) {
+        this->node_table->set_tables(tables);
+        return;
+    }
+    if (contact_nodes.find(this->node->get_id()) != contact_nodes.end()) {
+        // should be the contact node of the state level ring
+        Ring table_state;
+        table_state.ring_level = 3;
+
+        // reset stringstream and ring variables
+        peer_set.clear();
+        peer_list.clear();
+
+        std::string node_id_until_country = this->node->get_id().substr(0, ID_STATE_START);
+        int j = 0;
+        for (int i = 0; i < num_states_in_country; i++) {
+            ss.str("");
+            ss.clear();
+            ss << std::setw(ID_STATE_LEN) << std::setfill('0') << i;
+            std::string state_id_in_country = ss.str();
+            std::string node_id_until_state = node_id_until_country + state_id_in_country;
+            for (auto contact_node : contact_nodes_list) {
+                std::string node_id = node_id_until_state + contact_node->get_id().substr(ID_CITY_START);
+                unsigned short port = starting_port_number + convert_ID_string_to_int(node_id,
+                                                                num_nodes_in_dist, num_cnodes_in_dist, 
+                                                                num_nodes_in_city, num_cnodes_in_city, 
+                                                                num_nodes_in_state, num_cnodes_in_state, 
+                                                                num_nodes_in_country, num_cnodes_in_country, 
+                                                                num_nodes_in_continent);
+                Node node(node_id, "127.0.0.1", port);
+
+                peer_list.push_back(std::make_shared<Node>(node));
+                peer_set.insert({node_id, std::make_shared<Node>(node)});
+
+                if (j < num_cnodes_in_state) {
+                    contact_nodes_next.insert({node_id, std::make_shared<Node>(node)});
+                    j++;
+                }
+            }
+        }
+
+        table_state.contact_nodes = contact_nodes_next;
+        table_state.predecessor = NULL;
+        table_state.successor = NULL;
+        table_state.peer_set = peer_set;
+        table_state.peer_list = peer_list;
+
+        tables.push_back(table_state);
+
+        // exchange contact_nodes and contact_nodes_next
+        contact_nodes.clear();
+        contact_nodes_list.clear();
+        for (auto contact_node : contact_nodes_next) {
+            contact_nodes.insert(contact_node);
+            contact_nodes_list.push_back(contact_node.second);
+        }
+        contact_nodes_next.clear();
+    }
+
+    // contact nodes - country level
+    if (num_nodes_in_continent == 0) {
+        this->node_table->set_tables(tables);
+        return;
+    }
+    if (contact_nodes.find(this->node->get_id()) != contact_nodes.end()) {
+        // should be the contact node of the country level ring
+        Ring table_country;
+        table_country.ring_level = 4;
+
+        // reset stringstream and ring variables
+        peer_set.clear();
+        peer_list.clear();
+
+        std::string node_id_until_continent = this->node->get_id().substr(0, ID_COUNTRY_START);
+        int j = 0;
+        for (int i = 0; i < num_countries_in_continent; i++) {
+            ss.str("");
+            ss.clear();
+            ss << std::setw(ID_COUNTRY_LEN) << std::setfill('0') << i;
+            std::string country_id_in_continent = ss.str();
+            std::string node_id_until_country = node_id_until_continent + country_id_in_continent;
+            for (auto contact_node : contact_nodes_list) {
+                std::string node_id = node_id_until_country + contact_node->get_id().substr(ID_STATE_START);
+                unsigned short port = starting_port_number + convert_ID_string_to_int(node_id,
+                                                                num_nodes_in_dist, num_cnodes_in_dist, 
+                                                                num_nodes_in_city, num_cnodes_in_city, 
+                                                                num_nodes_in_state, num_cnodes_in_state, 
+                                                                num_nodes_in_country, num_cnodes_in_country, 
+                                                                num_nodes_in_continent);
+                Node node(node_id, "127.0.0.1", port);
+
+                peer_list.push_back(std::make_shared<Node>(node));
+                peer_set.insert({node_id, std::make_shared<Node>(node)});
+
+                if (j < num_cnodes_in_country) {
+                    contact_nodes_next.insert({node_id, std::make_shared<Node>(node)});
+                    j++;
+                }
+            }
+        }
+
+        table_country.contact_nodes = contact_nodes_next;
+        table_country.predecessor = NULL;
+        table_country.successor = NULL;
+        table_country.peer_set = peer_set;
+        table_country.peer_list = peer_list;
+
+        tables.push_back(table_country);
+
+        // exchange contact_nodes and contact_nodes_next
+        contact_nodes.clear();
+        contact_nodes_list.clear();
+        for (auto contact_node : contact_nodes_next) {
+            contact_nodes.insert(contact_node);
+            contact_nodes_list.push_back(contact_node.second);
+        }
+        contact_nodes_next.clear();
+    }
+
+    // contact nodes - continent level
+    if (contact_nodes.find(this->node->get_id()) != contact_nodes.end()) {
+        // should be the contact node of the country level ring
+        Ring table_continent;
+        table_continent.ring_level = 5;
+
+        // reset stringstream and ring variables
+        peer_set.clear();
+        peer_list.clear();
+
+        int j = 0;
+        for (int i = 0; i < num_continents; i++) {
+            ss.str("");
+            ss.clear();
+            ss << std::setw(ID_CONTINENT_LEN) << std::setfill('0') << i;
+            std::string node_id_until_continent = ss.str();
+            for (auto contact_node : contact_nodes_list) {
+                std::string node_id = node_id_until_continent + contact_node->get_id().substr(ID_COUNTRY_START);
+                unsigned short port = starting_port_number + convert_ID_string_to_int(node_id,
+                                                                num_nodes_in_dist, num_cnodes_in_dist, 
+                                                                num_nodes_in_city, num_cnodes_in_city, 
+                                                                num_nodes_in_state, num_cnodes_in_state, 
+                                                                num_nodes_in_country, num_cnodes_in_country, 
+                                                                num_nodes_in_continent);
+                Node node(node_id, "127.0.0.1", port);
+
+                peer_list.push_back(std::make_shared<Node>(node));
+                peer_set.insert({node_id, std::make_shared<Node>(node)});
+
+                if (j < num_cnodes_in_continent) {
+                    contact_nodes_next.insert({node_id, std::make_shared<Node>(node)});
+                    j++;
+                }
+            }
+        }
+
+        table_continent.contact_nodes = contact_nodes_next;
+        table_continent.predecessor = NULL;
+        table_continent.successor = NULL;
+        table_continent.peer_set = peer_set;
+        table_continent.peer_list = peer_list;
+
+        tables.push_back(table_continent);
     }
 
     this->node_table->set_tables(tables);
 
-    // [TODO - if needed]
-    // contact nodes - state level
-    // contact nodes - country level
-    // contact nodes - continent level
+    return;
 }
 
 void BaseApp::start(const std::string &start_time, int num_nodes_in_dist, int num_cnodes_in_dist, 
@@ -223,8 +404,8 @@ void BaseApp::start(const std::string &start_time, int num_nodes_in_dist, int nu
         int num_nodes_in_continent, int num_continents,
         int num_cnodes_in_continent,
         unsigned short starting_port_number) {
-    BOOST_LOG_TRIVIAL(debug) << "Setting up NodeTable for node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
-    BOOST_LOG_TRIVIAL(debug) << "Establishing structure on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
+    std::cout << "Setting up NodeTable for node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]\n";
+    std::cout << "Establishing structure on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]\n";
     
     this->form_structure(num_nodes_in_dist, num_cnodes_in_dist, 
         num_nodes_in_city, num_cnodes_in_city, 
@@ -234,26 +415,25 @@ void BaseApp::start(const std::string &start_time, int num_nodes_in_dist, int nu
         num_cnodes_in_continent,
         starting_port_number);
     
-    BOOST_LOG_TRIVIAL(debug) << "Structure established on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
-    BOOST_LOG_TRIVIAL(debug) << "Node Tables on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
+    std::cout << "Structure established on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]\n";
+    std::cout << "Node Tables on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]\n";
     for (auto table : this->node_table->get_tables()) {
-        BOOST_LOG_TRIVIAL(debug) << "Level: " + std::to_string(table.ring_level);
+	std::cout << "Level: " << std::to_string(table.ring_level) << "\n";
         for (auto peer : table.peer_list) {
-            BOOST_LOG_TRIVIAL(debug) << "Peer - " + peer->get_id() + " " + peer->get_ip() + ":" + std::to_string(peer->get_port());
+	    std::cout << "Peer - " + peer->get_id() + " " + peer->get_ip() + ":" + std::to_string(peer->get_port()) << "\n";
         }
         for (auto contact_node : table.contact_nodes) {
-            BOOST_LOG_TRIVIAL(debug) << "Contact node - " + contact_node.first + " " + contact_node.second->get_ip() + ":" + std::to_string(contact_node.second->get_port());
+	    std::cout << "Contact node - " + contact_node.first + " " + contact_node.second->get_ip() + ":" + std::to_string(contact_node.second->get_port()) << "\n";
         }
     }
 
     this->peer_manager = std::make_shared<PeerManager>(node, node_table, start_time);
 
-    BOOST_LOG_TRIVIAL(debug) << "Starting HGFR PeerManager on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
+    std::cout << "Starting HGFR PeerManager on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]\n";
     this->peer_manager->start();
 }
 
 void BaseApp::stop() {
-    // BOOST_LOG_TRIVIAL(debug) << "Stopping HGFR PeerManager on node [ID: " + this->node->get_id() + "] [IP: " + this->node->get_ip() + "] [" + std::to_string(this->node->get_port()) + "]";
     this->peer_manager->stop();
 }
 
@@ -263,7 +443,7 @@ void BaseApp::broadcast(const std::string &data) {
 
 int main(int argc, char** argv) {
     if (argc != 17) {
-        BOOST_LOG_TRIVIAL(info) << "Wrong arguments. Correct usage: "
+	std::cout << "Wrong arguments. Correct usage: "
                                         << "./app_eth ip_addr port_num id "
                                             << "num_nodes_in_dist num_cnodes_in_dist " 
                                             << "num_nodes_in_city num_cnodes_in_city " 
@@ -300,22 +480,20 @@ int main(int argc, char** argv) {
                                             num_nodes_in_state, num_cnodes_in_state, 
                                             num_nodes_in_country, num_cnodes_in_country, 
                                             num_nodes_in_continent);
-    BOOST_LOG_TRIVIAL(debug) << "Order: " << order;
+    std::cout << "Order: " << order << "\n";
     std::string id_string = convert_ID_int_to_string(order, num_nodes_in_dist, num_cnodes_in_dist, 
                                             num_nodes_in_city, num_cnodes_in_city, 
                                             num_nodes_in_state, num_cnodes_in_state, 
                                             num_nodes_in_country, num_cnodes_in_country, 
                                             num_nodes_in_continent);
-    BOOST_LOG_TRIVIAL(debug) << "ID: " << id_string;
-    BOOST_LOG_TRIVIAL(debug) << "ID: " << id << "\n";
-    return 0;*/
+    */
 
     // initialize the app
-    BOOST_LOG_TRIVIAL(debug) << "Creating HGFR base application on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]";
+    std::cout << "Creating HGFR base application on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]\n";
     BaseApp app = BaseApp(ip, port, id);
 
     // start the app service
-    BOOST_LOG_TRIVIAL(debug) << "Starting HGFR base service on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]";
+    std::cout << "Starting HGFR base service on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]\n";
     app.start(start_time, num_nodes_in_dist, num_cnodes_in_dist, 
         num_nodes_in_city, num_cnodes_in_city, 
         num_nodes_in_state, num_cnodes_in_state,
@@ -331,7 +509,7 @@ int main(int argc, char** argv) {
         ofs << Message::csv_header << "\n";
         ofs.close();
     } else {
-        BOOST_LOG_TRIVIAL(trace) << "Error opening file";
+	std::cout << "Error opening file\n";
     }
     
     // broadcast a message
@@ -342,19 +520,12 @@ int main(int argc, char** argv) {
                                             num_nodes_in_continent);
     if (order < 180) {
         std::this_thread::sleep_for (std::chrono::seconds(5));
-        BOOST_LOG_TRIVIAL(debug) << "Slept for 5 seconds";
-        BOOST_LOG_TRIVIAL(debug) << "Broadcasting message ...";
-        // app.broadcast("MSG #1: Hello world (1)!");
-        // app.broadcast("MSG #2: Hello world (2)!");
-        // app.broadcast("MSG #3: Hello world (3)!");
-        // app.broadcast(one_kb_data);
+	std::cout << "Slept for 5 seconds\n";
+	std::cout << "Broadcasting message ...\n";
         app.broadcast(data_of_block_size);
-        //app.broadcast(data_of_block_size);
-        //app.broadcast(data_of_block_size);
     }
 
-    // stop the app service
-    // BOOST_LOG_TRIVIAL(debug) << "Stopping HGFR base service on node [ID: " + id + "] [IP: " + ip + "] [" + std::to_string(port) + "]";
+    // block
     app.stop();
 
     return 0;

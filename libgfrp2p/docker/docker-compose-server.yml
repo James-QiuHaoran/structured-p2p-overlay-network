@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  server:
+    image: jitaodocker/hgfr_eval_server
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+    stdin_open: true
+    tty: true
+    networks:
+      - net
+
+networks:
+  net:
+    driver: overlay
+    ipam:
+      config:
+        - subnet: 10.0.0.0/16

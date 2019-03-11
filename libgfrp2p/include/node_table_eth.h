@@ -1,12 +1,11 @@
 #ifndef NODE_TABLE_ETH_H
 #define NODE_TABLE_ETH_H
 
+#include <iostream>
 #include <string>
 #include <memory>
 #include <mutex>
 #include <vector>
-
-#include <boost/log/trivial.hpp>
 
 #include "node.h"
 

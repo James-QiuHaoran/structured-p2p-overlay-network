@@ -1,0 +1,31 @@
+# CMake
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+
+# Protobuf
+*.pb.cc
+*.pb.h
+
+# Build folder
+build/
+
+# Output folders
+lib/
+bin/
+
+# Deprecated
+deprecated/
+
+# Editor files
+.vscode/
+
+# Log files (keeps directory)
+test/log/*

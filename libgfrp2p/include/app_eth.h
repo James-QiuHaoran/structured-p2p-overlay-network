@@ -11,17 +11,12 @@
 #include <chrono>         // std::chrono::seconds
 #include <ctime>
 
-#include <boost/random/uniform_int_distribution.hpp>
-#include <boost/random/mersenne_twister.hpp>
-
 #include "peer_manager_eth.h"
 #include "node.h"
 #include "node_table_eth.h"
 #include "message.h"
 #include "param_constants.h"
 #include "utils.h"
-
-boost::random::mt19937 gen_seed;
 
 // string of data of length 1024 bytes
 static const std::string one_kb_data(1024, 'S');
@@ -50,9 +45,6 @@ public:
     	int num_nodes_in_continent, int num_continents,
         int num_cnodes_in_continent,
         unsigned short starting_port_number);
-
-    // generate random number in range [low, high]
-    int random_num_in_range(int low, int high);
 
     // start the application
     void start(const std::string &start_time, int num_nodes_in_dist, int num_cnodes_in_dist, 

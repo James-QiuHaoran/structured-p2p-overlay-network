@@ -1,9 +1,28 @@
-This is the proof and analysis. \\
+\subsection{Broadcast Message Complexity}
 
-\subsection{Proof of Broadcast Performance}
+Consider a network of size $N$. All nodes in the network are geographically distributed evenly. 
+In \xxx, every $r$ nodes that are geographically near to each other will be gathered into a ring at the bottom level. 
+If there are $c$ contact nodes in each ring at the bottom level, then the number of nodes elected to be the normal nodes at the second level will be: $$L(1) = \frac{cN}{r}$$ 
+Then according to the protocol of \xxx, the number of nodes elected to be the normal nodes at the next level will be the number of rings at the second level multiply with parameter $c$, which is: $$L(2) = \frac{c^2N}{r^2}$$ 
+Recursively, the number of nodes $L(h)$ and the number of rings $R(h)$ at level $h$ will be: $$L(h) = \frac{c^hN}{r^h}, R(h)=\frac{c^hN}{r^{h+1}}$$ 
+Let there be $T$ nodes in the top level (which are DNS seeds for a networked system), let $C = c/r$ be the contact node/normal node ratio at each ring, then the number of levels will be: $$l = log_{C}{\frac{T}{N}}$$
+To broadcast a message from a node in any ring at the bottom level, the message will first be disseminated upwards until it reached the ring at the top level. The number of messages used to reach any contact nodes at the top level is: $$M_1(N)=1+l=1+log_{C}{\frac{T}{N}}$$
+The number of messages used to broadcast from the top level rings recursively to all nodes in each ring at each level is: $$M_2(N)=\sum_{i=0}^{l} N\frac{c}{r}^i=N\frac{1-C^{l-1}}{1-C}$$
+$$=\frac{CN-T}{C(1-C)}$$ Hence the message complexity of a broadcast operation is $O(N)$, which is better than current message complexity of both push gossip ($O(NlogN)$) and push-pull gossip ($O(NloglogN)$) \cite{jelasity2011gossip}.
 
-give a proof of time complexity and message comlexity of broadcast, node join and contact node election. Compare to current works.
+\subsection{Broadcast Time Complexity}
 
-\subsection{Security and Robustness Analysis}
+Considering that the cost to transmit a data packet between two nodes in any two different continents is far larger than the cost to transmit between two nodes in the same city, let the cost of transmit data packets in different rings at level $h$ be $C(h)$, which is a mapping from levels to time cost constants. 
+To broadcast a message from a node in any ring at the bottom level, the going-up path of the message to broadcast takes at most: $$T_1(N) = \sum_{i=1}^{l}C(i)$$
+After the message reaches any of the contact nodes at the top level, the message starts to broadcast downwards recursively in each ring (in parallel) from the top level to the bottom level. The time it takes to touch each individual node at the bottom level is: $$T_2(N) = \sum_{i=0}^{l}C(i)\log_{k}{\frac{L(i)}{R(i)}}R(i)$$ $$= \sum_{i=0}^{l}C(i)\log_{k}{C^iN}$$
+Hence the time complexity of a broadcast operation is $O(logN)$, which is also the complexity of the number of rounds in broadcast. Although the time complexity of gossip algorithm is also $O(logN)$, in this case, if each node only connect to those nodes who have the smallest proximity in geographical locality, the total time complexity will be $O(N)$ \cite{kashyap2006efficient, kaune2008embracing}.
 
-analyze of fault tolerance, anonymity.
+\subsection{Robustness}
+
+In a blockchain system, individual machines are often under the control of a large number of heterogeneous users who may join or leave the network at any time. The dynamic of large-scale distributed system and link failure cause problems to the message dissemination. Since the dissemination of membership information and transactions require to reach all nodes, even the consensus protocol requires the message to reach at least a half (PoW, PoS, DPoS, Ripple) or two thirds (BFT, PBFT, Tendermint, Algorand BA*) \cite{zheng2016blockchain}, the P2P network under a blockchain system should try the best to reach as many nodes as possible. Under dynamic node joining/leaving and link failure, the network should be robust enough to cover as many as possible the remaining working nodes.
+To analyze the robustness of \xxx, we define reliability metric to be the ratio of covered nodes and remaining nodes. Let the probability of node failure be $p$, therefore, the number of nodes cannot be reached is: $$F(N)=\sum_{i=1}^{l} \sum_{j=i+1}^{l}(1-p)^jp^cR(i)r^{i}$$
+%=\sum_{i=1}^{l} p^c\frac{c^iN}{r}=p^c\frac{Nc(1-c^l)}{r(1-c)}
+Thus the reliability of \xxx will be: $$Reliability = \frac{N-F(N)}{(1-p)N}$$
+%=\frac{1-p^c\frac{c(1-c^l)}{r(1-c)}}{1-p}$$ 
+%$$\frac{1}{1-p}-\frac{p^cC(1-c^l)}{(1-p)(1-c)}
+In the context of blockchain systems, a 7-level \xxx will reach 1/2 of all nodes on broadcasting a message if the node failure rate is less than 13.8\%, and will reach 2/3 of all nodes if the failure rate is less than 13.3\%. In the evaluation, we set the fault rate of all nodes to be from 10\% to 70\%, the reliability of \xxx can reach the same level with gossip. And we found that in blockchain system context, gossip is overly strong in terms of robustness. As the consensus protocol of a blockchain system only need responses from a half or two thirds of all nodes to be honest, we could trade fault-tolerance off to gain efficiency.

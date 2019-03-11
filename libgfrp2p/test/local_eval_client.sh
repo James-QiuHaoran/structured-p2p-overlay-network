@@ -7,6 +7,8 @@ then
     exit 1
 fi
 
+mkdir -p log
+
 echo $'== HGFRR Evaluation ==\n'
 
 bootstrap_port_base="20200"
@@ -17,4 +19,5 @@ do
     bootstrap_port=$(($bootstrap_port_base+$i))
     broadcast_port=$(($broadcast_port_base+$i))
     ../bin/eval_client $bootstrap_port $broadcast_port 127.0.0.1 $2 &
+    sleep 0.05
 done

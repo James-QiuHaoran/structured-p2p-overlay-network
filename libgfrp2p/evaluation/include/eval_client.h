@@ -11,6 +11,8 @@
 #include "peer_manager.h"
 #include "transport.h"
 #include "utils.h"
+#include "node_table_eth.h"
+#include "peer_manager_eth.h"
 
 #include "bootstrap_message.pb.h"
 
@@ -25,6 +27,9 @@ private:
     const unsigned short bootstrap_server_port;
 
     // p2p layer info
+    std::unique_ptr<EvalConfig> eval_config_;
+    std::unique_ptr< std::unordered_map<std::string, std::pair<std::string, unsigned short>> > node_list_;
+
     std::shared_ptr<Node> self_;
     std::shared_ptr<NodeTable> node_table_;
     std::shared_ptr<PeerManager> peer_manager_;
@@ -35,8 +40,22 @@ private:
         int num_nodes_in_city, int num_cnodes_in_city, 
         int num_nodes_in_state, int num_cnodes_in_state, 
         int num_nodes_in_country, int num_cnodes_in_country, 
-        int num_nodes_in_continent, 
+        int num_nodes_in_continent, int num_cnodes_in_continent,
+        int num_continents,
         const std::unordered_map<std::string, std::pair<std::string, unsigned short>>& node_list);
+
+    // Kademlia mechanism
+    std::shared_ptr<NodeTableETH> node_table_eth_;
+    std::shared_ptr<PeerManagerETH> peer_manager_eth_;
+
+    void create_kad_table(int num_nodes_in_dist, int num_cnodes_in_dist, 
+        int num_nodes_in_city, int num_cnodes_in_city, 
+        int num_nodes_in_state, int num_cnodes_in_state, 
+        int num_nodes_in_country, int num_cnodes_in_country, 
+        int num_nodes_in_continent, int num_cnodes_in_continent,
+        int num_continents,
+        const std::unordered_map<std::string, std::pair<std::string, unsigned short>>& node_list);
+
 
     void send_init();
     void send_push_log();
