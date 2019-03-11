@@ -518,7 +518,7 @@ int main(int argc, char** argv) {
                                             num_nodes_in_state, num_cnodes_in_state, 
                                             num_nodes_in_country, num_cnodes_in_country, 
                                             num_nodes_in_continent);
-    if (order < 180) {
+    if (order == 1) {
         std::this_thread::sleep_for (std::chrono::seconds(5));
 	std::cout << "Slept for 5 seconds\n";
 	std::cout << "Broadcasting message ...\n";
