@@ -2,9 +2,9 @@
 
 ## TODO List
 
-- Deploy on docker (config);
-- Test Kad+Gossip against Eth;
-- Evaluation;
+- ~~Deploy on docker (config)~~;
+- ~~Test Kad+Gossip against Eth~~;
+- ~~Evaluation~~;
 
 ---
 
